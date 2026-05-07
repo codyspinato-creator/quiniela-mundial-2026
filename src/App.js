@@ -27,8 +27,8 @@ const B = {
   text:      "#111111",   // negro
   textSub:   "#444455",   // gris oscuro
   muted:     "#888899",   // gris medio
-  logoMF:    "/logo-mundofutbol.png",
-  logoMundial:"https://assets.football-logos.cc/logos/tournaments/256x256/fifa-world-cup-2026.31d2489d.png",
+  logoMF:    "/logo-mf.png",
+  logoMundial:"/logo-mundial.png",
 };
 
 // ─── KNOCKOUT STRUCTURE ───────────────────────────────────────────────────────
@@ -445,26 +445,54 @@ export default function App() {
   if(screen==="login") return (
     <div style={{minHeight:"100vh",background:B.bg,display:"flex",alignItems:"center",justifyContent:"center",fontFamily:"Georgia,serif",padding:20}}>
       <div style={{maxWidth:360,width:"100%"}}>
-        {/* Hero banner - matches the image style */}
+        {/* Hero banner - matches the screenshot */}
         <div style={{
           background:"#2a4bc9",
-          borderRadius:20, padding:"28px 24px 24px", marginBottom:20,
-          boxShadow:"0 8px 32px rgba(58,91,217,0.35)",
-          position:"relative", overflow:"hidden", minHeight:160,
+          borderRadius:20, marginBottom:20,
+          boxShadow:"0 8px 32px rgba(58,91,217,0.4)",
+          position:"relative", overflow:"hidden",
+          minHeight:180, display:"flex",
         }}>
-          {/* Colorful diagonal stripes - right side like in the image */}
-          <div style={{position:"absolute",right:0,top:0,bottom:0,width:"52%",overflow:"hidden"}}>
-            {[["#7c3aed","0%"],["#3a5bd9","18%"],["#00c853","36%"],["#e63946","54%"],["#f77f00","72%"]].map(([col,left])=>(
-              <div key={col} style={{position:"absolute",top:"-20%",bottom:"-20%",left,width:"22%",
-                background:col,transform:"skewX(-6deg)",opacity:0.95}}/>
-            ))}
+          {/* Left: text content */}
+          <div style={{
+            position:"relative", zIndex:2,
+            padding:"28px 20px 24px 24px",
+            flex:1, display:"flex", flexDirection:"column", justifyContent:"center",
+          }}>
+            {/* MF Logo */}
+            <img src={B.logoMF} alt="MundoFutbol"
+              style={{ height:52, objectFit:"contain", objectPosition:"left", marginBottom:10,
+                filter:"drop-shadow(0 0 6px rgba(255,255,255,0.3))" }}
+              onError={e=>{ e.target.style.display="none"; }}
+            />
+            <div style={{fontSize:8,letterSpacing:5,color:"rgba(255,255,255,0.75)",textTransform:"uppercase",fontWeight:"600",marginBottom:2}}>Copa del Mundo</div>
+            <div style={{fontSize:28,fontWeight:"900",color:"#ffffff",letterSpacing:-0.5,lineHeight:1,textTransform:"uppercase"}}>QUINIELA</div>
+            <div style={{fontSize:28,fontWeight:"900",color:"#ffffff",letterSpacing:-0.5,lineHeight:1,textTransform:"uppercase",marginBottom:6}}>2026</div>
+            <div style={{fontSize:9,color:"rgba(255,255,255,0.7)",letterSpacing:3,textTransform:"uppercase"}}>Predice · Compite · Gana</div>
           </div>
-          {/* Content left-aligned like in the image */}
-          <div style={{position:"relative",zIndex:2,maxWidth:"58%"}}>
-            <Logos size={50} />
-            <div style={{marginTop:16,fontSize:9,letterSpacing:5,color:"#ffffffaa",textTransform:"uppercase",fontWeight:"600"}}>Copa del Mundo</div>
-            <div style={{fontSize:26,fontWeight:"900",color:"#ffffff",marginTop:2,letterSpacing:-0.5,lineHeight:1.1,textTransform:"uppercase"}}>Quiniela 2026</div>
-            <div style={{fontSize:10,color:"#ffffffbb",marginTop:6,letterSpacing:3,textTransform:"uppercase"}}>Predice · Compite · Gana</div>
+
+          {/* Right: vertical colored stripes + FIFA logo */}
+          <div style={{position:"relative", width:180, flexShrink:0, overflow:"hidden"}}>
+            {/* Vertical stripes */}
+            {[["#7c3aed",0],["#3a5bd9",36],["#00c853",72],["#e63946",108],["#f77f00",144]].map(([col,x])=>(
+              <div key={col} style={{
+                position:"absolute", top:0, bottom:0,
+                left:x, width:40,
+                background:col,
+              }}/>
+            ))}
+            {/* FIFA 2026 logo on top of stripes */}
+            <div style={{
+              position:"absolute", inset:0,
+              display:"flex", alignItems:"center", justifyContent:"center",
+              zIndex:2,
+            }}>
+              <img src={B.logoMundial} alt="FIFA World Cup 2026"
+                style={{ height:140, objectFit:"contain",
+                  filter:"drop-shadow(0 2px 12px rgba(0,0,0,0.4))" }}
+                onError={e=>{ e.target.style.display="none"; }}
+              />
+            </div>
           </div>
         </div>
         <div style={{background:"#ffffff",border:"1px solid #e0e0e8",borderRadius:16,padding:24,boxShadow:"0 4px 20px rgba(0,0,0,0.08)"}}>
