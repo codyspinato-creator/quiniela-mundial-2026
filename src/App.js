@@ -178,7 +178,7 @@ function MatchCard({ match, idx, rondaColor, onChange, autoFilled=false }) {
 }
 
 // ─── KNOCKOUT TAB ─────────────────────────────────────────────────────────────
-function KnockoutTab({ knockout, setKnockout }) {
+function KnockoutTab({ knockout, setKnockout, scores }) {
   const [rondaActiva, setRondaActiva] = useState("r32");
   const ronda = RONDAS.find(r=>r.id===rondaActiva);
 
@@ -189,7 +189,7 @@ function KnockoutTab({ knockout, setKnockout }) {
       const updated = { ...prev, [rondaId]: arr };
       // If a winner was set, propagate to next round
       if (newMatch.ganador) {
-        return buildBracket(scores, updated);
+        try { return buildBracket(scores||{}, updated); } catch(e) { return updated; }
       }
       return updated;
     });
@@ -334,8 +334,7 @@ export default function App() {
 
   // Auto-rebuild knockout bracket whenever scores change
   useEffect(() => {
-    const newKO = buildBracket(scores, knockout);
-    setKnockout(newKO);
+    try { const newKO = buildBracket(scores, knockout); setKnockout(newKO); } catch(e) {}
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [scores]);
 
@@ -737,7 +736,7 @@ export default function App() {
 
         {/* ═══ ELIMINATORIAS ═══ */}
         {tab==="knockout"&&(
-          <KnockoutTab knockout={knockout} setKnockout={setKnockout} />
+          <KnockoutTab knockout={knockout} setKnockout={setKnockout} scores={scores} />
         )}
 
         {/* ═══ PREDICCIONES ═══ */}
