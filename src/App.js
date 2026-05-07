@@ -235,12 +235,7 @@ function KnockoutTab({ knockout, setKnockout, scores }) {
             <div style={{ fontSize:16, fontWeight:"bold", color:ronda.color }}>{ronda.label}</div>
             <div style={{ fontSize:10, color:B.muted }}>
               {completedInRound}/{ronda.partidos} partidos predichos
-              {rondaActiva==="r32" && " · 32 equipos clasificados de fase de grupos"}
-              {rondaActiva==="r16" && " · 16 ganadores de dieciseisavos"}
-              {rondaActiva==="qf"  && " · 8 ganadores de octavos"}
-              {rondaActiva==="sf"  && " · 4 ganadores de cuartos"}
-              {rondaActiva==="final" && " · Los 2 mejores del mundo"}
-              {rondaActiva==="third" && " · Los perdedores de semifinales"}
+              {ronda.info && <span style={{color:ronda.color}}> · {ronda.info}</span>}
             </div>
           </div>
           {completedInRound===ronda.partidos && (

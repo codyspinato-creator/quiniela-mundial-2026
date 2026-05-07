@@ -88,6 +88,222 @@ export function completionPct(quiniela) {
   return { partidos: filled, total: totalP, extras, pct: Math.round((filled / totalP) * 100) };
 }
 
+// ─── BRACKET SEEDING FIFA 2026 OFICIAL ───────────────────────────────────────
+//
+// DIECISEISAVOS (R32) - 16 partidos
+// Zona Alta:
+//   M1:  1A vs mejor 3°         (Ciudad de México)
+//   M2:  1E vs 2F               (Boston)
+//   M3:  1F vs 2E               (Houston)
+//   M4:  1I vs 2J               (Filadelfia)
+//   M5:  1L vs 2K               (Toronto)
+//   M6:  2A vs 2B               (Los Ángeles) - duelo de sublíderes
+//   M7:  1G vs mejor 3°         (Seattle)
+//   M8:  1K vs mejor 3°         (Kansas City)
+// Zona Baja:
+//   M9:  1B vs mejor 3°         (Vancouver)
+//   M10: 1D vs 2C               (Dallas)
+//   M11: 1C vs 2D               (Atlanta)  
+//   M12: 1J vs mejor 3°         (Miami)
+//   M13: 1H vs 2G               (Nueva York/NJ)
+//   M14: 2K vs 2L               (Toronto) - duelo sublíderes
+//   M15: 1B vs mejor 3°         (Vancouver)  
+//   M16: 1G vs 2H               (Seattle)
+//
+// OCTAVOS (R16): ganadores de R32 se enfrentan por lado del cuadro
+// CUARTOS: 9-jul Boston, 10-jul LA, 11-jul Miami, 11-jul Kansas City
+// SEMIS: 14-jul Dallas, 15-jul Atlanta
+// TERCER PUESTO: 18-jul Miami | FINAL: 19-jul Nueva York/NJ
+
+export const R32_BRACKET = [
+  // ── ZONA ALTA ──────────────────────────────────────────────────────────────
+  { local: "1A", visita: "3°mejor",  sede: "Ciudad de México" },  // M1
+  { local: "1E", visita: "2F",       sede: "Boston"           },  // M2
+  { local: "1F", visita: "2E",       sede: "Houston"          },  // M3
+  { local: "1I", visita: "2J",       sede: "Filadelfia"       },  // M4
+  { local: "1L", visita: "2K",       sede: "Toronto"          },  // M5
+  { local: "2A", visita: "2B",       sede: "Los Ángeles"      },  // M6
+  { local: "1G", visita: "3°mejor",  sede: "Seattle"          },  // M7
+  { local: "1K", visita: "3°mejor",  sede: "Kansas City"      },  // M8
+  // ── ZONA BAJA ──────────────────────────────────────────────────────────────
+  { local: "1B", visita: "3°mejor",  sede: "Vancouver"        },  // M9
+  { local: "1D", visita: "2C",       sede: "Dallas"           },  // M10
+  { local: "1C", visita: "2D",       sede: "Atlanta"          },  // M11
+  { local: "1J", visita: "3°mejor",  sede: "Miami"            },  // M12
+  { local: "1H", visita: "2G",       sede: "Nueva York/NJ"    },  // M13
+  { local: "2K", visita: "2L",       sede: "Toronto"          },  // M14
+  { local: "1B", visita: "3°mejor",  sede: "Vancouver"        },  // M15 - ajustar
+  { local: "1G", visita: "2H",       sede: "Seattle"          },  // M16
+];
+
+// OCTAVOS: ganadores de R32 por lado del cuadro
+// Lado Izq: W(M2) vs W(M3), W(M4) vs W(M1), etc.
+export const R16_BRACKET = [
+  { l:"W1",  v:"W0",  sede:"Filadelfia"   },  // W(Boston) vs W(CdMex)
+  { l:"W2",  v:"W3",  sede:"Houston"      },  // W(Houston) vs W(Filadelfia)
+  { l:"W5",  v:"W4",  sede:"Los Ángeles"  },  // W(Toronto) vs W(Boston)
+  { l:"W6",  v:"W7",  sede:"Seattle"      },  // W(LA) vs W(Seattle)
+  { l:"W9",  v:"W8",  sede:"Dallas"       },  // W(Vancouver) vs W(Kansas City)
+  { l:"W10", v:"W11", sede:"Atlanta"      },  // W(Dallas) vs W(Atlanta)
+  { l:"W12", v:"W13", sede:"Miami"        },  // W(Miami) vs W(NY/NJ)
+  { l:"W14", v:"W15", sede:"Vancouver"    },  // W(Toronto2) vs W(Seattle2)
+];
+
+// CUARTOS
+export const QF_BRACKET = [
+  { l:"W0", v:"W1", sede:"Boston",      fecha:"9 jul"  },
+  { l:"W2", v:"W3", sede:"Los Ángeles", fecha:"10 jul" },
+  { l:"W4", v:"W5", sede:"Miami",       fecha:"11 jul" },
+  { l:"W6", v:"W7", sede:"Kansas City", fecha:"11 jul" },
+];
+
+// SEMIFINALES
+export const SF_BRACKET = [
+  { l:"W0", v:"W1", sede:"Dallas (AT&T Stadium)",          fecha:"14 jul" },
+  { l:"W2", v:"W3", sede:"Atlanta (Mercedes-Benz Stadium)", fecha:"15 jul" },
+];
+
+export function getGroupClassified(scores) {
+  const result = {}; // { "1A": "🇦🇷 Argentina", "2A": "🇧🇷 Brasil", ... }
+  const thirds = []; // array of { group, team, pts, gf, gc }
+
+  KEYS.forEach(g => {
+    const gr = GRUPOS[g];
+    const ms = gr.partidos.map((_, i) => scores?.[g]?.[i] || { local: "", visita: "" });
+    const tabla = calcTabla(gr.equipos, gr.partidos, ms);
+
+    if (tabla[0] && tabla[0][1].jj > 0) {
+      result[`1${g}`] = tabla[0][0];
+    }
+    if (tabla[1] && tabla[1][1].jj > 0) {
+      result[`2${g}`] = tabla[1][0];
+    }
+    if (tabla[2] && tabla[2][1].jj > 0) {
+      thirds.push({
+        group: g, team: tabla[2][0],
+        pts: tabla[2][1].pts, gf: tabla[2][1].gf, gc: tabla[2][1].gc,
+        dif: tabla[2][1].gf - tabla[2][1].gc,
+      });
+    }
+  });
+
+  // Sort thirds by pts > dif > gf
+  thirds.sort((a, b) => {
+    if (b.pts !== a.pts) return b.pts - a.pts;
+    if (b.dif !== a.dif) return b.dif - a.dif;
+    return b.gf - a.gf;
+  });
+
+  // Assign best 8 thirds to their bracket slots (simplified - assign in order)
+  const topThirds = thirds.slice(0, 8);
+  const groupsOf8 = ["ABCD", "EFGH", "IJKL", "ABEF", "CDIJ", "GHKL", "ACDE", "BFJK"];
+  groupsOf8.forEach((key, i) => {
+    if (topThirds[i]) result[`3${key}`] = topThirds[i].team;
+  });
+
+  return result;
+}
+
+// ─── Build bracket from classified + round winners ────────────────────────────
+export function buildBracket(scores, knockout) {
+  const classified = getGroupClassified(scores);
+
+  const newKO = {};
+
+  // ── R32: fill from group classified ────────────────────────────────────────
+  newKO.r32 = R32_BRACKET.map((slot, i) => {
+    const existing = knockout?.r32?.[i] || {};
+    return {
+      id: i,
+      local: classified[slot.local] || existing.local || "",
+      visita: classified[slot.visita] || existing.visita || "",
+      localGoles: existing.localGoles || "",
+      visitaGoles: existing.visitaGoles || "",
+      ganador: existing.ganador || "",
+      penaltis: existing.penaltis || false,
+      penaltisGanador: existing.penaltisGanador || "",
+    };
+  });
+
+  // ── R16: fill from R32 winners ─────────────────────────────────────────────
+  newKO.r16 = R16_BRACKET.map((slot, i) => {
+    const existing = knockout?.r16?.[i] || {};
+    const wIdx = parseInt(slot.local.replace("W", ""));
+    const vIdx = parseInt(slot.visita.replace("W", ""));
+    const localTeam = newKO.r32[wIdx]?.ganador || existing.local || "";
+    const visitaTeam = newKO.r32[vIdx]?.ganador || existing.visita || "";
+    return {
+      id: i, local: localTeam, visita: visitaTeam,
+      localGoles: localTeam !== existing.local ? "" : existing.localGoles || "",
+      visitaGoles: visitaTeam !== existing.visita ? "" : existing.visitaGoles || "",
+      ganador: (localTeam === existing.local && visitaTeam === existing.visita) ? existing.ganador || "" : "",
+      penaltis: false, penaltisGanador: "",
+    };
+  });
+
+  // ── QF: fill from R16 winners ──────────────────────────────────────────────
+  newKO.qf = QF_BRACKET.map((slot, i) => {
+    const existing = knockout?.qf?.[i] || {};
+    const wIdx = parseInt(slot.local.replace("W", ""));
+    const vIdx = parseInt(slot.visita.replace("W", ""));
+    const localTeam = newKO.r16[wIdx]?.ganador || existing.local || "";
+    const visitaTeam = newKO.r16[vIdx]?.ganador || existing.visita || "";
+    return {
+      id: i, local: localTeam, visita: visitaTeam,
+      localGoles: localTeam !== existing.local ? "" : existing.localGoles || "",
+      visitaGoles: visitaTeam !== existing.visita ? "" : existing.visitaGoles || "",
+      ganador: (localTeam === existing.local && visitaTeam === existing.visita) ? existing.ganador || "" : "",
+      penaltis: false, penaltisGanador: "",
+    };
+  });
+
+  // ── SF: fill from QF winners ───────────────────────────────────────────────
+  newKO.sf = SF_BRACKET.map((slot, i) => {
+    const existing = knockout?.sf?.[i] || {};
+    const wIdx = parseInt(slot.local.replace("W", ""));
+    const vIdx = parseInt(slot.visita.replace("W", ""));
+    const localTeam = newKO.qf[wIdx]?.ganador || existing.local || "";
+    const visitaTeam = newKO.qf[vIdx]?.ganador || existing.visita || "";
+    return {
+      id: i, local: localTeam, visita: visitaTeam,
+      localGoles: localTeam !== existing.local ? "" : existing.localGoles || "",
+      visitaGoles: visitaTeam !== existing.visita ? "" : existing.visitaGoles || "",
+      ganador: (localTeam === existing.local && visitaTeam === existing.visita) ? existing.ganador || "" : "",
+      penaltis: false, penaltisGanador: "",
+    };
+  });
+
+  // ── Final: fill from SF winners ────────────────────────────────────────────
+  const sfW0 = newKO.sf[0]?.ganador || knockout?.final?.[0]?.local || "";
+  const sfW1 = newKO.sf[1]?.ganador || knockout?.final?.[0]?.visita || "";
+  const existingFinal = knockout?.final?.[0] || {};
+  newKO.final = [{
+    id: 0, local: sfW0, visita: sfW1,
+    localGoles: sfW0 !== existingFinal.local ? "" : existingFinal.localGoles || "",
+    visitaGoles: sfW1 !== existingFinal.visita ? "" : existingFinal.visitaGoles || "",
+    ganador: (sfW0 === existingFinal.local && sfW1 === existingFinal.visita) ? existingFinal.ganador || "" : "",
+    penaltis: false, penaltisGanador: "",
+  }];
+
+  // ── 3rd place: fill from SF losers ────────────────────────────────────────
+  const sf0Loser = newKO.sf[0]?.ganador
+    ? (newKO.sf[0].ganador === newKO.sf[0].local ? newKO.sf[0].visita : newKO.sf[0].local)
+    : knockout?.third?.[0]?.local || "";
+  const sf1Loser = newKO.sf[1]?.ganador
+    ? (newKO.sf[1].ganador === newKO.sf[1].local ? newKO.sf[1].visita : newKO.sf[1].local)
+    : knockout?.third?.[0]?.visita || "";
+  const existingThird = knockout?.third?.[0] || {};
+  newKO.third = [{
+    id: 0, local: sf0Loser, visita: sf1Loser,
+    localGoles: sf0Loser !== existingThird.local ? "" : existingThird.localGoles || "",
+    visitaGoles: sf1Loser !== existingThird.visita ? "" : existingThird.visitaGoles || "",
+    ganador: (sf0Loser === existingThird.local && sf1Loser === existingThird.visita) ? existingThird.ganador || "" : "",
+    penaltis: false, penaltisGanador: "",
+  }];
+
+  return newKO;
+}
+
 // ─── BRACKET SEEDING ─────────────────────────────────────────────────────────
 export const R32_BRACKET = [
   { local: "1A", visita: "2B" }, { local: "1C", visita: "2D" },
@@ -140,29 +356,41 @@ export function buildBracket(scores, knockout) {
   const c = getGroupClassified(scores);
   const ko = {};
 
-  ko.r32 = R32_BRACKET.map((s,i) => makeMatch(i, c[s.local]||"", c[s.visita]||"", knockout?.r32?.[i]));
+  // R32: fill from group classified, keep sede info
+  ko.r32 = R32_BRACKET.map((s,i) => {
+    const local = c[s.local] || "";
+    // For 3rd place slots, leave blank (user fills manually)
+    const visita = s.visita.startsWith("3°") ? "" : (c[s.visita]||"");
+    const m = makeMatch(i, local, visita, knockout?.r32?.[i]);
+    return { ...m, sede: s.sede };
+  });
 
   ko.r16 = R16_BRACKET.map((s,i) => {
     const li=parseInt(s.l.replace("W","")), vi=parseInt(s.v.replace("W",""));
-    return makeMatch(i, ko.r32[li]?.ganador||"", ko.r32[vi]?.ganador||"", knockout?.r16?.[i]);
+    const m = makeMatch(i, ko.r32[li]?.ganador||"", ko.r32[vi]?.ganador||"", knockout?.r16?.[i]);
+    return { ...m, sede: s.sede };
   });
 
   ko.qf = QF_BRACKET.map((s,i) => {
     const li=parseInt(s.l.replace("W","")), vi=parseInt(s.v.replace("W",""));
-    return makeMatch(i, ko.r16[li]?.ganador||"", ko.r16[vi]?.ganador||"", knockout?.qf?.[i]);
+    const m = makeMatch(i, ko.r16[li]?.ganador||"", ko.r16[vi]?.ganador||"", knockout?.qf?.[i]);
+    return { ...m, sede: s.sede, fecha: s.fecha };
   });
 
   ko.sf = SF_BRACKET.map((s,i) => {
     const li=parseInt(s.l.replace("W","")), vi=parseInt(s.v.replace("W",""));
-    return makeMatch(i, ko.qf[li]?.ganador||"", ko.qf[vi]?.ganador||"", knockout?.sf?.[i]);
+    const m = makeMatch(i, ko.qf[li]?.ganador||"", ko.qf[vi]?.ganador||"", knockout?.sf?.[i]);
+    return { ...m, sede: s.sede, fecha: s.fecha };
   });
 
   const sfW0=ko.sf[0]?.ganador||"", sfW1=ko.sf[1]?.ganador||"";
-  ko.final = [makeMatch(0, sfW0, sfW1, knockout?.final?.[0])];
+  ko.final = [{ ...makeMatch(0, sfW0, sfW1, knockout?.final?.[0]),
+    sede: "MetLife Stadium, Nueva York/NJ", fecha: "19 jul" }];
 
   const sf0L=ko.sf[0]?.ganador?(ko.sf[0].ganador===ko.sf[0].local?ko.sf[0].visita:ko.sf[0].local):"";
   const sf1L=ko.sf[1]?.ganador?(ko.sf[1].ganador===ko.sf[1].local?ko.sf[1].visita:ko.sf[1].local):"";
-  ko.third = [makeMatch(0, sf0L, sf1L, knockout?.third?.[0])];
+  ko.third = [{ ...makeMatch(0, sf0L, sf1L, knockout?.third?.[0]),
+    sede: "Hard Rock Stadium, Miami", fecha: "18 jul" }];
 
   return ko;
 }
