@@ -312,6 +312,7 @@ export default function App() {
   const [screen,setScreen]=useState("login");
   const [myId,setMyId]=useState(""); const [myNombre,setMyNombre]=useState("");
   const [loginInput,setLoginInput]=useState(""); const [loginError,setLoginError]=useState("");
+  const [codigoInput,setCodigoInput]=useState("");
   const [saving,setSaving]=useState(false); const [saveMsg,setSaveMsg]=useState("");
   const [portalData,setPortalData]=useState([]); const [portalLoading,setPortalLoading]=useState(false);
   const [selectedUser,setSelectedUser]=useState(null);
@@ -335,7 +336,22 @@ export default function App() {
   // ── Auth / Save / Load ────────────────────────────────────────────────────
   const handleLogin=async()=>{
     const name=loginInput.trim();
-    if(!name||name.length<2){setLoginError("Escribe al menos 2 caracteres");return;}
+    if(!name||name.length<2){setLoginError("Escribe tu nombre (mínimo 2 caracteres)");return;}
+    if(!codigoInput.trim()){setLoginError("Ingresa el código de acceso");return;}
+    // Verify access code against Firestore admin/config
+    try{
+      const cfgSnap=await getDoc(doc(db,"admin","config"));
+      if(cfgSnap.exists()){
+        const cfg=cfgSnap.data();
+        if(cfg.codigoAcceso && codigoInput.trim()!==cfg.codigoAcceso){
+          setLoginError("Código de acceso incorrecto ❌");
+          return;
+        }
+      }
+      // If no config set yet, any code works (organizer hasn't set one)
+    }catch(e){
+      // If can't reach Firestore, let through (offline fallback)
+    }
     const id=name.toLowerCase().replace(/[^a-z0-9]/gi,"_").substring(0,24);
     setMyId(id); setMyNombre(name);
     try{
@@ -442,10 +458,27 @@ export default function App() {
           <div style={{position:"absolute",bottom:0,left:0,right:0,height:3,background:"linear-gradient(90deg,#fee440,#f15bb5,#9b5de5,#00bbf9)"}}/>
         </div>
         <div style={{background:B.card,border:`1px solid ${B.border}`,borderRadius:16,padding:24,boxShadow:`0 0 40px ${B.primary}25`}}>
-          <div style={{fontSize:12,color:B.muted,marginBottom:8}}>¿Cómo te llamas?</div>
-          <input autoFocus value={loginInput} onChange={e=>setLoginInput(e.target.value)} onKeyDown={e=>e.key==="Enter"&&handleLogin()} placeholder="Tu nombre o alias..." style={{width:"100%",background:"#ffffff07",border:`1px solid ${B.border}`,borderRadius:8,padding:"10px 12px",color:B.text,fontSize:14,outline:"none",boxSizing:"border-box",marginBottom:8}}/>
-          {loginError&&<div style={{fontSize:11,color:"#f44336",marginBottom:8}}>{loginError}</div>}
-          <button onClick={handleLogin} style={{width:"100%",padding:12,borderRadius:9,border:"none",background:"linear-gradient(135deg,#9b5de5,#f15bb5)",color:"#000",fontWeight:"bold",fontSize:14,cursor:"pointer",boxShadow:`0 4px 20px ${B.primary}30`}}>Entrar a mi Quiniela →</button>
+          <div style={{fontSize:12,color:B.muted,marginBottom:6}}>Tu nombre</div>
+          <input
+            autoFocus value={loginInput}
+            onChange={e=>setLoginInput(e.target.value)}
+            onKeyDown={e=>e.key==="Enter"&&handleLogin()}
+            placeholder="Tu nombre o alias..."
+            style={{width:"100%",background:"#ffffff07",border:`1px solid ${B.border}`,borderRadius:8,padding:"10px 12px",color:B.text,fontSize:14,outline:"none",boxSizing:"border-box",marginBottom:12}}
+          />
+          <div style={{fontSize:12,color:B.muted,marginBottom:6}}>Código de acceso</div>
+          <div style={{position:"relative",marginBottom:8}}>
+            <input
+              type="password" value={codigoInput}
+              onChange={e=>setCodigoInput(e.target.value)}
+              onKeyDown={e=>e.key==="Enter"&&handleLogin()}
+              placeholder="Código de la quiniela..."
+              style={{width:"100%",background:"#ffffff07",border:`1px solid ${B.border}`,borderRadius:8,padding:"10px 12px 10px 36px",color:B.text,fontSize:14,outline:"none",boxSizing:"border-box"}}
+            />
+            <span style={{position:"absolute",left:12,top:"50%",transform:"translateY(-50%)",fontSize:14,opacity:0.5}}>🔑</span>
+          </div>
+          {loginError&&<div style={{fontSize:11,color:"#f44336",marginBottom:8,padding:"6px 10px",background:"#f4433615",borderRadius:6,border:"1px solid #f4433630"}}>{loginError}</div>}
+          <button onClick={handleLogin} style={{width:"100%",padding:12,borderRadius:9,border:"none",background:"linear-gradient(135deg,#9b5de5,#f15bb5)",color:"#fff",fontWeight:"bold",fontSize:14,cursor:"pointer",boxShadow:`0 4px 20px ${B.primary}30`,marginTop:4}}>Entrar a mi Quiniela →</button>
           <div style={{textAlign:"center",marginTop:14,display:"flex",gap:16,justifyContent:"center"}}>
             <button onClick={()=>setScreen("portal")} style={{background:"transparent",border:"none",color:B.muted,fontSize:11,cursor:"pointer",textDecoration:"underline"}}>👥 Ver quinielas de todos</button>
             <button onClick={()=>setScreen("admin")} style={{background:"transparent",border:"none",color:"#f59e0b",fontSize:11,cursor:"pointer",textDecoration:"underline"}}>🔐 Admin</button>

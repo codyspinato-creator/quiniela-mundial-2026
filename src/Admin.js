@@ -39,6 +39,8 @@ export default function Admin({ onBack }) {
   const [authed, setAuthed] = useState(false);
   const [passInput, setPassInput] = useState("");
   const [passError, setPassError] = useState("");
+  const [codigoAcceso, setCodigoAcceso] = useState("");
+  const [codigoSaved, setCodigoSaved] = useState(false);
 
   const [resultados, setResultados] = useState(emptyResultados());
   const [participantes, setParticipantes] = useState([]);
@@ -50,6 +52,15 @@ export default function Admin({ onBack }) {
   const [grupoActivo, setGrupoActivo] = useState("A");
   const [rondaActiva, setRondaActiva] = useState("r32");
 
+  // ── Save access code ──────────────────────────────────────────────────────
+  const saveCodigo = async () => {
+    try {
+      await setDoc(doc(db, "admin", "config"), { codigoAcceso: codigoAcceso.trim(), updatedAt: Date.now() });
+      setCodigoSaved(true);
+      setTimeout(() => setCodigoSaved(false), 3000);
+    } catch (e) { console.error(e); }
+  };
+
   // ── Load oficial results + participants ────────────────────────────────────
   const loadData = useCallback(async () => {
     setLoading(true);
@@ -59,6 +70,11 @@ export default function Admin({ onBack }) {
       if (rSnap.exists()) {
         const data = rSnap.data();
         setResultados({ ...emptyResultados(), ...data });
+      }
+      // Load access code config
+      const cfgSnap = await getDoc(doc(db, "admin", "config"));
+      if (cfgSnap.exists()) {
+        setCodigoAcceso(cfgSnap.data().codigoAcceso || "");
       }
       // Load all participants
       const pSnap = await getDocs(collection(db, "quinielas"));
@@ -174,7 +190,7 @@ export default function Admin({ onBack }) {
             </div>
           </div>
           <div style={{ display: "flex", gap: 4, overflowX: "auto" }}>
-            {[["grupos", "📋 Grupos"], ["knockout", "⚔️ Eliminatorias"], ["especiales", "🏆 Especiales"], ["ranking", "🥇 Ranking"]].map(([id, label]) => (
+            {[["grupos", "📋 Grupos"], ["knockout", "⚔️ Eliminatorias"], ["especiales", "🏆 Especiales"], ["ranking", "🥇 Ranking"], ["codigo", "🔑 Código"]].map(([id, label]) => (
               <button key={id} onClick={() => setAdminTab(id)} style={{ padding: "5px 10px", borderRadius: 6, border: "none", background: adminTab === id ? B.admin : "#ffffff0d", color: adminTab === id ? "#000" : B.muted, fontSize: 10, cursor: "pointer", fontWeight: "bold", whiteSpace: "nowrap", flexShrink: 0 }}>{label}</button>
             ))}
           </div>
@@ -384,6 +400,53 @@ export default function Admin({ onBack }) {
                   style={{ width: "100%", background: "#ffffff06", border: "1px solid #4caf5025", borderRadius: 8, padding: "8px 12px", color: B.text, fontSize: 13, outline: "none", boxSizing: "border-box" }} />
               )}
             </div>
+          </div>
+        )}
+
+        {/* ═══ CÓDIGO DE ACCESO ═══ */}
+        {!loading && adminTab === "codigo" && (
+          <div>
+            <div style={{ background:`${B.admin}15`, border:`1px solid ${B.admin}40`, borderRadius:10, padding:"12px 14px", marginBottom:18, fontSize:11, color:B.muted }}>
+              🔑 Define el código que los participantes necesitan para entrar a la quiniela. Compártelo solo con las personas que quieras que participen.
+            </div>
+
+            <div style={{ background:B.card, border:`1px solid ${B.border}`, borderRadius:14, padding:20, marginBottom:14 }}>
+              <div style={{ fontSize:13, fontWeight:"bold", color:B.text, marginBottom:4 }}>Código de acceso actual</div>
+              <div style={{ fontSize:11, color:B.muted, marginBottom:16 }}>
+                Los participantes deben ingresar este código al entrar. Si lo cambias, las personas con el código antiguo no podrán volver a entrar (aunque sus quinielas se conservan).
+              </div>
+
+              <div style={{ position:"relative", marginBottom:12 }}>
+                <input
+                  type="text"
+                  value={codigoAcceso}
+                  onChange={e => setCodigoAcceso(e.target.value)}
+                  placeholder="Escribe el código de acceso..."
+                  style={{ width:"100%", background:"#ffffff08", border:`1px solid ${B.admin}50`, borderRadius:8, padding:"12px 14px 12px 40px", color:B.text, fontSize:16, outline:"none", boxSizing:"border-box", letterSpacing:2, fontWeight:"bold" }}
+                />
+                <span style={{ position:"absolute", left:12, top:"50%", transform:"translateY(-50%)", fontSize:16 }}>🔑</span>
+              </div>
+
+              <button onClick={saveCodigo} style={{ width:"100%", padding:12, borderRadius:9, border:"none", background:codigoSaved ? B.primary : `linear-gradient(135deg,${B.admin},#d97706)`, color:"#000", fontWeight:"bold", fontSize:14, cursor:"pointer" }}>
+                {codigoSaved ? "✓ Código guardado" : "Guardar código"}
+              </button>
+            </div>
+
+            {codigoAcceso && (
+              <div style={{ background:B.card, border:`2px dashed ${B.admin}50`, borderRadius:12, padding:16, textAlign:"center" }}>
+                <div style={{ fontSize:10, color:B.muted, letterSpacing:3, textTransform:"uppercase", marginBottom:8 }}>Comparte este código con los participantes</div>
+                <div style={{ fontSize:32, fontWeight:"900", color:B.admin, letterSpacing:8 }}>{codigoAcceso}</div>
+                <div style={{ fontSize:10, color:B.muted, marginTop:8 }}>Solo quien tenga este código podrá entrar a la quiniela</div>
+              </div>
+            )}
+
+            {!codigoAcceso && (
+              <div style={{ background:"#ffffff06", border:"1px solid #ffffff10", borderRadius:10, padding:14, textAlign:"center" }}>
+                <div style={{ fontSize:28, marginBottom:8 }}>🔓</div>
+                <div style={{ fontSize:13, color:B.muted }}>Sin código configurado — cualquiera puede entrar</div>
+                <div style={{ fontSize:11, color:"#555", marginTop:4 }}>Define un código arriba para restringir el acceso</div>
+              </div>
+            )}
           </div>
         )}
 
