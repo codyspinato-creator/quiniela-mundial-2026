@@ -103,7 +103,7 @@ function MatchCard({ match, idx, rondaColor, onChange, autoFilled=false }) {
       {/* Equipo local */}
       <div style={{ display:"flex", alignItems:"center", gap:6, marginBottom:6 }}>
         {autoFilled && local ? (
-          <div style={{flex:1,background:"#ececf5",border:`1px solid ${ganador===local?"#9090c8":"#d0d0e0"}`,borderRadius:6,padding:"6px 8px",color:ganador===local?B.primary:"#7070b8",fontSize:11,fontWeight:ganador===local?"bold":"normal"}}>
+          <div style={{flex:1,background:"#f0f4ff",border:`1px solid ${ganador===local?"#3a5bd9":"#c8d8ff"}`,borderRadius:6,padding:"6px 8px",color:ganador===local?B.primary:"#7070b8",fontSize:11,fontWeight:ganador===local?"bold":"normal"}}>
             {local}
           </div>
         ) : (
@@ -118,14 +118,14 @@ function MatchCard({ match, idx, rondaColor, onChange, autoFilled=false }) {
           type="number" min="0" max="20"
           value={localGoles}
           onChange={e=>upd("localGoles", e.target.value)}
-          style={{ width:34, height:30, textAlign:"center", background:"#ececf5", border:`1px solid ${hasScore?rondaColor+"60":"#00000012"}`, borderRadius:6, color:hasScore?rondaColor:B.muted, fontSize:14, fontWeight:"bold", outline:"none" }}
+          style={{ width:38, height:36, textAlign:"center", background:"#f5f5f7", border:`2px solid ${hasScore?rondaColor:"#e0e0e8"}`, borderRadius:8, color:hasScore?rondaColor:"#bbb", fontSize:15, fontWeight:"bold", outline:"none" }}
         />
       </div>
 
       {/* Equipo visitante */}
       <div style={{ display:"flex", alignItems:"center", gap:6, marginBottom: empate ? 8 : 0 }}>
         {autoFilled && visita ? (
-          <div style={{flex:1,background:"#ececf5",border:`1px solid ${ganador===visita?"#9090c8":"#d0d0e0"}`,borderRadius:6,padding:"6px 8px",color:ganador===visita?B.primary:"#7070b8",fontSize:11,fontWeight:ganador===visita?"bold":"normal"}}>
+          <div style={{flex:1,background:"#f0f4ff",border:`1px solid ${ganador===visita?"#3a5bd9":"#c8d8ff"}`,borderRadius:6,padding:"6px 8px",color:ganador===visita?B.primary:"#7070b8",fontSize:11,fontWeight:ganador===visita?"bold":"normal"}}>
             {visita}
           </div>
         ) : (
@@ -140,7 +140,7 @@ function MatchCard({ match, idx, rondaColor, onChange, autoFilled=false }) {
           type="number" min="0" max="20"
           value={visitaGoles}
           onChange={e=>upd("visitaGoles", e.target.value)}
-          style={{ width:34, height:30, textAlign:"center", background:"#ececf5", border:`1px solid ${hasScore?"#00000025":"#00000012"}`, borderRadius:6, color:hasScore?B.text:B.muted, fontSize:14, fontWeight:"bold", outline:"none" }}
+          style={{ width:38, height:36, textAlign:"center", background:"#f5f5f7", border:`2px solid ${hasScore?rondaColor:"#e0e0e8"}`, borderRadius:8, color:hasScore?"#111":"#bbb", fontSize:15, fontWeight:"bold", outline:"none" }}
         />
       </div>
 
@@ -289,7 +289,7 @@ function KnockoutTab({ knockout, setKnockout }) {
 
       {/* Campeón si es final */}
       {isFinal && matches[0]?.ganador && (
-        <div style={{ marginTop:14, background:"linear-gradient(135deg,#060e06,#0a180a)", border:`2px solid ${B.primary}`, borderRadius:14, padding:"16px", textAlign:"center", boxShadow:`0 0 30px ${B.primary}25` }}>
+        <div style={{ marginTop:14, background:"linear-gradient(135deg,#eff4ff,#e8f0ff)", border:"2px solid #3a5bd9", borderRadius:14, padding:"16px", textAlign:"center", boxShadow:"0 4px 20px rgba(58,91,217,0.15)" }}>
           <div style={{ fontSize:36, marginBottom:6 }}>🏆</div>
           <div style={{ fontSize:12, color:B.muted, marginBottom:4 }}>¡CAMPEÓN DEL MUNDO 2026!</div>
           <div style={{ fontSize:20, fontWeight:"bold", color:B.primary }}>{matches[0].ganador}</div>
@@ -574,7 +574,7 @@ export default function App() {
         </div>
         <div style={{maxWidth:560,margin:"0 auto",padding:"14px 12px 40px"}}>
           {portalLoading&&<div style={{textAlign:"center",padding:40,color:B.muted}}><div style={{fontSize:28,marginBottom:8}}>⏳</div>Cargando...</div>}
-          {!portalLoading&&portalData.length===0&&(<div style={{textAlign:"center",padding:40}}><div style={{fontSize:40,marginBottom:12}}>🏜️</div><div style={{fontSize:14,color:B.muted,marginBottom:8}}>Aún no hay quinielas guardadas</div><button onClick={()=>setScreen(myId?"quiniela":"login")} style={{padding:"9px 20px",borderRadius:9,border:"none",background:B.primary,color:"#000",fontWeight:"bold",fontSize:13,cursor:"pointer"}}>{myId?"Ir a mi quiniela":"Crear quiniela"}</button></div>)}
+          {!portalLoading&&portalData.length===0&&(<div style={{textAlign:"center",padding:40}}><div style={{fontSize:40,marginBottom:12}}>🏜️</div><div style={{fontSize:14,color:B.muted,marginBottom:8}}>Aún no hay quinielas guardadas</div><button onClick={()=>setScreen(myId?"quiniela":"login")} style={{padding:"9px 20px",borderRadius:9,border:"none",background:"#3a5bd9",color:"#ffffff",fontWeight:"bold",fontSize:13,cursor:"pointer"}}>{myId?"Ir a mi quiniela":"Crear quiniela"}</button></div>)}
           {!portalLoading&&portalData.length>0&&(
             <>
               <div style={{background:"#ffffff",border:"1px solid #e0e0e8",borderRadius:12,padding:14,marginBottom:16,boxShadow:"0 2px 8px rgba(0,0,0,0.05)"}}>
@@ -672,7 +672,7 @@ export default function App() {
           <div style={{display:"flex",gap:3,alignItems:"center"}}>
             <div style={{fontSize:10,color:"#3a5bd9",fontWeight:"700",marginRight:4,whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis",maxWidth:80}}>⚽ {myNombre}</div>
             {TABS.map(({id,label})=>(<button key={id} onClick={()=>setTab(id)} style={{padding:"3px 7px",borderRadius:6,border:"none",background:tab===id?B.primary:"#0000000c",color:tab===id?"#000":B.muted,fontSize:9,cursor:"pointer",fontWeight:"bold",whiteSpace:"nowrap"}}>{label}</button>))}
-            <button onClick={saveQuiniela} disabled={saving} style={{marginLeft:"auto",padding:"3px 8px",borderRadius:6,border:"none",background:saving?"#f0f0f8":saveMsg.includes("✓")?B.primary:B.primary2,color:saving?B.muted:"#000",fontSize:9,cursor:saving?"not-allowed":"pointer",fontWeight:"bold",flexShrink:0}}>{saving?"...":saveMsg||"💾"}</button>
+            <button onClick={saveQuiniela} disabled={saving} style={{marginLeft:"auto",padding:"3px 8px",borderRadius:6,border:"none",background:saving?"#e0e0e8":saveMsg.includes("✓")?"#00c853":"#3a5bd9",color:saving?"#aaa":"#ffffff",fontSize:9,cursor:saving?"not-allowed":"pointer",fontWeight:"bold",flexShrink:0}}>{saving?"...":saveMsg||"💾"}</button>
           </div>
         </div>
       </div>
@@ -683,7 +683,7 @@ export default function App() {
         {tab==="partidos"&&(
           <>
             <div style={{display:"flex",flexWrap:"wrap",gap:5,justifyContent:"center",marginBottom:14}}>
-              {KEYS.map(g=>{const done=isDone(g);const active=g===grupo;return(<button key={g} onClick={()=>setGrupo(g)} style={{width:34,height:34,borderRadius:7,fontSize:12,fontWeight:"bold",border:active?"2px solid #3a5bd9":"2px solid transparent",background:done?(active?B.primary2:B.primaryDim):active?"#00000012":"#00000008",color:done?(active?"#ffffff":"#3a5bd9"):active?"#3a5bd9":"#888",cursor:"pointer",transition:"all 0.2s",boxShadow:active?`0 2px 8px rgba(58,91,217,0.20)`:"none"}}>{done&&!active?"✓":g}</button>);})}
+              {KEYS.map(g=>{const done=isDone(g);const active=g===grupo;return(<button key={g} onClick={()=>setGrupo(g)} style={{width:34,height:34,borderRadius:7,fontSize:12,fontWeight:"bold",border:active?"2px solid #3a5bd9":"2px solid transparent",background:done?(active?B.primary2:B.primaryDim):active?"#00000012":"#00000008",color:done?(active?"#ffffff":"#3a5bd9"):active?"#3a5bd9":"#aaa",cursor:"pointer",transition:"all 0.2s",boxShadow:active?`0 2px 8px rgba(58,91,217,0.20)`:"none"}}>{done&&!active?"✓":g}</button>);})}
             </div>
             <div style={{borderRadius:14,overflow:"hidden",border:`1px solid ${gr.accent}20`,marginBottom:12}}>
               <div style={{background:`linear-gradient(135deg,${gr.color},${gr.color}cc)`,padding:"11px 14px",display:"flex",alignItems:"center",gap:10,borderBottom:`2px solid ${gr.accent}30`}}>
@@ -701,14 +701,14 @@ export default function App() {
                       const ok=!isNaN(gl)&&!isNaN(gv)&&m.local!==""&&m.visita!=="";
                       const wL=ok&&gl>gv,wV=ok&&gv>gl,emp=ok&&gl===gv;
                       return(
-                        <div key={idx} style={{padding:"9px 14px",borderBottom:"1px solid #ffffff04",background:ok?"#ffffff02":"transparent"}}>
+                        <div key={idx} style={{padding:"9px 14px",borderBottom:"1px solid #eeeeef",background:"#ffffff"}}>
                           <div style={{fontSize:9,color:"#e0e0f0",marginBottom:5}}>📅 {p.fecha}</div>
                           <div style={{display:"flex",alignItems:"center",gap:6}}>
-                            <div style={{flex:1,fontSize:11,textAlign:"right",fontWeight:wL?"bold":"normal",color:wL?"#111111":ok?"#444455":"#aaa"}}>{p.local}</div>
-                            <input type="number" min="0" max="20" value={m.local} onChange={e=>setGol(grupo,idx,"local",e.target.value)} style={{width:34,height:32,textAlign:"center",background:"#ececf5",border:`1px solid ${ok?B.primary+"60":"#00000012"}`,borderRadius:6,color:ok?B.primary:B.muted,fontSize:15,fontWeight:"bold",outline:"none"}}/>
+                            <div style={{flex:1,fontSize:11,textAlign:"right",fontWeight:wL?"bold":"normal",color:wL?"#111":ok?"#333":"#aaa"}}>{p.local}</div>
+                            <input type="number" min="0" max="20" value={m.local} onChange={e=>setGol(grupo,idx,"local",e.target.value)} style={{width:34,height:32,textAlign:"center",background:"#f0f0f5",border:`2px solid ${ok?"#3a5bd9":"#e0e0e8"}`,borderRadius:6,color:ok?"#3a5bd9":"#bbb",fontSize:15,fontWeight:"bold",outline:"none"}}/>
                             <div style={{width:16,textAlign:"center",fontSize:12,color:wL?B.primary:wV?"#f44336":emp?"#ff9800":"#e8e8f5",fontWeight:"bold"}}>{ok?(wL?"▸":wV?"◂":"="):"·"}</div>
-                            <input type="number" min="0" max="20" value={m.visita} onChange={e=>setGol(grupo,idx,"visita",e.target.value)} style={{width:34,height:32,textAlign:"center",background:"#ececf5",border:`1px solid ${ok?"#00000025":"#00000012"}`,borderRadius:6,color:ok?B.text:B.muted,fontSize:15,fontWeight:"bold",outline:"none"}}/>
-                            <div style={{flex:1,fontSize:11,fontWeight:wV?"bold":"normal",color:wV?"#111111":ok?"#444455":"#aaa"}}>{p.visita}</div>
+                            <input type="number" min="0" max="20" value={m.visita} onChange={e=>setGol(grupo,idx,"visita",e.target.value)} style={{width:34,height:32,textAlign:"center",background:"#f0f0f5",border:`2px solid ${ok?"#3a5bd9":"#e0e0e8"}`,borderRadius:6,color:ok?"#333":"#bbb",fontSize:15,fontWeight:"bold",outline:"none"}}/>
+                            <div style={{flex:1,fontSize:11,fontWeight:wV?"bold":"normal",color:wV?"#111":ok?"#333":"#aaa"}}>{p.visita}</div>
                           </div>
                         </div>
                       );
@@ -716,17 +716,17 @@ export default function App() {
                   </div>
                 ))}
               </div>
-              <div style={{background:"#f5f5f7",padding:"10px 14px",borderTop:"2px solid #0a180a"}}>
+              <div style={{background:"#f5f5f7",padding:"10px 14px",borderTop:"1px solid #e8e8f0"}}>
                 <div style={{fontSize:8,letterSpacing:2,color:"#e8e8f5",textTransform:"uppercase",marginBottom:7}}>Clasificación proyectada</div>
                 <table style={{width:"100%",borderCollapse:"collapse",fontSize:10}}>
                   <thead><tr>{["#","Equipo","PJ","GF","GC","DIF","PTS"].map(h=><th key={h} style={{color:"#e8e8f5",textAlign:h==="Equipo"?"left":"center",padding:"0 4px 4px",fontWeight:"normal"}}>{h}</th>)}</tr></thead>
-                  <tbody>{tabla.map(([eq,st],i)=>(<tr key={eq} style={{borderTop:"1px solid #eeeeef"}}><td style={{padding:4,textAlign:"center"}}>{i<2?<span style={{background:gr.accent,color:gr.color||"#000",borderRadius:4,padding:"1px 4px",fontSize:9,fontWeight:"900"}}>{i+1}</span>:<span style={{color:"#e8e8f5"}}>{i+1}</span>}</td><td style={{padding:4,color:i<2?B.text:"#e0e0f0",fontWeight:i<2?"bold":"normal",fontSize:11}}>{eq.split(" ").slice(0,2).join(" ")}</td>{[st.jj,st.gf,st.gc,st.gf-st.gc,st.pts].map((v,vi)=><td key={vi} style={{textAlign:"center",padding:4,color:vi===4?(i<2?B.primary:"#e8e8f5"):"#e0e0f0",fontWeight:vi===4&&i<2?"bold":"normal"}}>{v}</td>)}</tr>))}</tbody>
+                  <tbody>{tabla.map(([eq,st],i)=>(<tr key={eq} style={{borderTop:"1px solid #f0f0f0"}}><td style={{padding:4,textAlign:"center"}}>{i<2?<span style={{background:gr.accent,color:gr.color||"#000",borderRadius:4,padding:"1px 4px",fontSize:9,fontWeight:"900"}}>{i+1}</span>:<span style={{color:"#bbb"}}>{i+1}</span>}</td><td style={{padding:4,color:i<2?"#111":"#888",fontWeight:i<2?"bold":"normal",fontSize:11}}>{eq.split(" ").slice(0,2).join(" ")}</td>{[st.jj,st.gf,st.gc,st.gf-st.gc,st.pts].map((v,vi)=><td key={vi} style={{textAlign:"center",padding:4,color:vi===4?(i<2?"#3a5bd9":"#aaa"):"#ccc",fontWeight:vi===4&&i<2?"bold":"normal"}}>{v}</td>)}</tr>))}</tbody>
                 </table>
               </div>
             </div>
             <div style={{display:"flex",gap:8,marginBottom:12}}>
-              <button onClick={()=>gIdx>0&&setGrupo(KEYS[gIdx-1])} disabled={gIdx===0} style={{flex:1,padding:8,borderRadius:9,border:"1px solid #0a1a0a",background:gIdx===0?"#050805":"#f0f0f8",color:gIdx===0?"#e8e8f5":B.muted,fontSize:12,cursor:gIdx===0?"not-allowed":"pointer"}}>← Anterior</button>
-              <button onClick={()=>gIdx<KEYS.length-1&&setGrupo(KEYS[gIdx+1])} disabled={gIdx===KEYS.length-1} style={{flex:1,padding:8,borderRadius:9,border:"none",background:gIdx===KEYS.length-1?"#050805":B.primary,color:gIdx===KEYS.length-1?"#e8e8f5":"#000",fontSize:12,fontWeight:"bold",cursor:gIdx===KEYS.length-1?"not-allowed":"pointer"}}>Siguiente →</button>
+              <button onClick={()=>gIdx>0&&setGrupo(KEYS[gIdx-1])} disabled={gIdx===0} style={{flex:1,padding:8,borderRadius:9,border:"1px solid #e0e0e8",background:gIdx===0?"#f5f5f7":"#f0f0ff",color:gIdx===0?"#ccc":"#7c3aed",fontSize:12,cursor:gIdx===0?"not-allowed":"pointer"}}>← Anterior</button>
+              <button onClick={()=>gIdx<KEYS.length-1&&setGrupo(KEYS[gIdx+1])} disabled={gIdx===KEYS.length-1} style={{flex:1,padding:8,borderRadius:9,border:"none",background:gIdx===KEYS.length-1?"#f5f5f7":"#7c3aed",color:gIdx===KEYS.length-1?"#ccc":"#ffffff",fontSize:12,fontWeight:"bold",cursor:gIdx===KEYS.length-1?"not-allowed":"pointer"}}>Siguiente →</button>
             </div>
             <div style={{background:"#ffffff",border:"1px solid #e0e0e8",borderRadius:10,padding:"10px 14px",textAlign:"center"}}>
               <div style={{fontSize:10,color:"#888",marginBottom:6}}>¿Listo con los grupos?</div>
@@ -743,7 +743,7 @@ export default function App() {
         {/* ═══ PREDICCIONES ═══ */}
         {tab==="predicciones"&&(
           <div>
-            <div style={{background:"linear-gradient(135deg,#060e06,#0a180a)",border:`1px solid ${B.primary}35`,borderRadius:14,padding:16,marginBottom:18,textAlign:"center",boxShadow:`0 4px 16px rgba(58,91,217,0.10)`}}>
+            <div style={{background:"linear-gradient(135deg,#2a4bc9,#7c3aed)",border:"none",borderRadius:14,padding:16,marginBottom:18,textAlign:"center",boxShadow:"0 4px 20px rgba(58,91,217,0.25)"}}>
               <Logos size={42} center />
               <div style={{fontSize:16,fontWeight:"bold",color:"#ffffff",marginTop:12,marginBottom:4}}>Predicciones Especiales</div>
               <div style={{fontSize:11,color:"#ffffffaa"}}>Elige el podio y al máximo goleador</div>
@@ -852,7 +852,7 @@ export default function App() {
                   {ranked.map((p,rank)=>{
                     const isMe=p.id===myId;
                     return(
-                      <div key={p.id} style={{display:"grid",gridTemplateColumns:"32px 1fr 40px 40px 40px 52px",gap:4,padding:"9px 12px",borderTop:"1px solid #eeeeef",background:isMe?"#e8e8f5":"transparent",alignItems:"center"}}>
+                      <div key={p.id} style={{display:"grid",gridTemplateColumns:"32px 1fr 40px 40px 40px 52px",gap:4,padding:"9px 12px",borderTop:"1px solid #f0f0f0",background:isMe?"#e8e8f5":"transparent",alignItems:"center"}}>
                         <div style={{fontSize:rank<3?15:12,textAlign:"center"}}>{rank===0?"🥇":rank===1?"🥈":rank===2?"🥉":<span style={{color:B.muted}}>{rank+1}</span>}</div>
                         <div>
                           <div style={{fontSize:12,fontWeight:isMe?"bold":"normal",color:isMe?B.primary:rank===0?B.text:B.muted}}>{p.nombre}{isMe&&<span style={{fontSize:9,marginLeft:5,color:B.primary}}>← tú</span>}</div>
@@ -871,7 +871,7 @@ export default function App() {
             {/* Load portal data if not loaded */}
             {resultadosOficiales&&Object.keys(resultadosOficiales).length>0&&portalData.length===0&&(
               <div style={{textAlign:"center",marginTop:16}}>
-                <button onClick={loadPortal} style={{padding:"9px 20px",borderRadius:9,border:"none",background:B.primary,color:"#000",fontWeight:"bold",fontSize:13,cursor:"pointer"}}>Cargar ranking completo</button>
+                <button onClick={loadPortal} style={{padding:"9px 20px",borderRadius:9,border:"none",background:"#3a5bd9",color:"#ffffff",fontWeight:"bold",fontSize:13,cursor:"pointer"}}>Cargar ranking completo</button>
               </div>
             )}
 
@@ -901,7 +901,7 @@ export default function App() {
                 <span style={tagStyle(podioCompleto,B.primary)}>{podioCompleto?"✓":"·"} Extras {predCount}/4</span>
               </div>
               <div style={{display:"flex",gap:8}}>
-                <button onClick={saveQuiniela} disabled={saving} style={{flex:1,padding:9,borderRadius:9,border:"none",background:saving?"#f0f0f8":B.primary,color:saving?B.muted:"#000",fontWeight:"bold",fontSize:12,cursor:saving?"not-allowed":"pointer"}}>{saving?"Guardando...":saveMsg||"💾 Guardar quiniela"}</button>
+                <button onClick={saveQuiniela} disabled={saving} style={{flex:1,padding:9,borderRadius:9,border:"none",background:saving?"#e0e0e8":"#3a5bd9",color:saving?"#aaa":"#fff",fontWeight:"bold",fontSize:12,cursor:saving?"not-allowed":"pointer"}}>{saving?"Guardando...":saveMsg||"💾 Guardar quiniela"}</button>
                 <button onClick={()=>setScreen("portal")} style={{flex:1,padding:9,borderRadius:9,border:"1px solid #0a1a0a",background:"#f0f0f8",color:B.muted,fontSize:12,cursor:"pointer"}}>👥 Ver portal</button>
               </div>
             </div>
@@ -929,7 +929,7 @@ export default function App() {
                 const done=ko.filter(m=>m.ganador).length;
                 const ganadores=ko.filter(m=>m.ganador).map(m=>m.ganador);
                 return(
-                  <div key={r.id} onClick={()=>setTab("knockout")} style={{padding:"8px 0",borderBottom:"1px solid #0a180a",cursor:"pointer"}}>
+                  <div key={r.id} onClick={()=>setTab("knockout")} style={{padding:"8px 0",borderBottom:"1px solid #eeeeef",cursor:"pointer"}}>
                     <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:ganadores.length?5:0}}>
                       <span style={{fontSize:16}}>{r.emoji}</span>
                       <span style={{fontSize:12,color:done===r.partidos?B.primary:B.muted,fontWeight:done===r.partidos?"bold":"normal"}}>{r.label}</span>
