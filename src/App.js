@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { doc, setDoc, getDoc, collection, getDocs } from "firebase/firestore";
 import { db } from "./firebase";
-import { GRUPOS, KEYS, SELECCIONES, GOLEADORES, calcTabla, completionPct } from "./data";
+import { GRUPOS, KEYS, SELECCIONES, GOLEADORES, calcTabla, completionPct, buildBracket } from "./data";
 import { calcTotalPoints } from "./scoring";
 import Admin from "./Admin";
 
@@ -60,7 +60,7 @@ function Logos({ size = 40, center = false }) {
 
 
 // ─── KNOCKOUT MATCH CARD ──────────────────────────────────────────────────────
-function MatchCard({ match, idx, rondaColor, onChange }) {
+function MatchCard({ match, idx, rondaColor, onChange, autoFilled=false }) {
   const { local, localGoles, visita, visitaGoles, ganador, penaltis, penaltisGanador } = match;
   const hasTeams = local && visita;
   const gl = parseInt(localGoles), gv = parseInt(visitaGoles);
@@ -75,19 +75,28 @@ function MatchCard({ match, idx, rondaColor, onChange }) {
       borderRadius:12, padding:"10px 12px", marginBottom:8,
       boxShadow: ganador ? `0 0 10px ${rondaColor}18` : "none",
     }}>
-      <div style={{ fontSize:9, color:B.muted, marginBottom:7, display:"flex", justifyContent:"space-between" }}>
+      <div style={{ fontSize:9, color:B.muted, marginBottom:7, display:"flex", justifyContent:"space-between", alignItems:"center" }}>
         <span>Partido {idx+1}</span>
-        {ganador && <span style={{ color:rondaColor, fontWeight:"bold" }}>✓ {ganador.split(" ").slice(0,2).join(" ")}</span>}
+        <div style={{display:"flex",gap:4,alignItems:"center"}}>
+          {autoFilled && <span style={{fontSize:8,background:"#00cc0015",border:"1px solid #00cc0030",color:"#00cc00",borderRadius:10,padding:"1px 6px"}}>⚡ Auto</span>}
+          {ganador && <span style={{ color:rondaColor, fontWeight:"bold" }}>✓ {ganador.split(" ").slice(0,2).join(" ")}</span>}
+        </div>
       </div>
 
       {/* Equipo local */}
       <div style={{ display:"flex", alignItems:"center", gap:6, marginBottom:6 }}>
+        {autoFilled && local ? (
+          <div style={{flex:1,background:"#0d180d",border:`1px solid ${ganador===local?"#00cc0060":"#00cc0025"}`,borderRadius:6,padding:"6px 8px",color:ganador===local?B.primary:"#00cc0099",fontSize:11,fontWeight:ganador===local?"bold":"normal"}}>
+            {local}
+          </div>
+        ) : (
         <input
           value={local}
           onChange={e=>upd("local", e.target.value)}
           placeholder="Equipo local..."
           style={{ flex:1, background:"#ffffff08", border:`1px solid ${ganador===local&&local?"#00cc0060":"#ffffff12"}`, borderRadius:6, padding:"6px 8px", color:ganador===local&&local?B.primary:B.text, fontSize:11, outline:"none", fontWeight:ganador===local&&local?"bold":"normal" }}
         />
+        )}
         <input
           type="number" min="0" max="20"
           value={localGoles}
@@ -98,12 +107,18 @@ function MatchCard({ match, idx, rondaColor, onChange }) {
 
       {/* Equipo visitante */}
       <div style={{ display:"flex", alignItems:"center", gap:6, marginBottom: empate ? 8 : 0 }}>
+        {autoFilled && visita ? (
+          <div style={{flex:1,background:"#0d180d",border:`1px solid ${ganador===visita?"#00cc0060":"#00cc0025"}`,borderRadius:6,padding:"6px 8px",color:ganador===visita?B.primary:"#00cc0099",fontSize:11,fontWeight:ganador===visita?"bold":"normal"}}>
+            {visita}
+          </div>
+        ) : (
         <input
           value={visita}
           onChange={e=>upd("visita", e.target.value)}
           placeholder="Equipo visitante..."
           style={{ flex:1, background:"#ffffff08", border:`1px solid ${ganador===visita&&visita?"#00cc0060":"#ffffff12"}`, borderRadius:6, padding:"6px 8px", color:ganador===visita&&visita?B.primary:B.text, fontSize:11, outline:"none", fontWeight:ganador===visita&&visita?"bold":"normal" }}
         />
+        )}
         <input
           type="number" min="0" max="20"
           value={visitaGoles}
@@ -154,7 +169,12 @@ function KnockoutTab({ knockout, setKnockout }) {
     setKnockout(prev => {
       const arr = [...(prev[rondaId]||[])];
       arr[idx] = newMatch;
-      return { ...prev, [rondaId]: arr };
+      const updated = { ...prev, [rondaId]: arr };
+      // If a winner was set, propagate to next round
+      if (newMatch.ganador) {
+        return buildBracket(scores, updated);
+      }
+      return updated;
     });
   };
 
@@ -293,6 +313,13 @@ export default function App() {
   const [knockout,setKnockout]=useState(emptyKnockout());
 
   const [tab,setTab]=useState("partidos"); const [grupo,setGrupo]=useState("A");
+
+  // Auto-rebuild knockout bracket whenever scores change
+  useEffect(() => {
+    const newKO = buildBracket(scores, knockout);
+    setKnockout(newKO);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [scores]);
 
   // ── Auth / Save / Load ────────────────────────────────────────────────────
   const handleLogin=async()=>{

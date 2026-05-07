@@ -87,3 +87,287 @@ export function completionPct(quiniela) {
   const extras = [quiniela.campeon, quiniela.segundo, quiniela.tercero, quiniela.goleador].filter(Boolean).length;
   return { partidos: filled, total: totalP, extras, pct: Math.round((filled / totalP) * 100) };
 }
+
+// ─── BRACKET SEEDING ─────────────────────────────────────────────────────────
+// FIFA 2026 official R32 bracket (16 matches)
+// Format: [match_index, slot] = "1A" means 1st of Group A, "2B" = 2nd of Group B, "3X" = best 3rd
+// Official bracket pairings based on FIFA draw rules:
+export const R32_BRACKET = [
+  // Match 0:  1A vs 2B
+  { local: "1A", visita: "2B" },
+  // Match 1:  1C vs 2D
+  { local: "1C", visita: "2D" },
+  // Match 2:  1E vs 2F
+  { local: "1E", visita: "2F" },
+  // Match 3:  1G vs 2H
+  { local: "1G", visita: "2H" },
+  // Match 4:  1I vs 2J
+  { local: "1I", visita: "2J" },
+  // Match 5:  1K vs 2L
+  { local: "1K", visita: "2L" },
+  // Match 6:  1B vs 2A
+  { local: "1B", visita: "2A" },
+  // Match 7:  1D vs 2C
+  { local: "1D", visita: "2C" },
+  // Match 8:  1F vs 2E
+  { local: "1F", visita: "2E" },
+  // Match 9:  1H vs 2G
+  { local: "1H", visita: "2G" },
+  // Match 10: 1J vs 2I
+  { local: "1J", visita: "2I" },
+  // Match 11: 1L vs 2K
+  { local: "1L", visita: "2K" },
+  // Match 12: Best 3rd (Group A/B/C/D) vs Best 3rd (Group E/F/G/H)
+  { local: "3ABCD", visita: "3EFGH" },
+  // Match 13: Best 3rd (Group I/J/K/L) vs Best 3rd (Group A/B/E/F)
+  { local: "3IJKL", visita: "3ABEF" },
+  // Match 14: Best 3rd (Group C/D/I/J) vs Best 3rd (Group G/H/K/L)
+  { local: "3CDIJ", visita: "3GHKL" },
+  // Match 15: Best 3rd (Group A/C/D/E) vs Best 3rd (Group B/F/J/K)
+  { local: "3ACDE", visita: "3BFJK" },
+];
+
+// R16 bracket: winner of R32 match X vs winner of R32 match Y
+export const R16_BRACKET = [
+  { local: "W0",  visita: "W1"  }, // Match 0
+  { local: "W2",  visita: "W3"  }, // Match 1
+  { local: "W4",  visita: "W5"  }, // Match 2
+  { local: "W6",  visita: "W7"  }, // Match 3
+  { local: "W8",  visita: "W9"  }, // Match 4
+  { local: "W10", visita: "W11" }, // Match 5
+  { local: "W12", visita: "W13" }, // Match 6
+  { local: "W14", visita: "W15" }, // Match 7
+];
+
+export const QF_BRACKET = [
+  { local: "W0", visita: "W1" },
+  { local: "W2", visita: "W3" },
+  { local: "W4", visita: "W5" },
+  { local: "W6", visita: "W7" },
+];
+
+export const SF_BRACKET = [
+  { local: "W0", visita: "W1" },
+  { local: "W2", visita: "W3" },
+];
+
+// ─── Calculate group standings ────────────────────────────────────────────────
+export function getGroupClassified(scores) {
+  const result = {}; // { "1A": "🇦🇷 Argentina", "2A": "🇧🇷 Brasil", ... }
+  const thirds = []; // array of { group, team, pts, gf, gc }
+
+  KEYS.forEach(g => {
+    const gr = GRUPOS[g];
+    const ms = gr.partidos.map((_, i) => scores?.[g]?.[i] || { local: "", visita: "" });
+    const tabla = calcTabla(gr.equipos, gr.partidos, ms);
+
+    if (tabla[0] && tabla[0][1].jj > 0) {
+      result[`1${g}`] = tabla[0][0];
+    }
+    if (tabla[1] && tabla[1][1].jj > 0) {
+      result[`2${g}`] = tabla[1][0];
+    }
+    if (tabla[2] && tabla[2][1].jj > 0) {
+      thirds.push({
+        group: g, team: tabla[2][0],
+        pts: tabla[2][1].pts, gf: tabla[2][1].gf, gc: tabla[2][1].gc,
+        dif: tabla[2][1].gf - tabla[2][1].gc,
+      });
+    }
+  });
+
+  // Sort thirds by pts > dif > gf
+  thirds.sort((a, b) => {
+    if (b.pts !== a.pts) return b.pts - a.pts;
+    if (b.dif !== a.dif) return b.dif - a.dif;
+    return b.gf - a.gf;
+  });
+
+  // Assign best 8 thirds to their bracket slots (simplified - assign in order)
+  const topThirds = thirds.slice(0, 8);
+  const groupsOf8 = ["ABCD", "EFGH", "IJKL", "ABEF", "CDIJ", "GHKL", "ACDE", "BFJK"];
+  groupsOf8.forEach((key, i) => {
+    if (topThirds[i]) result[`3${key}`] = topThirds[i].team;
+  });
+
+  return result;
+}
+
+// ─── Build bracket from classified + round winners ────────────────────────────
+export function buildBracket(scores, knockout) {
+  const classified = getGroupClassified(scores);
+
+  const newKO = {};
+
+  // ── R32: fill from group classified ────────────────────────────────────────
+  newKO.r32 = R32_BRACKET.map((slot, i) => {
+    const existing = knockout?.r32?.[i] || {};
+    return {
+      id: i,
+      local: classified[slot.local] || existing.local || "",
+      visita: classified[slot.visita] || existing.visita || "",
+      localGoles: existing.localGoles || "",
+      visitaGoles: existing.visitaGoles || "",
+      ganador: existing.ganador || "",
+      penaltis: existing.penaltis || false,
+      penaltisGanador: existing.penaltisGanador || "",
+    };
+  });
+
+  // ── R16: fill from R32 winners ─────────────────────────────────────────────
+  newKO.r16 = R16_BRACKET.map((slot, i) => {
+    const existing = knockout?.r16?.[i] || {};
+    const wIdx = parseInt(slot.local.replace("W", ""));
+    const vIdx = parseInt(slot.visita.replace("W", ""));
+    const localTeam = newKO.r32[wIdx]?.ganador || existing.local || "";
+    const visitaTeam = newKO.r32[vIdx]?.ganador || existing.visita || "";
+    return {
+      id: i, local: localTeam, visita: visitaTeam,
+      localGoles: localTeam !== existing.local ? "" : existing.localGoles || "",
+      visitaGoles: visitaTeam !== existing.visita ? "" : existing.visitaGoles || "",
+      ganador: (localTeam === existing.local && visitaTeam === existing.visita) ? existing.ganador || "" : "",
+      penaltis: false, penaltisGanador: "",
+    };
+  });
+
+  // ── QF: fill from R16 winners ──────────────────────────────────────────────
+  newKO.qf = QF_BRACKET.map((slot, i) => {
+    const existing = knockout?.qf?.[i] || {};
+    const wIdx = parseInt(slot.local.replace("W", ""));
+    const vIdx = parseInt(slot.visita.replace("W", ""));
+    const localTeam = newKO.r16[wIdx]?.ganador || existing.local || "";
+    const visitaTeam = newKO.r16[vIdx]?.ganador || existing.visita || "";
+    return {
+      id: i, local: localTeam, visita: visitaTeam,
+      localGoles: localTeam !== existing.local ? "" : existing.localGoles || "",
+      visitaGoles: visitaTeam !== existing.visita ? "" : existing.visitaGoles || "",
+      ganador: (localTeam === existing.local && visitaTeam === existing.visita) ? existing.ganador || "" : "",
+      penaltis: false, penaltisGanador: "",
+    };
+  });
+
+  // ── SF: fill from QF winners ───────────────────────────────────────────────
+  newKO.sf = SF_BRACKET.map((slot, i) => {
+    const existing = knockout?.sf?.[i] || {};
+    const wIdx = parseInt(slot.local.replace("W", ""));
+    const vIdx = parseInt(slot.visita.replace("W", ""));
+    const localTeam = newKO.qf[wIdx]?.ganador || existing.local || "";
+    const visitaTeam = newKO.qf[vIdx]?.ganador || existing.visita || "";
+    return {
+      id: i, local: localTeam, visita: visitaTeam,
+      localGoles: localTeam !== existing.local ? "" : existing.localGoles || "",
+      visitaGoles: visitaTeam !== existing.visita ? "" : existing.visitaGoles || "",
+      ganador: (localTeam === existing.local && visitaTeam === existing.visita) ? existing.ganador || "" : "",
+      penaltis: false, penaltisGanador: "",
+    };
+  });
+
+  // ── Final: fill from SF winners ────────────────────────────────────────────
+  const sfW0 = newKO.sf[0]?.ganador || knockout?.final?.[0]?.local || "";
+  const sfW1 = newKO.sf[1]?.ganador || knockout?.final?.[0]?.visita || "";
+  const existingFinal = knockout?.final?.[0] || {};
+  newKO.final = [{
+    id: 0, local: sfW0, visita: sfW1,
+    localGoles: sfW0 !== existingFinal.local ? "" : existingFinal.localGoles || "",
+    visitaGoles: sfW1 !== existingFinal.visita ? "" : existingFinal.visitaGoles || "",
+    ganador: (sfW0 === existingFinal.local && sfW1 === existingFinal.visita) ? existingFinal.ganador || "" : "",
+    penaltis: false, penaltisGanador: "",
+  }];
+
+  // ── 3rd place: fill from SF losers ────────────────────────────────────────
+  const sf0Loser = newKO.sf[0]?.ganador
+    ? (newKO.sf[0].ganador === newKO.sf[0].local ? newKO.sf[0].visita : newKO.sf[0].local)
+    : knockout?.third?.[0]?.local || "";
+  const sf1Loser = newKO.sf[1]?.ganador
+    ? (newKO.sf[1].ganador === newKO.sf[1].local ? newKO.sf[1].visita : newKO.sf[1].local)
+    : knockout?.third?.[0]?.visita || "";
+  const existingThird = knockout?.third?.[0] || {};
+  newKO.third = [{
+    id: 0, local: sf0Loser, visita: sf1Loser,
+    localGoles: sf0Loser !== existingThird.local ? "" : existingThird.localGoles || "",
+    visitaGoles: sf1Loser !== existingThird.visita ? "" : existingThird.visitaGoles || "",
+    ganador: (sf0Loser === existingThird.local && sf1Loser === existingThird.visita) ? existingThird.ganador || "" : "",
+    penaltis: false, penaltisGanador: "",
+  }];
+
+  return newKO;
+}
+
+// ─── BRACKET SEEDING ─────────────────────────────────────────────────────────
+export const R32_BRACKET = [
+  { local: "1A", visita: "2B" }, { local: "1C", visita: "2D" },
+  { local: "1E", visita: "2F" }, { local: "1G", visita: "2H" },
+  { local: "1I", visita: "2J" }, { local: "1K", visita: "2L" },
+  { local: "1B", visita: "2A" }, { local: "1D", visita: "2C" },
+  { local: "1F", visita: "2E" }, { local: "1H", visita: "2G" },
+  { local: "1J", visita: "2I" }, { local: "1L", visita: "2K" },
+  { local: "3ABCD", visita: "3EFGH" }, { local: "3IJKL", visita: "3ABEF" },
+  { local: "3CDIJ", visita: "3GHKL" }, { local: "3ACDE", visita: "3BFJK" },
+];
+export const R16_BRACKET = [
+  {l:"W0",v:"W1"},{l:"W2",v:"W3"},{l:"W4",v:"W5"},{l:"W6",v:"W7"},
+  {l:"W8",v:"W9"},{l:"W10",v:"W11"},{l:"W12",v:"W13"},{l:"W14",v:"W15"},
+];
+export const QF_BRACKET = [{l:"W0",v:"W1"},{l:"W2",v:"W3"},{l:"W4",v:"W5"},{l:"W6",v:"W7"}];
+export const SF_BRACKET = [{l:"W0",v:"W1"},{l:"W2",v:"W3"}];
+
+export function getGroupClassified(scores) {
+  const result = {};
+  const thirds = [];
+  KEYS.forEach(g => {
+    const gr = GRUPOS[g];
+    const ms = gr.partidos.map((_,i) => scores?.[g]?.[i] || {local:"",visita:""});
+    const tabla = calcTabla(gr.equipos, gr.partidos, ms);
+    if (tabla[0]&&tabla[0][1].jj>0) result["1"+g] = tabla[0][0];
+    if (tabla[1]&&tabla[1][1].jj>0) result["2"+g] = tabla[1][0];
+    if (tabla[2]&&tabla[2][1].jj>0) thirds.push({group:g,team:tabla[2][0],pts:tabla[2][1].pts,dif:tabla[2][1].gf-tabla[2][1].gc,gf:tabla[2][1].gf});
+  });
+  thirds.sort((a,b)=>b.pts!==a.pts?b.pts-a.pts:b.dif!==a.dif?b.dif-a.dif:b.gf-a.gf);
+  ["ABCD","EFGH","IJKL","ABEF","CDIJ","GHKL","ACDE","BFJK"].forEach((k,i)=>{
+    if (thirds[i]) result["3"+k] = thirds[i].team;
+  });
+  return result;
+}
+
+function makeMatch(i, local, visita, existing) {
+  const same = local===existing?.local && visita===existing?.visita;
+  return {
+    id:i, local, visita,
+    localGoles: same ? existing.localGoles||"" : "",
+    visitaGoles: same ? existing.visitaGoles||"" : "",
+    ganador: same ? existing.ganador||"" : "",
+    penaltis: same ? existing.penaltis||false : false,
+    penaltisGanador: same ? existing.penaltisGanador||"" : "",
+  };
+}
+
+export function buildBracket(scores, knockout) {
+  const c = getGroupClassified(scores);
+  const ko = {};
+
+  ko.r32 = R32_BRACKET.map((s,i) => makeMatch(i, c[s.local]||"", c[s.visita]||"", knockout?.r32?.[i]));
+
+  ko.r16 = R16_BRACKET.map((s,i) => {
+    const li=parseInt(s.l.replace("W","")), vi=parseInt(s.v.replace("W",""));
+    return makeMatch(i, ko.r32[li]?.ganador||"", ko.r32[vi]?.ganador||"", knockout?.r16?.[i]);
+  });
+
+  ko.qf = QF_BRACKET.map((s,i) => {
+    const li=parseInt(s.l.replace("W","")), vi=parseInt(s.v.replace("W",""));
+    return makeMatch(i, ko.r16[li]?.ganador||"", ko.r16[vi]?.ganador||"", knockout?.qf?.[i]);
+  });
+
+  ko.sf = SF_BRACKET.map((s,i) => {
+    const li=parseInt(s.l.replace("W","")), vi=parseInt(s.v.replace("W",""));
+    return makeMatch(i, ko.qf[li]?.ganador||"", ko.qf[vi]?.ganador||"", knockout?.sf?.[i]);
+  });
+
+  const sfW0=ko.sf[0]?.ganador||"", sfW1=ko.sf[1]?.ganador||"";
+  ko.final = [makeMatch(0, sfW0, sfW1, knockout?.final?.[0])];
+
+  const sf0L=ko.sf[0]?.ganador?(ko.sf[0].ganador===ko.sf[0].local?ko.sf[0].visita:ko.sf[0].local):"";
+  const sf1L=ko.sf[1]?.ganador?(ko.sf[1].ganador===ko.sf[1].local?ko.sf[1].visita:ko.sf[1].local):"";
+  ko.third = [makeMatch(0, sf0L, sf1L, knockout?.third?.[0])];
+
+  return ko;
+}
