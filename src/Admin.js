@@ -11,7 +11,7 @@ const B = {
   bg: "#f5f5f7", card: "#ffffff", border: "#e0e0e8",
   text: "#111111", muted: "#888899",
   admin: "#7c3aed", adminDim: "#7c3aed15",
-  logoMF: "/logo-mundofutbol.png",
+  logoMF: "/logo mf blanco verde.png",
 };
 
 const RONDAS = [
