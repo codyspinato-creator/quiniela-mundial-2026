@@ -497,6 +497,21 @@ export default function Admin({ onBack }) {
                   <div style={{ textAlign: "center", fontSize: 12, color: "#555" }}>{p.score.knockout}</div>
                   <div style={{ textAlign: "center", fontSize: 12, color: "#555" }}>{p.score.special}</div>
                   <div style={{ textAlign: "center", fontSize: 16, fontWeight: "bold", color: rank === 0 ? B.primary : rank < 3 ? B.primary2 : B.text }}>{p.score.total}</div>
+                  <div style={{ textAlign: "center" }}>
+                    <button
+                      onClick={() => deleteQuiniela(p.id, p.nombre)}
+                      disabled={deletingId === p.id}
+                      style={{
+                        padding: "4px 8px", borderRadius: 6, border: "none", fontSize: 11,
+                        background: confirmDelete === p.id ? "#e63946" : "#fff0f0",
+                        color: confirmDelete === p.id ? "#ffffff" : "#e63946",
+                        cursor: "pointer", fontWeight: confirmDelete === p.id ? "bold" : "normal",
+                        transition: "all 0.2s", whiteSpace: "nowrap",
+                      }}
+                    >
+                      {deletingId === p.id ? "⏳" : confirmDelete === p.id ? "¿Seguro?" : "🗑️"}
+                    </button>
+                  </div>
                 </div>
               ))}
             </div>
