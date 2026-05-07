@@ -88,7 +88,7 @@ function MatchCard({ match, idx, rondaColor, onChange, autoFilled=false }) {
 
   return (
     <div style={{
-      background: B.card, border:`1px solid ${ganador ? rondaColor+"50" : "#00000008"}`,
+      background: "#ffffff", border:`1px solid ${ganador ? rondaColor+"80" : "#e0e0e8"}`,
       borderRadius:12, padding:"10px 12px", marginBottom:8,
       boxShadow: ganador ? `0 0 10px ${rondaColor}18` : "none",
     }}>
@@ -111,7 +111,7 @@ function MatchCard({ match, idx, rondaColor, onChange, autoFilled=false }) {
           value={local}
           onChange={e=>upd("local", e.target.value)}
           placeholder="Equipo local..."
-          style={{ flex:1, background:"#00000008", border:`1px solid ${ganador===local&&local?"#9090c8":"#00000012"}`, borderRadius:6, padding:"6px 8px", color:ganador===local&&local?B.primary:B.text, fontSize:11, outline:"none", fontWeight:ganador===local&&local?"bold":"normal" }}
+          style={{ flex:1, background:"#f8f8f8", border:`1px solid ${ganador===local&&local?"#3a5bd9":"#e0e0e8"}`, borderRadius:6, padding:"7px 10px", color:ganador===local&&local?"#3a5bd9":"#111", fontSize:11, outline:"none", fontWeight:ganador===local&&local?"bold":"normal" }}
         />
         )}
         <input
@@ -133,7 +133,7 @@ function MatchCard({ match, idx, rondaColor, onChange, autoFilled=false }) {
           value={visita}
           onChange={e=>upd("visita", e.target.value)}
           placeholder="Equipo visitante..."
-          style={{ flex:1, background:"#00000008", border:`1px solid ${ganador===visita&&visita?"#9090c8":"#00000012"}`, borderRadius:6, padding:"6px 8px", color:ganador===visita&&visita?B.primary:B.text, fontSize:11, outline:"none", fontWeight:ganador===visita&&visita?"bold":"normal" }}
+          style={{ flex:1, background:"#f8f8f8", border:`1px solid ${ganador===visita&&visita?"#3a5bd9":"#e0e0e8"}`, borderRadius:6, padding:"7px 10px", color:ganador===visita&&visita?"#3a5bd9":"#111", fontSize:11, outline:"none", fontWeight:ganador===visita&&visita?"bold":"normal" }}
         />
         )}
         <input
@@ -151,7 +151,7 @@ function MatchCard({ match, idx, rondaColor, onChange, autoFilled=false }) {
           <div style={{ display:"flex", gap:6 }}>
             {[local, visita].filter(Boolean).map(eq=>(
               <button key={eq} onClick={()=>{ upd("penaltis",true); upd("penaltisGanador",eq); upd("ganador",eq); }}
-                style={{ flex:1, padding:"5px 8px", borderRadius:7, border:`1px solid ${penaltisGanador===eq?"#3a5bd9":"#00000015"}`, background:penaltisGanador===eq?"#e0e0e8":"#00000008", color:penaltisGanador===eq?B.primary:B.muted, fontSize:11, cursor:"pointer", fontWeight:penaltisGanador===eq?"bold":"normal" }}>
+                style={{ flex:1, padding:"5px 8px", borderRadius:7, border:`1px solid ${penaltisGanador===eq?"#3a5bd9":"#00000015"}`, background:penaltisGanador===eq?"#eff4ff":"#f8f8fc", color:penaltisGanador===eq?"#3a5bd9":"#666", fontSize:11, cursor:"pointer", fontWeight:penaltisGanador===eq?"bold":"normal" }}>
                 {eq.split(" ").slice(0,2).join(" ")}
               </button>
             ))}
@@ -166,7 +166,7 @@ function MatchCard({ match, idx, rondaColor, onChange, autoFilled=false }) {
           <div style={{ display:"flex", gap:6 }}>
             {[{eq:local,wins:gl>gv},{eq:visita,wins:gv>gl}].filter(x=>x.eq).map(({eq,wins})=>(
               <button key={eq} onClick={()=>upd("ganador",eq)}
-                style={{ flex:1, padding:"5px 8px", borderRadius:7, border:`1px solid ${ganador===eq?rondaColor:"#00000012"}`, background:ganador===eq?rondaColor+"25":"#00000008", color:ganador===eq?rondaColor:B.muted, fontSize:10, cursor:"pointer", fontWeight:ganador===eq?"bold":"normal" }}>
+                style={{ flex:1, padding:"5px 8px", borderRadius:7, border:`1px solid ${ganador===eq?rondaColor:"#00000012"}`, background:ganador===eq?rondaColor+"20":"#f8f8fc", color:ganador===eq?rondaColor:B.muted, fontSize:10, cursor:"pointer", fontWeight:ganador===eq?"bold":"normal" }}>
                 {wins?"⚽ ":""}{eq.split(" ").slice(0,2).join(" ")}
               </button>
             ))}
@@ -304,7 +304,7 @@ function KnockoutTab({ knockout, setKnockout }) {
           </button>
         )}
         {RONDAS.indexOf(ronda) < RONDAS.length-1 && (
-          <button onClick={()=>setRondaActiva(RONDAS[RONDAS.indexOf(ronda)+1].id)} style={{ flex:1, padding:8, borderRadius:9, border:"none", background:ronda.color, color:"#000", fontSize:12, fontWeight:"bold", cursor:"pointer" }}>
+          <button onClick={()=>setRondaActiva(RONDAS[RONDAS.indexOf(ronda)+1].id)} style={{ flex:1, padding:8, borderRadius:9, border:"none", background:ronda.color, color:"#ffffff", fontSize:12, fontWeight:"bold", cursor:"pointer" }}>
             {RONDAS[RONDAS.indexOf(ronda)+1].label} →
           </button>
         )}
@@ -545,7 +545,7 @@ export default function App() {
               const tab2=calcTabla(gr2.equipos,gr2.partidos,ms2);
               const done=ms2.every(m=>!isNaN(parseInt(m.local))&&m.local!==""&&!isNaN(parseInt(m.visita))&&m.visita!=="");
               return(
-                <div key={g} style={{background:done?B.card:"#f5f5f7",border:`1px solid ${done?gr2.color+"45":"#00000008"}`,borderRadius:10,padding:"9px 13px",marginBottom:7}}>
+                <div key={g} style={{background:"#ffffff",border:`1px solid ${done?gr2.color+"45":"#00000008"}`,borderRadius:10,padding:"9px 13px",marginBottom:7}}>
                   <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:done?8:0}}>
                     <div style={{width:26,height:26,borderRadius:6,background:done?gr2.color:"#0000000a",color:done?gr2.accent:"#e0e0f0",display:"flex",alignItems:"center",justifyContent:"center",fontSize:12,fontWeight:"900"}}>{g}</div>
                     <div style={{fontSize:10,color:B.muted}}>{gr2.equipos.map(e=>e.split(" ").slice(1).join(" ")).join(" · ")}</div>
@@ -595,7 +595,7 @@ export default function App() {
                 <div style={{marginBottom:14}}>
                   <div style={{fontSize:10,letterSpacing:3,color:B.primary,textTransform:"uppercase",marginBottom:8}}>🏅 Ranking de puntuación</div>
                   {portalData.map(p=>({...p,score:calcTotalPoints(p,resultadosOficiales)})).sort((a,b)=>b.score.total-a.score.total).slice(0,3).map((p,rank)=>(
-                    <div key={p.id} style={{display:"flex",alignItems:"center",gap:8,padding:"6px 10px",background:rank===0?"#e8e8f5":B.card,border:`1px solid ${rank===0?B.primary+"40":"#00000008"}`,borderRadius:8,marginBottom:4}}>
+                    <div key={p.id} style={{display:"flex",alignItems:"center",gap:8,padding:"6px 10px",background:rank===0?"#eff4ff":"#ffffff",border:`1px solid ${rank===0?"#3a5bd9":"#e0e0e8"}`,borderRadius:8,marginBottom:4}}>
                       <span style={{fontSize:14}}>{rank===0?"🥇":rank===1?"🥈":"🥉"}</span>
                       <span style={{fontSize:13,fontWeight:"bold",color:rank===0?B.primary:B.text,flex:1}}>{p.nombre}</span>
                       <span style={{fontSize:15,fontWeight:"bold",color:rank===0?B.primary:B.muted}}>{p.score.total} pts</span>
@@ -607,7 +607,7 @@ export default function App() {
               {portalData.map(q=>{
                 const qc=completionPct(q); const isMe=q.id===myId;
                 return(
-                  <div key={q.id} onClick={()=>setSelectedUser(q)} style={{background:isMe?"#f5f5f7":B.card,border:`1px solid ${isMe?B.primary+"45":"#00000008"}`,borderRadius:12,padding:"12px 14px",marginBottom:8,cursor:"pointer"}}>
+                  <div key={q.id} onClick={()=>setSelectedUser(q)} style={{background:isMe?"#eff4ff":"#ffffff",border:`1px solid ${isMe?"#3a5bd9":"#e0e0e8"}`,borderRadius:12,padding:"12px 14px",marginBottom:8,cursor:"pointer"}}>
                     <div style={{display:"flex",alignItems:"center",gap:10}}>
                       <div style={{width:36,height:36,borderRadius:10,background:isMe?B.primaryDim:"#00000008",border:`1px solid ${isMe?B.primary+"40":"#0000000d"}`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:15,fontWeight:"bold",color:isMe?B.primary:"#d8d8ec",flexShrink:0}}>{q.nombre.charAt(0).toUpperCase()}</div>
                       <div style={{flex:1,minWidth:0}}>
@@ -834,7 +834,7 @@ export default function App() {
 
             {/* No resultados yet */}
             {(!resultadosOficiales||Object.keys(resultadosOficiales).length===0)&&(
-              <div style={{background:B.card,border:`1px solid ${B.border}`,borderRadius:12,padding:24,marginBottom:16,textAlign:"center"}}>
+              <div style={{background:"#ffffff",border:"1px solid #e0e0e8",borderRadius:12,padding:24,marginBottom:16,textAlign:"center"}}>
                 <div style={{fontSize:32,marginBottom:8}}>⏳</div>
                 <div style={{fontSize:13,color:B.text,marginBottom:4}}>El ranking estará disponible</div>
                 <div style={{fontSize:11,color:B.muted}}>cuando el organizador ingrese los resultados oficiales</div>
@@ -845,7 +845,7 @@ export default function App() {
             {resultadosOficiales&&Object.keys(resultadosOficiales).length>0&&portalData.length>0&&(()=>{
               const ranked=portalData.map(p=>({...p,score:calcTotalPoints(p,resultadosOficiales)})).sort((a,b)=>b.score.total-a.score.total);
               return(
-                <div style={{background:B.card,border:`1px solid ${B.border}`,borderRadius:12,overflow:"hidden"}}>
+                <div style={{background:"#ffffff",border:"1px solid #e0e0e8",borderRadius:12,overflow:"hidden"}}>
                   <div style={{display:"grid",gridTemplateColumns:"32px 1fr 40px 40px 40px 52px",gap:4,padding:"8px 12px",background:"#e8e8f5",fontSize:9,color:B.muted,letterSpacing:1,textTransform:"uppercase"}}>
                     <div>#</div><div>Participante</div><div style={{textAlign:"center"}}>G</div><div style={{textAlign:"center"}}>E</div><div style={{textAlign:"center"}}>X</div><div style={{textAlign:"center"}}>TOTAL</div>
                   </div>
@@ -892,7 +892,7 @@ export default function App() {
         {/* ═══ RESUMEN ═══ */}
         {tab==="resumen"&&(
           <div>
-            <div style={{background:B.card,border:`1px solid ${B.border}`,borderRadius:12,padding:"13px 14px",marginBottom:14}}>
+            <div style={{background:"#ffffff",border:"1px solid #e0e0e8",borderRadius:12,padding:"13px 14px",marginBottom:14}}>
               <Logos size={26}/>
               <div style={{fontSize:14,fontWeight:"bold",marginTop:10,marginBottom:6}}>🎯 {myNombre}</div>
               <div style={{display:"flex",gap:6,flexWrap:"wrap",marginBottom:12}}>
@@ -950,7 +950,7 @@ export default function App() {
               const gr2=GRUPOS[g];const ms2=getMs(g);const tab2=calcTabla(gr2.equipos,gr2.partidos,ms2);
               const done=isDone(g);const filled=ms2.filter(m=>!isNaN(parseInt(m.local))&&m.local!=="").length;
               return(
-                <div key={g} onClick={()=>{setGrupo(g);setTab("partidos");}} style={{background:done?B.card:"#f5f5f7",border:`1px solid ${done?gr2.color+"40":"#00000008"}`,borderRadius:10,padding:"9px 13px",marginBottom:7,cursor:"pointer"}}>
+                <div key={g} onClick={()=>{setGrupo(g);setTab("partidos");}} style={{background:"#ffffff",border:`1px solid ${done?gr2.color+"40":"#00000008"}`,borderRadius:10,padding:"9px 13px",marginBottom:7,cursor:"pointer"}}>
                   <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:done?8:0}}>
                     <div style={{width:26,height:26,borderRadius:6,background:done?gr2.color:"#00000009",color:done?gr2.accent:"#e8e8f5",display:"flex",alignItems:"center",justifyContent:"center",fontSize:12,fontWeight:"900"}}>{g}</div>
                     <div style={{fontSize:10,color:B.muted}}>{gr2.equipos.map(e=>e.split(" ").slice(1).join(" ")).join(" · ")}</div>
