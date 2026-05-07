@@ -7,10 +7,21 @@ import Admin from "./Admin";
 
 // ─── BRAND ───────────────────────────────────────────────────────────────────
 const B = {
-  primary:"#00cc00", primary2:"#009900", primaryDim:"#00cc0018",
-  bg:"#050a05", card:"#090f09", border:"#00cc0020",
-  text:"#e8f5e8", muted:"#5a7a5a",
-  logoMF:"/logo-mundofutbol.png",
+  // Mundial 2026 palette: lila + blanco + burdeos
+  primary:   "#9b5de5",   // lila principal
+  primary2:  "#7b3fc4",   // lila oscuro
+  primaryDim:"#9b5de518", // lila translúcido
+  accent:    "#ffffff",   // blanco
+  burdo:     "#7b1c2e",   // burdeos del logo
+  vivid:     "#f15bb5",   // magenta/rosa vibrante
+  vivid2:    "#fee440",   // amarillo vibrante
+  vivid3:    "#00bbf9",   // azul vibrante
+  bg:        "#0e0618",   // fondo muy oscuro con tinte lila
+  card:      "#160d22",   // fondo tarjeta
+  border:    "#9b5de530",
+  text:      "#f0ecff",   // blanco con tinte lila
+  muted:     "#7a6a99",   // lila apagado
+  logoMF:    "/logo-mundofutbol.png",
   logoMundial:"https://assets.football-logos.cc/logos/tournaments/256x256/fifa-world-cup-2026.31d2489d.png",
 };
 
@@ -27,7 +38,7 @@ const RONDAS = [
   { id:"r16",  label:"Octavos",       short:"1/8",  emoji:"🔥",  partidos:8,  color:"#7a4a9b" },
   { id:"qf",   label:"Cuartos",       short:"1/4",  emoji:"⭐",  partidos:4,  color:"#9b7a4a" },
   { id:"sf",   label:"Semifinales",   short:"1/2",  emoji:"🌟",  partidos:2,  color:"#9b4a4a" },
-  { id:"final",label:"Final",         short:"FINAL",emoji:"🏆",  partidos:1,  color:"#00cc00" },
+  { id:"final",label:"Final",         short:"FINAL",emoji:"🏆",  partidos:1,  color:"#9b5de5" },
   { id:"third",label:"3er Puesto",    short:"3°",   emoji:"🥉",  partidos:1,  color:"#a07040" },
 ];
 
@@ -51,7 +62,7 @@ function Logos({ size = 40, center = false }) {
   return (
     <div style={{ display:"flex", alignItems:"center", gap:10, justifyContent:center?"center":"flex-start" }}>
       <img src={B.logoMF} alt="MundoFutbol" style={{ height:size, objectFit:"contain", filter:"drop-shadow(0 0 6px #00cc0050)" }} onError={e=>{ e.target.style.display="none"; }} />
-      <div style={{ width:1, height:size*0.7, background:"#00cc0020" }} />
+      <div style={{ width:1, height:size*0.7, background:"#9b5de530" }} />
       <img src={B.logoMundial} alt="FIFA World Cup 2026" style={{ height:size*0.85, objectFit:"contain" }} onError={e=>{ e.target.style.display="none"; }} />
     </div>
   );
@@ -78,7 +89,7 @@ function MatchCard({ match, idx, rondaColor, onChange, autoFilled=false }) {
       <div style={{ fontSize:9, color:B.muted, marginBottom:7, display:"flex", justifyContent:"space-between", alignItems:"center" }}>
         <span>Partido {idx+1}</span>
         <div style={{display:"flex",gap:4,alignItems:"center"}}>
-          {autoFilled && <span style={{fontSize:8,background:"#00cc0015",border:"1px solid #00cc0030",color:"#00cc00",borderRadius:10,padding:"1px 6px"}}>⚡ Auto</span>}
+          {autoFilled && <span style={{fontSize:8,background:"#9b5de515",border:"1px solid #00cc0030",color:"#9b5de5",borderRadius:10,padding:"1px 6px"}}>⚡ Auto</span>}
           {ganador && <span style={{ color:rondaColor, fontWeight:"bold" }}>✓ {ganador.split(" ").slice(0,2).join(" ")}</span>}
         </div>
       </div>
@@ -86,7 +97,7 @@ function MatchCard({ match, idx, rondaColor, onChange, autoFilled=false }) {
       {/* Equipo local */}
       <div style={{ display:"flex", alignItems:"center", gap:6, marginBottom:6 }}>
         {autoFilled && local ? (
-          <div style={{flex:1,background:"#0d180d",border:`1px solid ${ganador===local?"#00cc0060":"#00cc0025"}`,borderRadius:6,padding:"6px 8px",color:ganador===local?B.primary:"#00cc0099",fontSize:11,fontWeight:ganador===local?"bold":"normal"}}>
+          <div style={{flex:1,background:"#1e1230",border:`1px solid ${ganador===local?"#9b5de570":"#9b5de535"}`,borderRadius:6,padding:"6px 8px",color:ganador===local?B.primary:"#9b5de599",fontSize:11,fontWeight:ganador===local?"bold":"normal"}}>
             {local}
           </div>
         ) : (
@@ -94,21 +105,21 @@ function MatchCard({ match, idx, rondaColor, onChange, autoFilled=false }) {
           value={local}
           onChange={e=>upd("local", e.target.value)}
           placeholder="Equipo local..."
-          style={{ flex:1, background:"#ffffff08", border:`1px solid ${ganador===local&&local?"#00cc0060":"#ffffff12"}`, borderRadius:6, padding:"6px 8px", color:ganador===local&&local?B.primary:B.text, fontSize:11, outline:"none", fontWeight:ganador===local&&local?"bold":"normal" }}
+          style={{ flex:1, background:"#ffffff08", border:`1px solid ${ganador===local&&local?"#9b5de570":"#ffffff12"}`, borderRadius:6, padding:"6px 8px", color:ganador===local&&local?B.primary:B.text, fontSize:11, outline:"none", fontWeight:ganador===local&&local?"bold":"normal" }}
         />
         )}
         <input
           type="number" min="0" max="20"
           value={localGoles}
           onChange={e=>upd("localGoles", e.target.value)}
-          style={{ width:34, height:30, textAlign:"center", background:"#0d180d", border:`1px solid ${hasScore?rondaColor+"60":"#ffffff12"}`, borderRadius:6, color:hasScore?rondaColor:B.muted, fontSize:14, fontWeight:"bold", outline:"none" }}
+          style={{ width:34, height:30, textAlign:"center", background:"#1e1230", border:`1px solid ${hasScore?rondaColor+"60":"#ffffff12"}`, borderRadius:6, color:hasScore?rondaColor:B.muted, fontSize:14, fontWeight:"bold", outline:"none" }}
         />
       </div>
 
       {/* Equipo visitante */}
       <div style={{ display:"flex", alignItems:"center", gap:6, marginBottom: empate ? 8 : 0 }}>
         {autoFilled && visita ? (
-          <div style={{flex:1,background:"#0d180d",border:`1px solid ${ganador===visita?"#00cc0060":"#00cc0025"}`,borderRadius:6,padding:"6px 8px",color:ganador===visita?B.primary:"#00cc0099",fontSize:11,fontWeight:ganador===visita?"bold":"normal"}}>
+          <div style={{flex:1,background:"#1e1230",border:`1px solid ${ganador===visita?"#9b5de570":"#9b5de535"}`,borderRadius:6,padding:"6px 8px",color:ganador===visita?B.primary:"#9b5de599",fontSize:11,fontWeight:ganador===visita?"bold":"normal"}}>
             {visita}
           </div>
         ) : (
@@ -116,14 +127,14 @@ function MatchCard({ match, idx, rondaColor, onChange, autoFilled=false }) {
           value={visita}
           onChange={e=>upd("visita", e.target.value)}
           placeholder="Equipo visitante..."
-          style={{ flex:1, background:"#ffffff08", border:`1px solid ${ganador===visita&&visita?"#00cc0060":"#ffffff12"}`, borderRadius:6, padding:"6px 8px", color:ganador===visita&&visita?B.primary:B.text, fontSize:11, outline:"none", fontWeight:ganador===visita&&visita?"bold":"normal" }}
+          style={{ flex:1, background:"#ffffff08", border:`1px solid ${ganador===visita&&visita?"#9b5de570":"#ffffff12"}`, borderRadius:6, padding:"6px 8px", color:ganador===visita&&visita?B.primary:B.text, fontSize:11, outline:"none", fontWeight:ganador===visita&&visita?"bold":"normal" }}
         />
         )}
         <input
           type="number" min="0" max="20"
           value={visitaGoles}
           onChange={e=>upd("visitaGoles", e.target.value)}
-          style={{ width:34, height:30, textAlign:"center", background:"#0d180d", border:`1px solid ${hasScore?"#ffffff25":"#ffffff12"}`, borderRadius:6, color:hasScore?B.text:B.muted, fontSize:14, fontWeight:"bold", outline:"none" }}
+          style={{ width:34, height:30, textAlign:"center", background:"#1e1230", border:`1px solid ${hasScore?"#ffffff25":"#ffffff12"}`, borderRadius:6, color:hasScore?B.text:B.muted, fontSize:14, fontWeight:"bold", outline:"none" }}
         />
       </div>
 
@@ -134,7 +145,7 @@ function MatchCard({ match, idx, rondaColor, onChange, autoFilled=false }) {
           <div style={{ display:"flex", gap:6 }}>
             {[local, visita].filter(Boolean).map(eq=>(
               <button key={eq} onClick={()=>{ upd("penaltis",true); upd("penaltisGanador",eq); upd("ganador",eq); }}
-                style={{ flex:1, padding:"5px 8px", borderRadius:7, border:`1px solid ${penaltisGanador===eq?"#00cc00":"#ffffff15"}`, background:penaltisGanador===eq?"#00cc0020":"#ffffff06", color:penaltisGanador===eq?B.primary:B.muted, fontSize:11, cursor:"pointer", fontWeight:penaltisGanador===eq?"bold":"normal" }}>
+                style={{ flex:1, padding:"5px 8px", borderRadius:7, border:`1px solid ${penaltisGanador===eq?"#9b5de5":"#ffffff15"}`, background:penaltisGanador===eq?"#9b5de530":"#ffffff06", color:penaltisGanador===eq?B.primary:B.muted, fontSize:11, cursor:"pointer", fontWeight:penaltisGanador===eq?"bold":"normal" }}>
                 {eq.split(" ").slice(0,2).join(" ")}
               </button>
             ))}
@@ -197,7 +208,7 @@ function KnockoutTab({ knockout, setKnockout }) {
               <button key={r.id} onClick={()=>setRondaActiva(r.id)} style={{
                 padding:"6px 10px", borderRadius:8, border:`2px solid ${active?r.color:"transparent"}`,
                 background:active?r.color+"22":"#ffffff06",
-                color:active?r.color:done===r.partidos?"#4caf50":B.muted,
+                color:active?r.color:done===r.partidos?"#9b5de5":B.muted,
                 fontSize:10, cursor:"pointer", fontWeight:"bold", whiteSpace:"nowrap",
                 boxShadow:active?`0 0 10px ${r.color}30`:"none",
               }}>
@@ -227,7 +238,7 @@ function KnockoutTab({ knockout, setKnockout }) {
             </div>
           </div>
           {completedInRound===ronda.partidos && (
-            <div style={{ marginLeft:"auto", fontSize:10, color:"#4caf50", background:"#4caf5015", border:"1px solid #4caf50", borderRadius:20, padding:"2px 8px" }}>✓ Completo</div>
+            <div style={{ marginLeft:"auto", fontSize:10, color:"#9b5de5", background:"#9b5de515", border:"1px solid #4caf50", borderRadius:20, padding:"2px 8px" }}>✓ Completo</div>
           )}
         </div>
         {/* Mini progress */}
@@ -256,7 +267,7 @@ function KnockoutTab({ knockout, setKnockout }) {
 
       {/* Bracket de ganadores si hay avance */}
       {completedInRound > 0 && !isFinal && !isThird && (
-        <div style={{ marginTop:14, background:"#060e06", border:`1px solid ${ronda.color}30`, borderRadius:12, padding:"10px 14px" }}>
+        <div style={{ marginTop:14, background:"#12091f", border:`1px solid ${ronda.color}30`, borderRadius:12, padding:"10px 14px" }}>
           <div style={{ fontSize:9, color:ronda.color, letterSpacing:2, textTransform:"uppercase", marginBottom:8 }}>
             Clasificados → {RONDAS[RONDAS.indexOf(ronda)+1]?.label}
           </div>
@@ -282,7 +293,7 @@ function KnockoutTab({ knockout, setKnockout }) {
       {/* Navegación entre rondas */}
       <div style={{ display:"flex", gap:8, marginTop:14 }}>
         {RONDAS.indexOf(ronda) > 0 && (
-          <button onClick={()=>setRondaActiva(RONDAS[RONDAS.indexOf(ronda)-1].id)} style={{ flex:1, padding:8, borderRadius:9, border:"1px solid #0a1a0a", background:"#0a140a", color:B.muted, fontSize:12, cursor:"pointer" }}>
+          <button onClick={()=>setRondaActiva(RONDAS[RONDAS.indexOf(ronda)-1].id)} style={{ flex:1, padding:8, borderRadius:9, border:"1px solid #0a1a0a", background:"#180e26", color:B.muted, fontSize:12, cursor:"pointer" }}>
             ← {RONDAS[RONDAS.indexOf(ronda)-1].label}
           </button>
         )}
@@ -411,23 +422,36 @@ export default function App() {
   if(screen==="login") return (
     <div style={{minHeight:"100vh",background:B.bg,display:"flex",alignItems:"center",justifyContent:"center",fontFamily:"Georgia,serif",padding:20}}>
       <div style={{maxWidth:360,width:"100%"}}>
-        <div style={{textAlign:"center",marginBottom:28}}>
-          <Logos size={54} center />
-          <div style={{marginTop:14,fontSize:9,letterSpacing:5,color:B.primary,textTransform:"uppercase"}}>Copa del Mundo 2026</div>
-          <div style={{fontSize:22,fontWeight:"bold",color:B.text,marginTop:4}}>Quiniela Oficial</div>
-          <div style={{fontSize:11,color:B.muted,marginTop:2}}>Predice · Compite · Gana</div>
+        {/* Hero banner - Mundial 2026 style */}
+        <div style={{
+          background:"linear-gradient(135deg,#7b1c2e 0%,#4a0e5c 40%,#1a0a40 100%)",
+          borderRadius:20, padding:"24px 20px 20px", marginBottom:20,
+          boxShadow:"0 8px 40px #9b5de540",
+          border:"1px solid #9b5de530",
+          position:"relative", overflow:"hidden",
+        }}>
+          {/* Colorful stripe bar like the Mundial logo background */}
+          <div style={{position:"absolute",top:0,left:0,right:0,height:5,background:"linear-gradient(90deg,#f15bb5,#9b5de5,#00bbf9,#fee440,#00f5d4,#f15bb5)"}}/>
+          <div style={{textAlign:"center"}}>
+            <Logos size={54} center />
+            <div style={{marginTop:14,fontSize:9,letterSpacing:6,color:"#ffffff90",textTransform:"uppercase"}}>Copa del Mundo</div>
+            <div style={{fontSize:28,fontWeight:"900",color:"#ffffff",marginTop:2,letterSpacing:-0.5}}>Quiniela 2026</div>
+            <div style={{fontSize:11,color:"#ffffff60",marginTop:4}}>Predice · Compite · Gana</div>
+          </div>
+          {/* Bottom stripe */}
+          <div style={{position:"absolute",bottom:0,left:0,right:0,height:3,background:"linear-gradient(90deg,#fee440,#f15bb5,#9b5de5,#00bbf9)"}}/>
         </div>
-        <div style={{background:B.card,border:`1px solid ${B.border}`,borderRadius:16,padding:24,boxShadow:`0 0 40px ${B.primary}12`}}>
+        <div style={{background:B.card,border:`1px solid ${B.border}`,borderRadius:16,padding:24,boxShadow:`0 0 40px ${B.primary}25`}}>
           <div style={{fontSize:12,color:B.muted,marginBottom:8}}>¿Cómo te llamas?</div>
           <input autoFocus value={loginInput} onChange={e=>setLoginInput(e.target.value)} onKeyDown={e=>e.key==="Enter"&&handleLogin()} placeholder="Tu nombre o alias..." style={{width:"100%",background:"#ffffff07",border:`1px solid ${B.border}`,borderRadius:8,padding:"10px 12px",color:B.text,fontSize:14,outline:"none",boxSizing:"border-box",marginBottom:8}}/>
           {loginError&&<div style={{fontSize:11,color:"#f44336",marginBottom:8}}>{loginError}</div>}
-          <button onClick={handleLogin} style={{width:"100%",padding:12,borderRadius:9,border:"none",background:`linear-gradient(135deg,${B.primary},${B.primary2})`,color:"#000",fontWeight:"bold",fontSize:14,cursor:"pointer",boxShadow:`0 4px 20px ${B.primary}30`}}>Entrar a mi Quiniela →</button>
+          <button onClick={handleLogin} style={{width:"100%",padding:12,borderRadius:9,border:"none",background:"linear-gradient(135deg,#9b5de5,#f15bb5)",color:"#000",fontWeight:"bold",fontSize:14,cursor:"pointer",boxShadow:`0 4px 20px ${B.primary}30`}}>Entrar a mi Quiniela →</button>
           <div style={{textAlign:"center",marginTop:14,display:"flex",gap:16,justifyContent:"center"}}>
             <button onClick={()=>setScreen("portal")} style={{background:"transparent",border:"none",color:B.muted,fontSize:11,cursor:"pointer",textDecoration:"underline"}}>👥 Ver quinielas de todos</button>
             <button onClick={()=>setScreen("admin")} style={{background:"transparent",border:"none",color:"#f59e0b",fontSize:11,cursor:"pointer",textDecoration:"underline"}}>🔐 Admin</button>
           </div>
         </div>
-        <div style={{textAlign:"center",marginTop:14,fontSize:10,color:"#1a2a1a"}}>Usa el mismo nombre para recuperar tu quiniela</div>
+        <div style={{textAlign:"center",marginTop:14,fontSize:10,color:"#2a1a40"}}>Usa el mismo nombre para recuperar tu quiniela</div>
       </div>
     </div>
   );
@@ -440,7 +464,7 @@ export default function App() {
       const q=selectedUser; const qc=completionPct(q);
       return(
         <div style={{minHeight:"100vh",background:B.bg,color:B.text,fontFamily:"Georgia,serif"}}>
-          <div style={{background:"#060d06",borderBottom:`2px solid ${B.primary}`,padding:"10px 14px",position:"sticky",top:0,zIndex:100}}>
+          <div style={{background:"#12091f",borderBottom:`2px solid ${B.primary}`,padding:"10px 14px",position:"sticky",top:0,zIndex:100}}>
             <div style={{maxWidth:560,margin:"0 auto",display:"flex",alignItems:"center",gap:10}}>
               <button onClick={()=>setSelectedUser(null)} style={{background:"#ffffff08",border:"none",borderRadius:8,padding:"6px 10px",color:"#aaa",cursor:"pointer",fontSize:12}}>← Volver</button>
               <div><div style={{fontSize:8,color:B.primary,letterSpacing:3}}>QUINIELA DE</div><div style={{fontSize:15,fontWeight:"bold"}}>{q.nombre}</div></div>
@@ -448,19 +472,19 @@ export default function App() {
             </div>
           </div>
           <div style={{maxWidth:560,margin:"0 auto",padding:"14px 12px 40px"}}>
-            <div style={{background:"#080d08",border:`1px solid ${B.border}`,borderRadius:12,padding:14,marginBottom:14}}>
+            <div style={{background:"#140b22",border:`1px solid ${B.border}`,borderRadius:12,padding:14,marginBottom:14}}>
               <div style={{fontSize:10,letterSpacing:3,color:B.primary,textTransform:"uppercase",marginBottom:12}}>Predicciones Especiales</div>
               <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8}}>
-                {[{icon:"🥇",label:"Campeón",val:q.campeon,color:B.primary},{icon:"🥈",label:"Subcampeón",val:q.segundo,color:"#888"},{icon:"🥉",label:"3er Lugar",val:q.tercero,color:"#a07040"},{icon:"👟",label:"Bota de Oro",val:q.goleador==="Otro..."?q.goleadorCustom:q.goleador,color:"#4caf50"}].map(({icon,label,val,color})=>(
+                {[{icon:"🥇",label:"Campeón",val:q.campeon,color:B.primary},{icon:"🥈",label:"Subcampeón",val:q.segundo,color:"#888"},{icon:"🥉",label:"3er Lugar",val:q.tercero,color:"#a07040"},{icon:"👟",label:"Bota de Oro",val:q.goleador==="Otro..."?q.goleadorCustom:q.goleador,color:"#9b5de5"}].map(({icon,label,val,color})=>(
                   <div key={label} style={{background:val?"#ffffff04":"#ffffff02",border:`1px solid ${val?color+"35":"#ffffff07"}`,borderRadius:10,padding:"10px 12px"}}>
                     <div style={{fontSize:9,color:B.muted,marginBottom:4}}>{icon} {label}</div>
-                    <div style={{fontSize:12,fontWeight:"bold",color:val?color:"#2a4a2a"}}>{val||"—"}</div>
+                    <div style={{fontSize:12,fontWeight:"bold",color:val?color:"#3a2a5a"}}>{val||"—"}</div>
                   </div>
                 ))}
               </div>
             </div>
             {/* Eliminatorias resumen */}
-            <div style={{background:"#080d08",border:`1px solid ${B.border}`,borderRadius:12,padding:14,marginBottom:14}}>
+            <div style={{background:"#140b22",border:`1px solid ${B.border}`,borderRadius:12,padding:14,marginBottom:14}}>
               <div style={{fontSize:10,letterSpacing:3,color:B.primary,textTransform:"uppercase",marginBottom:10}}>Eliminatorias</div>
               {RONDAS.map(r=>{
                 const ko=(q.knockout||{})[r.id]||[];
@@ -469,7 +493,7 @@ export default function App() {
                   <div key={r.id} style={{display:"flex",alignItems:"center",gap:8,padding:"5px 0",borderBottom:"1px solid #ffffff05"}}>
                     <span style={{fontSize:14}}>{r.emoji}</span>
                     <span style={{fontSize:11,color:B.muted,flex:1}}>{r.label}</span>
-                    <span style={{fontSize:10,color:done===r.partidos?"#4caf50":B.muted}}>{done}/{r.partidos}</span>
+                    <span style={{fontSize:10,color:done===r.partidos?"#9b5de5":B.muted}}>{done}/{r.partidos}</span>
                   </div>
                 );
               })}
@@ -479,13 +503,13 @@ export default function App() {
               const tab2=calcTabla(gr2.equipos,gr2.partidos,ms2);
               const done=ms2.every(m=>!isNaN(parseInt(m.local))&&m.local!==""&&!isNaN(parseInt(m.visita))&&m.visita!=="");
               return(
-                <div key={g} style={{background:done?B.card:"#060806",border:`1px solid ${done?gr2.color+"45":"#ffffff07"}`,borderRadius:10,padding:"9px 13px",marginBottom:7}}>
+                <div key={g} style={{background:done?B.card:"#110820",border:`1px solid ${done?gr2.color+"45":"#ffffff07"}`,borderRadius:10,padding:"9px 13px",marginBottom:7}}>
                   <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:done?8:0}}>
-                    <div style={{width:26,height:26,borderRadius:6,background:done?gr2.color:"#ffffff0a",color:done?gr2.accent:"#2a4a2a",display:"flex",alignItems:"center",justifyContent:"center",fontSize:12,fontWeight:"900"}}>{g}</div>
+                    <div style={{width:26,height:26,borderRadius:6,background:done?gr2.color:"#ffffff0a",color:done?gr2.accent:"#3a2a5a",display:"flex",alignItems:"center",justifyContent:"center",fontSize:12,fontWeight:"900"}}>{g}</div>
                     <div style={{fontSize:10,color:B.muted}}>{gr2.equipos.map(e=>e.split(" ").slice(1).join(" ")).join(" · ")}</div>
-                    <span style={{marginLeft:"auto",fontSize:9,color:done?B.primary:"#2a4a2a"}}>{done?"✓":"pendiente"}</span>
+                    <span style={{marginLeft:"auto",fontSize:9,color:done?B.primary:"#3a2a5a"}}>{done?"✓":"pendiente"}</span>
                   </div>
-                  {done&&(<div style={{display:"flex",gap:4}}>{tab2.map(([eq,st],i)=>(<div key={eq} style={{flex:1,textAlign:"center",background:i<2?gr2.color+"25":"#ffffff04",border:`1px solid ${i<2?gr2.color+"40":"#ffffff06"}`,borderRadius:6,padding:"4px 2px"}}><div style={{fontSize:8,color:i<2?gr2.accent:"#1a3a1a",marginBottom:1}}>{i+1}°</div><div style={{fontSize:9,color:i<2?B.text:"#1a3a1a",fontWeight:i<2?"bold":"normal"}}>{eq.split(" ").slice(1).join(" ").substring(0,7)}</div><div style={{fontSize:10,color:i<2?gr2.accent:"#1a3a1a",fontWeight:"bold"}}>{st.pts}pts</div></div>))}</div>)}
+                  {done&&(<div style={{display:"flex",gap:4}}>{tab2.map(([eq,st],i)=>(<div key={eq} style={{flex:1,textAlign:"center",background:i<2?gr2.color+"25":"#ffffff04",border:`1px solid ${i<2?gr2.color+"40":"#ffffff06"}`,borderRadius:6,padding:"4px 2px"}}><div style={{fontSize:8,color:i<2?gr2.accent:"#2a1a50",marginBottom:1}}>{i+1}°</div><div style={{fontSize:9,color:i<2?B.text:"#2a1a50",fontWeight:i<2?"bold":"normal"}}>{eq.split(" ").slice(1).join(" ").substring(0,7)}</div><div style={{fontSize:10,color:i<2?gr2.accent:"#2a1a50",fontWeight:"bold"}}>{st.pts}pts</div></div>))}</div>)}
                 </div>
               );
             })}
@@ -496,7 +520,7 @@ export default function App() {
 
     return(
       <div style={{minHeight:"100vh",background:B.bg,color:B.text,fontFamily:"Georgia,serif"}}>
-        <div style={{background:"#060d06",borderBottom:`2px solid ${B.primary}`,padding:"10px 14px",position:"sticky",top:0,zIndex:100}}>
+        <div style={{background:"#12091f",borderBottom:`2px solid ${B.primary}`,padding:"10px 14px",position:"sticky",top:0,zIndex:100}}>
           <div style={{maxWidth:560,margin:"0 auto",display:"flex",alignItems:"center",gap:10}}>
             <button onClick={()=>setScreen(myId?"quiniela":"login")} style={{background:"#ffffff08",border:"none",borderRadius:8,padding:"6px 10px",color:"#aaa",cursor:"pointer",fontSize:12}}>← {myId?"Mi quiniela":"Inicio"}</button>
             <Logos size={26} />
@@ -521,7 +545,7 @@ export default function App() {
                   return(<div>
                     <div style={{fontSize:11,color:B.muted,marginBottom:6}}>🏆 Campeón más elegido</div>
                     <div style={{display:"flex",gap:6,flexWrap:"wrap",marginBottom:10}}>{topC.map(([sel,n])=>(<div key={sel} style={{background:B.primaryDim,border:`1px solid ${B.primary}35`,borderRadius:8,padding:"5px 10px",display:"flex",alignItems:"center",gap:6}}><span style={{fontSize:13}}>{sel.split(" ")[0]}</span><span style={{fontSize:11,color:B.primary,fontWeight:"bold"}}>{sel.split(" ").slice(1).join(" ")}</span><span style={{fontSize:10,color:B.muted,background:"#ffffff0d",borderRadius:10,padding:"1px 5px"}}>{n}</span></div>))}</div>
-                    {topG&&<div style={{fontSize:11,color:B.muted}}>👟 Goleador favorito: <span style={{color:"#4caf50",fontWeight:"bold"}}>{topG[0]}</span> <span style={{color:"#2a4a2a"}}>({topG[1]} votos)</span></div>}
+                    {topG&&<div style={{fontSize:11,color:B.muted}}>👟 Goleador favorito: <span style={{color:"#9b5de5",fontWeight:"bold"}}>{topG[0]}</span> <span style={{color:"#3a2a5a"}}>({topG[1]} votos)</span></div>}
                   </div>);
                 })()}
               </div>
@@ -529,7 +553,7 @@ export default function App() {
                 <div style={{marginBottom:14}}>
                   <div style={{fontSize:10,letterSpacing:3,color:B.primary,textTransform:"uppercase",marginBottom:8}}>🏅 Ranking de puntuación</div>
                   {portalData.map(p=>({...p,score:calcTotalPoints(p,resultadosOficiales)})).sort((a,b)=>b.score.total-a.score.total).slice(0,3).map((p,rank)=>(
-                    <div key={p.id} style={{display:"flex",alignItems:"center",gap:8,padding:"6px 10px",background:rank===0?"#0a1a08":B.card,border:`1px solid ${rank===0?B.primary+"40":"#ffffff08"}`,borderRadius:8,marginBottom:4}}>
+                    <div key={p.id} style={{display:"flex",alignItems:"center",gap:8,padding:"6px 10px",background:rank===0?"#1a1030":B.card,border:`1px solid ${rank===0?B.primary+"40":"#ffffff08"}`,borderRadius:8,marginBottom:4}}>
                       <span style={{fontSize:14}}>{rank===0?"🥇":rank===1?"🥈":"🥉"}</span>
                       <span style={{fontSize:13,fontWeight:"bold",color:rank===0?B.primary:B.text,flex:1}}>{p.nombre}</span>
                       <span style={{fontSize:15,fontWeight:"bold",color:rank===0?B.primary:B.muted}}>{p.score.total} pts</span>
@@ -537,13 +561,13 @@ export default function App() {
                   ))}
                 </div>
               )}
-              <div style={{fontSize:10,letterSpacing:3,color:"#1a3a1a",textTransform:"uppercase",marginBottom:10}}>Participantes ({portalData.length})</div>
+              <div style={{fontSize:10,letterSpacing:3,color:"#2a1a50",textTransform:"uppercase",marginBottom:10}}>Participantes ({portalData.length})</div>
               {portalData.map(q=>{
                 const qc=completionPct(q); const isMe=q.id===myId;
                 return(
-                  <div key={q.id} onClick={()=>setSelectedUser(q)} style={{background:isMe?"#071207":B.card,border:`1px solid ${isMe?B.primary+"45":"#ffffff08"}`,borderRadius:12,padding:"12px 14px",marginBottom:8,cursor:"pointer"}}>
+                  <div key={q.id} onClick={()=>setSelectedUser(q)} style={{background:isMe?"#130a25":B.card,border:`1px solid ${isMe?B.primary+"45":"#ffffff08"}`,borderRadius:12,padding:"12px 14px",marginBottom:8,cursor:"pointer"}}>
                     <div style={{display:"flex",alignItems:"center",gap:10}}>
-                      <div style={{width:36,height:36,borderRadius:10,background:isMe?B.primaryDim:"#ffffff07",border:`1px solid ${isMe?B.primary+"40":"#ffffff0d"}`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:15,fontWeight:"bold",color:isMe?B.primary:"#3a5a3a",flexShrink:0}}>{q.nombre.charAt(0).toUpperCase()}</div>
+                      <div style={{width:36,height:36,borderRadius:10,background:isMe?B.primaryDim:"#ffffff07",border:`1px solid ${isMe?B.primary+"40":"#ffffff0d"}`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:15,fontWeight:"bold",color:isMe?B.primary:"#4a2a6a",flexShrink:0}}>{q.nombre.charAt(0).toUpperCase()}</div>
                       <div style={{flex:1,minWidth:0}}>
                         <div style={{display:"flex",alignItems:"center",gap:6,marginBottom:3}}>
                           <span style={{fontSize:13,fontWeight:"bold",color:isMe?B.primary:B.text}}>{q.nombre}</span>
@@ -551,7 +575,7 @@ export default function App() {
                         </div>
                         <div style={{display:"flex",gap:8}}>
                           {q.campeon&&<span style={{fontSize:9,color:B.primary}}>🏆 {q.campeon.split(" ").slice(1).join(" ")}</span>}
-                          {q.goleador&&q.goleador!=="Otro..."&&<span style={{fontSize:9,color:"#4caf50"}}>👟 {q.goleador}</span>}
+                          {q.goleador&&q.goleador!=="Otro..."&&<span style={{fontSize:9,color:"#9b5de5"}}>👟 {q.goleador}</span>}
                         </div>
                       </div>
                       <div style={{textAlign:"right",flexShrink:0}}>
@@ -564,12 +588,12 @@ export default function App() {
                           </div>
                         ):(
                           <div>
-                            <div style={{fontSize:14,fontWeight:"bold",color:qc.pct===100?B.primary:qc.pct>50?B.primary2:"#3a5a3a"}}>{qc.pct}%</div>
-                            <div style={{fontSize:9,color:"#2a4a2a"}}>grupos</div>
+                            <div style={{fontSize:14,fontWeight:"bold",color:qc.pct===100?B.primary:qc.pct>50?B.primary2:"#4a2a6a"}}>{qc.pct}%</div>
+                            <div style={{fontSize:9,color:"#3a2a5a"}}>grupos</div>
                           </div>
                         )}
                       </div>
-                      <div style={{color:"#1a3a1a",fontSize:16}}>›</div>
+                      <div style={{color:"#2a1a50",fontSize:16}}>›</div>
                     </div>
                     <div style={{height:2,background:"#ffffff06",borderRadius:1,overflow:"hidden",marginTop:8}}>
                       <div style={{height:"100%",width:qc.pct+"%",background:qc.pct===100?B.primary:`linear-gradient(90deg,${B.primary2},${B.primary})`,transition:"width 0.3s"}}/>
@@ -590,7 +614,7 @@ export default function App() {
   return(
     <div style={{minHeight:"100vh",background:B.bg,color:B.text,fontFamily:"Georgia,serif"}}>
       {/* HEADER */}
-      <div style={{background:"#060d06",borderBottom:`2px solid ${B.primary}`,padding:"9px 14px",position:"sticky",top:0,zIndex:100,boxShadow:`0 4px 20px ${B.primary}12`}}>
+      <div style={{background:"#12091f",borderBottom:`2px solid ${B.primary}`,padding:"9px 14px",position:"sticky",top:0,zIndex:100,boxShadow:`0 4px 20px ${B.primary}12`}}>
         <div style={{maxWidth:560,margin:"0 auto"}}>
           <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:6}}>
             <Logos size={28}/>
@@ -601,12 +625,12 @@ export default function App() {
             <button onClick={()=>setScreen("portal")} style={{background:"#ffffff08",border:`1px solid ${B.border}`,borderRadius:8,padding:"5px 8px",color:"#aaa",cursor:"pointer",fontSize:9,whiteSpace:"nowrap"}}>👥 Portal</button>
           </div>
           <div style={{height:3,background:"#ffffff07",borderRadius:2,overflow:"hidden",marginBottom:6}}>
-            <div style={{height:"100%",width:pct+"%",background:pct===100?B.primary:`linear-gradient(90deg,${B.primary2},${B.primary})`,transition:"width 0.3s",boxShadow:`0 0 8px ${B.primary}60`}}/>
+            <div style={{height:"100%",width:pct+"%",background:pct===100?B.primary:`linear-gradient(90deg,#f15bb5,${B.primary},#00bbf9)`,transition:"width 0.3s",boxShadow:`0 0 10px ${B.primary}80`}}/>
           </div>
           <div style={{display:"flex",gap:3,alignItems:"center"}}>
             <div style={{fontSize:10,color:B.primary,fontWeight:"bold",marginRight:4,whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis",maxWidth:80}}>⚽ {myNombre}</div>
             {TABS.map(({id,label})=>(<button key={id} onClick={()=>setTab(id)} style={{padding:"3px 7px",borderRadius:6,border:"none",background:tab===id?B.primary:"#ffffff0c",color:tab===id?"#000":B.muted,fontSize:9,cursor:"pointer",fontWeight:"bold",whiteSpace:"nowrap"}}>{label}</button>))}
-            <button onClick={saveQuiniela} disabled={saving} style={{marginLeft:"auto",padding:"3px 8px",borderRadius:6,border:"none",background:saving?"#1a2a1a":saveMsg.includes("✓")?B.primary:B.primary2,color:saving?B.muted:"#000",fontSize:9,cursor:saving?"not-allowed":"pointer",fontWeight:"bold",flexShrink:0}}>{saving?"...":saveMsg||"💾"}</button>
+            <button onClick={saveQuiniela} disabled={saving} style={{marginLeft:"auto",padding:"3px 8px",borderRadius:6,border:"none",background:saving?"#2a1a40":saveMsg.includes("✓")?B.primary:B.primary2,color:saving?B.muted:"#000",fontSize:9,cursor:saving?"not-allowed":"pointer",fontWeight:"bold",flexShrink:0}}>{saving?"...":saveMsg||"💾"}</button>
           </div>
         </div>
       </div>
@@ -617,7 +641,7 @@ export default function App() {
         {tab==="partidos"&&(
           <>
             <div style={{display:"flex",flexWrap:"wrap",gap:5,justifyContent:"center",marginBottom:14}}>
-              {KEYS.map(g=>{const done=isDone(g);const active=g===grupo;return(<button key={g} onClick={()=>setGrupo(g)} style={{width:34,height:34,borderRadius:7,fontSize:12,fontWeight:"bold",border:active?`2px solid ${B.primary}`:"2px solid transparent",background:done?(active?B.primary2:B.primaryDim):active?"#ffffff12":"#ffffff06",color:done?(active?"#fff":B.primary):active?B.text:B.muted,cursor:"pointer",transition:"all 0.2s",boxShadow:active?`0 0 10px ${B.primary}40`:"none"}}>{done&&!active?"✓":g}</button>);})}
+              {KEYS.map(g=>{const done=isDone(g);const active=g===grupo;return(<button key={g} onClick={()=>setGrupo(g)} style={{width:34,height:34,borderRadius:7,fontSize:12,fontWeight:"bold",border:active?`2px solid ${B.primary}`:"2px solid transparent",background:done?(active?B.primary2:B.primaryDim):active?"#ffffff12":"#ffffff06",color:done?(active?"#fff":B.primary):active?B.text:B.muted,cursor:"pointer",transition:"all 0.2s",boxShadow:active?`0 0 12px ${B.primary}60`:"none"}}>{done&&!active?"✓":g}</button>);})}
             </div>
             <div style={{borderRadius:14,overflow:"hidden",border:`1px solid ${gr.accent}20`,marginBottom:12}}>
               <div style={{background:`linear-gradient(135deg,${gr.color},${gr.color}cc)`,padding:"11px 14px",display:"flex",alignItems:"center",gap:10,borderBottom:`2px solid ${gr.accent}30`}}>
@@ -625,10 +649,10 @@ export default function App() {
                 <div><div style={{fontSize:15,fontWeight:"bold"}}>Grupo {grupo}</div><div style={{fontSize:10,color:"#ffffff70"}}>{gr.equipos.map(e=>e.split(" ").slice(1).join(" ")).join(" · ")}</div></div>
                 {isDone(grupo)&&<div style={{marginLeft:"auto",fontSize:10,color:B.primary,background:B.primaryDim,border:`1px solid ${B.primary}`,borderRadius:20,padding:"2px 8px"}}>✓ Listo</div>}
               </div>
-              <div style={{background:"#080e08"}}>
+              <div style={{background:"#140b22"}}>
                 {[1,2,3].map(fecha=>(
                   <div key={fecha}>
-                    <div style={{padding:"5px 14px",background:"#ffffff03",fontSize:9,color:"#2a4a2a",letterSpacing:2,textTransform:"uppercase",borderTop:fecha>1?"1px solid #ffffff05":"none",borderBottom:"1px solid #ffffff05"}}>Jornada {fecha}</div>
+                    <div style={{padding:"5px 14px",background:"#ffffff03",fontSize:9,color:"#3a2a5a",letterSpacing:2,textTransform:"uppercase",borderTop:fecha>1?"1px solid #ffffff05":"none",borderBottom:"1px solid #ffffff05"}}>Jornada {fecha}</div>
                     {gr.partidos.filter(p=>p.f===fecha).map(p=>{
                       const idx=gr.partidos.indexOf(p);const m=ms[idx];
                       const gl=parseInt(m.local),gv=parseInt(m.visita);
@@ -636,12 +660,12 @@ export default function App() {
                       const wL=ok&&gl>gv,wV=ok&&gv>gl,emp=ok&&gl===gv;
                       return(
                         <div key={idx} style={{padding:"9px 14px",borderBottom:"1px solid #ffffff04",background:ok?"#ffffff02":"transparent"}}>
-                          <div style={{fontSize:9,color:"#2a4a2a",marginBottom:5}}>📅 {p.fecha}</div>
+                          <div style={{fontSize:9,color:"#3a2a5a",marginBottom:5}}>📅 {p.fecha}</div>
                           <div style={{display:"flex",alignItems:"center",gap:6}}>
                             <div style={{flex:1,fontSize:11,textAlign:"right",fontWeight:wL?"bold":"normal",color:wL?B.text:ok?B.muted:"#aaa"}}>{p.local}</div>
-                            <input type="number" min="0" max="20" value={m.local} onChange={e=>setGol(grupo,idx,"local",e.target.value)} style={{width:34,height:32,textAlign:"center",background:"#0d180d",border:`1px solid ${ok?B.primary+"60":"#ffffff12"}`,borderRadius:6,color:ok?B.primary:B.muted,fontSize:15,fontWeight:"bold",outline:"none"}}/>
-                            <div style={{width:16,textAlign:"center",fontSize:12,color:wL?B.primary:wV?"#f44336":emp?"#ff9800":"#1a3a1a",fontWeight:"bold"}}>{ok?(wL?"▸":wV?"◂":"="):"·"}</div>
-                            <input type="number" min="0" max="20" value={m.visita} onChange={e=>setGol(grupo,idx,"visita",e.target.value)} style={{width:34,height:32,textAlign:"center",background:"#0d180d",border:`1px solid ${ok?"#ffffff25":"#ffffff12"}`,borderRadius:6,color:ok?B.text:B.muted,fontSize:15,fontWeight:"bold",outline:"none"}}/>
+                            <input type="number" min="0" max="20" value={m.local} onChange={e=>setGol(grupo,idx,"local",e.target.value)} style={{width:34,height:32,textAlign:"center",background:"#1e1230",border:`1px solid ${ok?B.primary+"60":"#ffffff12"}`,borderRadius:6,color:ok?B.primary:B.muted,fontSize:15,fontWeight:"bold",outline:"none"}}/>
+                            <div style={{width:16,textAlign:"center",fontSize:12,color:wL?B.primary:wV?"#f44336":emp?"#ff9800":"#2a1a50",fontWeight:"bold"}}>{ok?(wL?"▸":wV?"◂":"="):"·"}</div>
+                            <input type="number" min="0" max="20" value={m.visita} onChange={e=>setGol(grupo,idx,"visita",e.target.value)} style={{width:34,height:32,textAlign:"center",background:"#1e1230",border:`1px solid ${ok?"#ffffff25":"#ffffff12"}`,borderRadius:6,color:ok?B.text:B.muted,fontSize:15,fontWeight:"bold",outline:"none"}}/>
                             <div style={{flex:1,fontSize:11,fontWeight:wV?"bold":"normal",color:wV?B.text:ok?B.muted:"#aaa"}}>{p.visita}</div>
                           </div>
                         </div>
@@ -650,21 +674,21 @@ export default function App() {
                   </div>
                 ))}
               </div>
-              <div style={{background:"#050a05",padding:"10px 14px",borderTop:"2px solid #0a180a"}}>
-                <div style={{fontSize:8,letterSpacing:2,color:"#1a3a1a",textTransform:"uppercase",marginBottom:7}}>Clasificación proyectada</div>
+              <div style={{background:"#0e0618",padding:"10px 14px",borderTop:"2px solid #0a180a"}}>
+                <div style={{fontSize:8,letterSpacing:2,color:"#2a1a50",textTransform:"uppercase",marginBottom:7}}>Clasificación proyectada</div>
                 <table style={{width:"100%",borderCollapse:"collapse",fontSize:10}}>
-                  <thead><tr>{["#","Equipo","PJ","GF","GC","DIF","PTS"].map(h=><th key={h} style={{color:"#1a3a1a",textAlign:h==="Equipo"?"left":"center",padding:"0 4px 4px",fontWeight:"normal"}}>{h}</th>)}</tr></thead>
-                  <tbody>{tabla.map(([eq,st],i)=>(<tr key={eq} style={{borderTop:"1px solid #0a180a"}}><td style={{padding:4,textAlign:"center"}}>{i<2?<span style={{background:gr.accent,color:gr.color||"#000",borderRadius:4,padding:"1px 4px",fontSize:9,fontWeight:"900"}}>{i+1}</span>:<span style={{color:"#1a3a1a"}}>{i+1}</span>}</td><td style={{padding:4,color:i<2?B.text:"#2a4a2a",fontWeight:i<2?"bold":"normal",fontSize:11}}>{eq.split(" ").slice(0,2).join(" ")}</td>{[st.jj,st.gf,st.gc,st.gf-st.gc,st.pts].map((v,vi)=><td key={vi} style={{textAlign:"center",padding:4,color:vi===4?(i<2?B.primary:"#1a3a1a"):"#2a4a2a",fontWeight:vi===4&&i<2?"bold":"normal"}}>{v}</td>)}</tr>))}</tbody>
+                  <thead><tr>{["#","Equipo","PJ","GF","GC","DIF","PTS"].map(h=><th key={h} style={{color:"#2a1a50",textAlign:h==="Equipo"?"left":"center",padding:"0 4px 4px",fontWeight:"normal"}}>{h}</th>)}</tr></thead>
+                  <tbody>{tabla.map(([eq,st],i)=>(<tr key={eq} style={{borderTop:"1px solid #0a180a"}}><td style={{padding:4,textAlign:"center"}}>{i<2?<span style={{background:gr.accent,color:gr.color||"#000",borderRadius:4,padding:"1px 4px",fontSize:9,fontWeight:"900"}}>{i+1}</span>:<span style={{color:"#2a1a50"}}>{i+1}</span>}</td><td style={{padding:4,color:i<2?B.text:"#3a2a5a",fontWeight:i<2?"bold":"normal",fontSize:11}}>{eq.split(" ").slice(0,2).join(" ")}</td>{[st.jj,st.gf,st.gc,st.gf-st.gc,st.pts].map((v,vi)=><td key={vi} style={{textAlign:"center",padding:4,color:vi===4?(i<2?B.primary:"#2a1a50"):"#3a2a5a",fontWeight:vi===4&&i<2?"bold":"normal"}}>{v}</td>)}</tr>))}</tbody>
                 </table>
               </div>
             </div>
             <div style={{display:"flex",gap:8,marginBottom:12}}>
-              <button onClick={()=>gIdx>0&&setGrupo(KEYS[gIdx-1])} disabled={gIdx===0} style={{flex:1,padding:8,borderRadius:9,border:"1px solid #0a1a0a",background:gIdx===0?"#050805":"#0a140a",color:gIdx===0?"#1a3a1a":B.muted,fontSize:12,cursor:gIdx===0?"not-allowed":"pointer"}}>← Anterior</button>
-              <button onClick={()=>gIdx<KEYS.length-1&&setGrupo(KEYS[gIdx+1])} disabled={gIdx===KEYS.length-1} style={{flex:1,padding:8,borderRadius:9,border:"none",background:gIdx===KEYS.length-1?"#050805":B.primary,color:gIdx===KEYS.length-1?"#1a3a1a":"#000",fontSize:12,fontWeight:"bold",cursor:gIdx===KEYS.length-1?"not-allowed":"pointer"}}>Siguiente →</button>
+              <button onClick={()=>gIdx>0&&setGrupo(KEYS[gIdx-1])} disabled={gIdx===0} style={{flex:1,padding:8,borderRadius:9,border:"1px solid #0a1a0a",background:gIdx===0?"#050805":"#180e26",color:gIdx===0?"#2a1a50":B.muted,fontSize:12,cursor:gIdx===0?"not-allowed":"pointer"}}>← Anterior</button>
+              <button onClick={()=>gIdx<KEYS.length-1&&setGrupo(KEYS[gIdx+1])} disabled={gIdx===KEYS.length-1} style={{flex:1,padding:8,borderRadius:9,border:"none",background:gIdx===KEYS.length-1?"#050805":B.primary,color:gIdx===KEYS.length-1?"#2a1a50":"#000",fontSize:12,fontWeight:"bold",cursor:gIdx===KEYS.length-1?"not-allowed":"pointer"}}>Siguiente →</button>
             </div>
             <div style={{background:B.card,border:`1px solid ${B.border}`,borderRadius:10,padding:"10px 14px",textAlign:"center"}}>
               <div style={{fontSize:10,color:B.muted,marginBottom:6}}>¿Listo con los grupos?</div>
-              <button onClick={()=>setTab("knockout")} style={{padding:"8px 18px",borderRadius:8,border:"none",background:`linear-gradient(135deg,${B.primary},${B.primary2})`,color:"#000",fontWeight:"bold",fontSize:12,cursor:"pointer"}}>Continuar a Eliminatorias ⚔️</button>
+              <button onClick={()=>setTab("knockout")} style={{padding:"8px 18px",borderRadius:8,border:"none",background:"linear-gradient(135deg,#9b5de5,#f15bb5)",color:"#000",fontWeight:"bold",fontSize:12,cursor:"pointer"}}>Continuar a Eliminatorias ⚔️</button>
             </div>
           </>
         )}
@@ -677,17 +701,17 @@ export default function App() {
         {/* ═══ PREDICCIONES ═══ */}
         {tab==="predicciones"&&(
           <div>
-            <div style={{background:"linear-gradient(135deg,#060e06,#0a180a)",border:`1px solid ${B.primary}35`,borderRadius:14,padding:16,marginBottom:18,textAlign:"center",boxShadow:`0 0 30px ${B.primary}10`}}>
+            <div style={{background:"linear-gradient(135deg,#060e06,#0a180a)",border:`1px solid ${B.primary}35`,borderRadius:14,padding:16,marginBottom:18,textAlign:"center",boxShadow:`0 0 30px ${B.primary}20`}}>
               <Logos size={42} center />
               <div style={{fontSize:16,fontWeight:"bold",color:B.primary,marginTop:12,marginBottom:4}}>Predicciones Especiales</div>
               <div style={{fontSize:11,color:B.muted}}>Elige el podio y al máximo goleador</div>
               <div style={{marginTop:10,display:"flex",justifyContent:"center",gap:8}}>
-                {[campeon,segundo,tercero,goleador||goleadorCustom].map((v,i)=>(<div key={i} style={{width:10,height:10,borderRadius:"50%",background:v?B.primary:"#1a2a1a",boxShadow:v?`0 0 6px ${B.primary}`:"none",transition:"all 0.3s"}}/>))}
+                {[campeon,segundo,tercero,goleador||goleadorCustom].map((v,i)=>(<div key={i} style={{width:10,height:10,borderRadius:"50%",background:v?B.primary:"#2a1a40",boxShadow:v?`0 0 6px ${B.primary}`:"none",transition:"all 0.3s"}}/>))}
               </div>
             </div>
             {(campeon||segundo||tercero)&&(
               <div style={{marginBottom:18,display:"flex",alignItems:"flex-end",justifyContent:"center",gap:6,height:110}}>
-                {[{place:2,val:segundo,h:70,bg:"linear-gradient(180deg,#3a3a3a,#1a1a1a)",border:"#555",medal:"🥈"},{place:1,val:campeon,h:90,bg:`linear-gradient(180deg,${B.primary},${B.primary2})`,border:B.primary,medal:"🥇"},{place:3,val:tercero,h:55,bg:"linear-gradient(180deg,#5a3a1a,#3a2010)",border:"#7a5a2a",medal:"🥉"}].map(({place,val,h,bg,border,medal})=>(
+                {[{place:2,val:segundo,h:70,bg:"linear-gradient(180deg,#3a3a3a,#1a1a1a)",border:"#555",medal:"🥈"},{place:1,val:campeon,h:90,bg:"linear-gradient(180deg,#9b5de5,#7b3fc4)",border:"#9b5de5",medal:"🥇"},{place:3,val:tercero,h:55,bg:"linear-gradient(180deg,#5a3a1a,#3a2010)",border:"#7a5a2a",medal:"🥉"}].map(({place,val,h,bg,border,medal})=>(
                   <div key={place} style={{flex:1,display:"flex",flexDirection:"column",alignItems:"center"}}>
                     {val&&<div style={{fontSize:10,color:place===1?B.primary:B.muted,marginBottom:4,textAlign:"center",fontWeight:place===1?"bold":"normal"}}>{val.split(" ").slice(1).join(" ")}</div>}
                     <div style={{width:"100%",height:h,background:bg,borderRadius:"8px 8px 0 0",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",border:`1px solid ${border}`,boxShadow:place===1?`0 0 20px ${B.primary}40`:"none"}}>
@@ -717,20 +741,20 @@ export default function App() {
             <div style={{background:B.card,border:"1px solid #4caf5020",borderRadius:12,padding:14,marginBottom:18}}>
               <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:12}}>
                 <span style={{fontSize:20}}>👟</span>
-                <div><div style={{fontSize:13,fontWeight:"bold",color:"#4caf50"}}>Bota de Oro</div><div style={{fontSize:10,color:B.muted}}>Máximo goleador del torneo</div></div>
-                {goleador&&goleador!=="Otro..."&&<div style={{marginLeft:"auto",fontSize:11,color:"#4caf50",fontWeight:"bold"}}>{GOLEADORES.find(g=>g.nombre===goleador)?.sel} {goleador}</div>}
+                <div><div style={{fontSize:13,fontWeight:"bold",color:"#9b5de5"}}>Bota de Oro</div><div style={{fontSize:10,color:B.muted}}>Máximo goleador del torneo</div></div>
+                {goleador&&goleador!=="Otro..."&&<div style={{marginLeft:"auto",fontSize:11,color:"#9b5de5",fontWeight:"bold"}}>{GOLEADORES.find(g=>g.nombre===goleador)?.sel} {goleador}</div>}
               </div>
               <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:6}}>
-                {GOLEADORES.map(g=>(<button key={g.nombre} onClick={()=>setGoleador(g.nombre===goleador?"":g.nombre)} style={{padding:"7px 10px",borderRadius:8,textAlign:"left",border:`1px solid ${goleador===g.nombre?"#4caf50":"#ffffff0d"}`,background:goleador===g.nombre?"#4caf5010":"#ffffff04",color:goleador===g.nombre?"#4caf50":B.muted,cursor:"pointer",transition:"all 0.15s",display:"flex",alignItems:"center",gap:6}}>
+                {GOLEADORES.map(g=>(<button key={g.nombre} onClick={()=>setGoleador(g.nombre===goleador?"":g.nombre)} style={{padding:"7px 10px",borderRadius:8,textAlign:"left",border:`1px solid ${goleador===g.nombre?"#9b5de5":"#ffffff0d"}`,background:goleador===g.nombre?"#9b5de510":"#ffffff04",color:goleador===g.nombre?"#9b5de5":B.muted,cursor:"pointer",transition:"all 0.15s",display:"flex",alignItems:"center",gap:6}}>
                   <span style={{fontSize:14}}>{g.sel}</span>
-                  <div style={{flex:1}}><div style={{fontSize:11,fontWeight:goleador===g.nombre?"bold":"normal"}}>{g.nombre}</div>{g.club&&<div style={{fontSize:9,color:"#2a4a2a"}}>{g.club}</div>}</div>
+                  <div style={{flex:1}}><div style={{fontSize:11,fontWeight:goleador===g.nombre?"bold":"normal"}}>{g.nombre}</div>{g.club&&<div style={{fontSize:9,color:"#3a2a5a"}}>{g.club}</div>}</div>
                   {goleador===g.nombre&&<span>✓</span>}
                 </button>))}
               </div>
               {goleador==="Otro..."&&<input type="text" placeholder="Nombre del jugador..." value={goleadorCustom} onChange={e=>setGoleadorCustom(e.target.value)} style={{width:"100%",background:"#ffffff06",border:"1px solid #4caf5025",borderRadius:8,padding:"8px 12px",color:B.text,fontSize:13,outline:"none",boxSizing:"border-box",marginTop:10}}/>}
             </div>
             {podioCompleto&&(
-              <div style={{background:"#060e06",border:`1px solid ${B.primary}`,borderRadius:12,padding:14,textAlign:"center",boxShadow:`0 0 20px ${B.primary}15`}}>
+              <div style={{background:"#12091f",border:`1px solid ${B.primary}`,borderRadius:12,padding:14,textAlign:"center",boxShadow:`0 0 20px ${B.primary}15`}}>
                 <div style={{fontSize:18,marginBottom:6}}>🎉</div>
                 <div style={{fontSize:13,fontWeight:"bold",color:B.primary,marginBottom:8}}>¡Predicciones completas!</div>
                 <button onClick={saveQuiniela} style={{padding:"8px 20px",borderRadius:8,border:"none",background:B.primary,color:"#000",fontWeight:"bold",fontSize:13,cursor:"pointer",marginRight:8}}>💾 Guardar</button>
@@ -780,13 +804,13 @@ export default function App() {
               const ranked=portalData.map(p=>({...p,score:calcTotalPoints(p,resultadosOficiales)})).sort((a,b)=>b.score.total-a.score.total);
               return(
                 <div style={{background:B.card,border:`1px solid ${B.border}`,borderRadius:12,overflow:"hidden"}}>
-                  <div style={{display:"grid",gridTemplateColumns:"32px 1fr 40px 40px 40px 52px",gap:4,padding:"8px 12px",background:"#0a1a0a",fontSize:9,color:B.muted,letterSpacing:1,textTransform:"uppercase"}}>
+                  <div style={{display:"grid",gridTemplateColumns:"32px 1fr 40px 40px 40px 52px",gap:4,padding:"8px 12px",background:"#1a0a30",fontSize:9,color:B.muted,letterSpacing:1,textTransform:"uppercase"}}>
                     <div>#</div><div>Participante</div><div style={{textAlign:"center"}}>G</div><div style={{textAlign:"center"}}>E</div><div style={{textAlign:"center"}}>X</div><div style={{textAlign:"center"}}>TOTAL</div>
                   </div>
                   {ranked.map((p,rank)=>{
                     const isMe=p.id===myId;
                     return(
-                      <div key={p.id} style={{display:"grid",gridTemplateColumns:"32px 1fr 40px 40px 40px 52px",gap:4,padding:"9px 12px",borderTop:"1px solid #0a180a",background:isMe?"#0a1a08":"transparent",alignItems:"center"}}>
+                      <div key={p.id} style={{display:"grid",gridTemplateColumns:"32px 1fr 40px 40px 40px 52px",gap:4,padding:"9px 12px",borderTop:"1px solid #0a180a",background:isMe?"#1a1030":"transparent",alignItems:"center"}}>
                         <div style={{fontSize:rank<3?15:12,textAlign:"center"}}>{rank===0?"🥇":rank===1?"🥈":rank===2?"🥉":<span style={{color:B.muted}}>{rank+1}</span>}</div>
                         <div>
                           <div style={{fontSize:12,fontWeight:isMe?"bold":"normal",color:isMe?B.primary:rank===0?B.text:B.muted}}>{p.nombre}{isMe&&<span style={{fontSize:9,marginLeft:5,color:B.primary}}>← tú</span>}</div>
@@ -810,10 +834,10 @@ export default function App() {
             )}
 
             {/* Leyenda */}
-            <div style={{marginTop:14,background:"#070e07",border:`1px solid ${B.border}`,borderRadius:10,padding:12}}>
+            <div style={{marginTop:14,background:"#130a20",border:`1px solid ${B.border}`,borderRadius:10,padding:12}}>
               <div style={{fontSize:9,color:B.muted,letterSpacing:2,textTransform:"uppercase",marginBottom:8}}>Sistema de puntos</div>
               <div style={{display:"flex",flexWrap:"wrap",gap:6}}>
-                {[["Resultado exacto","5 pts",B.primary],["Solo ganador","3 pts","#4caf50"],["Campeón/Sub/3°/Gol","5 c/u",B.primary]].map(([l,v,c])=>(
+                {[["Resultado exacto","5 pts",B.primary],["Solo ganador","3 pts","#9b5de5"],["Campeón/Sub/3°/Gol","5 c/u",B.primary]].map(([l,v,c])=>(
                   <div key={l} style={{padding:"4px 10px",borderRadius:8,background:c+"15",border:`1px solid ${c}30`,fontSize:10}}>
                     <span style={{color:B.muted}}>{l}: </span><span style={{color:c,fontWeight:"bold"}}>{v}</span>
                   </div>
@@ -835,20 +859,20 @@ export default function App() {
                 <span style={tagStyle(podioCompleto,B.primary)}>{podioCompleto?"✓":"·"} Extras {predCount}/4</span>
               </div>
               <div style={{display:"flex",gap:8}}>
-                <button onClick={saveQuiniela} disabled={saving} style={{flex:1,padding:9,borderRadius:9,border:"none",background:saving?"#1a2a1a":B.primary,color:saving?B.muted:"#000",fontWeight:"bold",fontSize:12,cursor:saving?"not-allowed":"pointer"}}>{saving?"Guardando...":saveMsg||"💾 Guardar quiniela"}</button>
-                <button onClick={()=>setScreen("portal")} style={{flex:1,padding:9,borderRadius:9,border:"1px solid #0a1a0a",background:"#0a140a",color:B.muted,fontSize:12,cursor:"pointer"}}>👥 Ver portal</button>
+                <button onClick={saveQuiniela} disabled={saving} style={{flex:1,padding:9,borderRadius:9,border:"none",background:saving?"#2a1a40":B.primary,color:saving?B.muted:"#000",fontWeight:"bold",fontSize:12,cursor:saving?"not-allowed":"pointer"}}>{saving?"Guardando...":saveMsg||"💾 Guardar quiniela"}</button>
+                <button onClick={()=>setScreen("portal")} style={{flex:1,padding:9,borderRadius:9,border:"1px solid #0a1a0a",background:"#180e26",color:B.muted,fontSize:12,cursor:"pointer"}}>👥 Ver portal</button>
               </div>
             </div>
 
             {/* Resumen predicciones */}
             {(campeon||segundo||tercero||goleador||goleadorCustom)&&(
-              <div style={{background:"#070e07",border:`1px solid ${B.border}`,borderRadius:12,padding:14,marginBottom:14}}>
+              <div style={{background:"#130a20",border:`1px solid ${B.border}`,borderRadius:12,padding:14,marginBottom:14}}>
                 <div style={{fontSize:10,letterSpacing:3,color:B.primary,textTransform:"uppercase",marginBottom:12}}>Predicciones Especiales</div>
                 <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8}}>
-                  {[{icon:"🥇",label:"Campeón",val:campeon,color:B.primary},{icon:"🥈",label:"Subcampeón",val:segundo,color:"#888"},{icon:"🥉",label:"3er Lugar",val:tercero,color:"#a07040"},{icon:"👟",label:"Bota de Oro",val:goleador==="Otro..."?goleadorCustom:goleador,color:"#4caf50"}].map(({icon,label,val,color})=>(
+                  {[{icon:"🥇",label:"Campeón",val:campeon,color:B.primary},{icon:"🥈",label:"Subcampeón",val:segundo,color:"#888"},{icon:"🥉",label:"3er Lugar",val:tercero,color:"#a07040"},{icon:"👟",label:"Bota de Oro",val:goleador==="Otro..."?goleadorCustom:goleador,color:"#9b5de5"}].map(({icon,label,val,color})=>(
                     <div key={label} style={{background:val?"#ffffff04":"#ffffff02",border:`1px solid ${val?color+"30":"#ffffff07"}`,borderRadius:10,padding:"10px 12px"}}>
                       <div style={{fontSize:9,color:B.muted,marginBottom:4}}>{icon} {label}</div>
-                      <div style={{fontSize:12,fontWeight:"bold",color:val?color:"#1a3a1a"}}>{val||"—"}</div>
+                      <div style={{fontSize:12,fontWeight:"bold",color:val?color:"#2a1a50"}}>{val||"—"}</div>
                     </div>
                   ))}
                 </div>
@@ -856,7 +880,7 @@ export default function App() {
             )}
 
             {/* Resumen eliminatorias */}
-            <div style={{background:"#070e07",border:`1px solid ${B.border}`,borderRadius:12,padding:14,marginBottom:14}}>
+            <div style={{background:"#130a20",border:`1px solid ${B.border}`,borderRadius:12,padding:14,marginBottom:14}}>
               <div style={{fontSize:10,letterSpacing:3,color:B.primary,textTransform:"uppercase",marginBottom:10}}>Eliminatorias</div>
               {RONDAS.map(r=>{
                 const ko=knockout[r.id]||[];
@@ -867,7 +891,7 @@ export default function App() {
                     <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:ganadores.length?5:0}}>
                       <span style={{fontSize:16}}>{r.emoji}</span>
                       <span style={{fontSize:12,color:done===r.partidos?B.primary:B.muted,fontWeight:done===r.partidos?"bold":"normal"}}>{r.label}</span>
-                      <span style={{marginLeft:"auto",fontSize:10,color:done===r.partidos?"#4caf50":B.muted}}>{done}/{r.partidos}</span>
+                      <span style={{marginLeft:"auto",fontSize:10,color:done===r.partidos?"#9b5de5":B.muted}}>{done}/{r.partidos}</span>
                     </div>
                     {ganadores.length>0&&(
                       <div style={{display:"flex",flexWrap:"wrap",gap:4,paddingLeft:24}}>
@@ -884,13 +908,13 @@ export default function App() {
               const gr2=GRUPOS[g];const ms2=getMs(g);const tab2=calcTabla(gr2.equipos,gr2.partidos,ms2);
               const done=isDone(g);const filled=ms2.filter(m=>!isNaN(parseInt(m.local))&&m.local!=="").length;
               return(
-                <div key={g} onClick={()=>{setGrupo(g);setTab("partidos");}} style={{background:done?B.card:"#060806",border:`1px solid ${done?gr2.color+"40":"#ffffff06"}`,borderRadius:10,padding:"9px 13px",marginBottom:7,cursor:"pointer"}}>
+                <div key={g} onClick={()=>{setGrupo(g);setTab("partidos");}} style={{background:done?B.card:"#110820",border:`1px solid ${done?gr2.color+"40":"#ffffff06"}`,borderRadius:10,padding:"9px 13px",marginBottom:7,cursor:"pointer"}}>
                   <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:done?8:0}}>
-                    <div style={{width:26,height:26,borderRadius:6,background:done?gr2.color:"#ffffff09",color:done?gr2.accent:"#1a3a1a",display:"flex",alignItems:"center",justifyContent:"center",fontSize:12,fontWeight:"900"}}>{g}</div>
+                    <div style={{width:26,height:26,borderRadius:6,background:done?gr2.color:"#ffffff09",color:done?gr2.accent:"#2a1a50",display:"flex",alignItems:"center",justifyContent:"center",fontSize:12,fontWeight:"900"}}>{g}</div>
                     <div style={{fontSize:10,color:B.muted}}>{gr2.equipos.map(e=>e.split(" ").slice(1).join(" ")).join(" · ")}</div>
-                    <span style={{marginLeft:"auto",fontSize:9,color:done?B.primary:"#1a3a1a"}}>{done?"✓":`${filled}/${gr2.partidos.length}`}</span>
+                    <span style={{marginLeft:"auto",fontSize:9,color:done?B.primary:"#2a1a50"}}>{done?"✓":`${filled}/${gr2.partidos.length}`}</span>
                   </div>
-                  {done&&(<div style={{display:"flex",gap:4}}>{tab2.map(([eq,st],i)=>(<div key={eq} style={{flex:1,textAlign:"center",background:i<2?gr2.color+"25":"#ffffff04",border:`1px solid ${i<2?gr2.color+"40":"#ffffff06"}`,borderRadius:6,padding:"4px 2px"}}><div style={{fontSize:8,color:i<2?gr2.accent:"#1a3a1a",marginBottom:1}}>{i+1}°</div><div style={{fontSize:9,color:i<2?B.text:"#1a3a1a",fontWeight:i<2?"bold":"normal"}}>{eq.split(" ").slice(1).join(" ").substring(0,7)}</div><div style={{fontSize:10,color:i<2?gr2.accent:"#1a3a1a",fontWeight:"bold"}}>{st.pts}pts</div></div>))}</div>)}
+                  {done&&(<div style={{display:"flex",gap:4}}>{tab2.map(([eq,st],i)=>(<div key={eq} style={{flex:1,textAlign:"center",background:i<2?gr2.color+"25":"#ffffff04",border:`1px solid ${i<2?gr2.color+"40":"#ffffff06"}`,borderRadius:6,padding:"4px 2px"}}><div style={{fontSize:8,color:i<2?gr2.accent:"#2a1a50",marginBottom:1}}>{i+1}°</div><div style={{fontSize:9,color:i<2?B.text:"#2a1a50",fontWeight:i<2?"bold":"normal"}}>{eq.split(" ").slice(1).join(" ").substring(0,7)}</div><div style={{fontSize:10,color:i<2?gr2.accent:"#2a1a50",fontWeight:"bold"}}>{st.pts}pts</div></div>))}</div>)}
                 </div>
               );
             })}

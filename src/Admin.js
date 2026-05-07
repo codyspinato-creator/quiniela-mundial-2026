@@ -7,10 +7,10 @@ import { calcTotalPoints } from "./scoring";
 
 // ─── BRAND ───────────────────────────────────────────────────────────────────
 const B = {
-  primary: "#00cc00", primary2: "#009900", primaryDim: "#00cc0018",
-  bg: "#050a05", card: "#090f09", border: "#00cc0020",
-  text: "#e8f5e8", muted: "#5a7a5a",
-  admin: "#f59e0b", adminDim: "#f59e0b18",
+  primary: "#9b5de5", primary2: "#7b3fc4", primaryDim: "#9b5de518",
+  bg: "#0e0618", card: "#160d22", border: "#9b5de530",
+  text: "#f0ecff", muted: "#7a6a99",
+  admin: "#fee440", adminDim: "#fee44018",
   logoMF: "/logo-mundofutbol.png",
 };
 
@@ -121,8 +121,13 @@ export default function Admin({ onBack }) {
   if (!authed) return (
     <div style={{ minHeight: "100vh", background: B.bg, display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "Georgia,serif", padding: 20 }}>
       <div style={{ maxWidth: 340, width: "100%" }}>
-        <div style={{ textAlign: "center", marginBottom: 24 }}>
-          <img src={B.logoMF} alt="MundoFutbol" style={{ height: 50, objectFit: "contain", marginBottom: 12 }} onError={e => { e.target.style.display = "none"; }} />
+        <div style={{
+          background:"linear-gradient(135deg,#7b1c2e,#4a0e5c,#1a0a40)",
+          borderRadius:16,padding:"20px",marginBottom:20,textAlign:"center",
+          border:"1px solid #9b5de530",position:"relative",overflow:"hidden"
+        }}>
+          <div style={{position:"absolute",top:0,left:0,right:0,height:4,background:"linear-gradient(90deg,#f15bb5,#9b5de5,#00bbf9,#fee440)"}}/>
+          <img src={B.logoMF} alt="MundoFutbol" style={{ height: 44, objectFit: "contain", marginBottom: 10, filter:"drop-shadow(0 0 8px #9b5de560)" }} onError={e => { e.target.style.display = "none"; }} />
           <div style={{ fontSize: 9, letterSpacing: 4, color: B.admin, textTransform: "uppercase" }}>Panel de Administrador</div>
           <div style={{ fontSize: 20, fontWeight: "bold", color: B.text, marginTop: 4 }}>🔐 Acceso Restringido</div>
         </div>
@@ -153,7 +158,7 @@ export default function Admin({ onBack }) {
   return (
     <div style={{ minHeight: "100vh", background: B.bg, color: B.text, fontFamily: "Georgia,serif" }}>
       {/* HEADER ADMIN */}
-      <div style={{ background: "#0a0800", borderBottom: `2px solid ${B.admin}`, padding: "10px 14px", position: "sticky", top: 0, zIndex: 100, boxShadow: `0 4px 20px ${B.admin}20` }}>
+      <div style={{ background: "linear-gradient(135deg,#12091f,#1a0a2e)", borderBottom: `2px solid ${B.admin}`, padding: "10px 14px", position: "sticky", top: 0, zIndex: 100, boxShadow: `0 4px 20px ${B.admin}20` }}>
         <div style={{ maxWidth: 620, margin: "0 auto" }}>
           <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 8 }}>
             <button onClick={onBack} style={{ background: "#ffffff08", border: "none", borderRadius: 8, padding: "5px 9px", color: "#aaa", cursor: "pointer", fontSize: 11 }}>← Salir</button>
@@ -211,10 +216,10 @@ export default function Admin({ onBack }) {
                     <div style={{ fontSize: 14, fontWeight: "bold" }}>Grupo {grupoActivo} — Resultados Oficiales</div>
                     <div style={{ fontSize: 10, color: "#ffffff70" }}>{gr.equipos.map(e => e.split(" ").slice(1).join(" ")).join(" · ")}</div>
                   </div>
-                  <div style={{ background: "#0a0f0a" }}>
+                  <div style={{ background: "#170e24" }}>
                     {[1, 2, 3].map(fecha => (
                       <div key={fecha}>
-                        <div style={{ padding: "4px 14px", background: "#ffffff04", fontSize: 9, color: "#3a5a2a", letterSpacing: 2, textTransform: "uppercase", borderBottom: "1px solid #ffffff06" }}>Jornada {fecha}</div>
+                        <div style={{ padding: "4px 14px", background: "#ffffff04", fontSize: 9, color: "#4a2a6a", letterSpacing: 2, textTransform: "uppercase", borderBottom: "1px solid #ffffff06" }}>Jornada {fecha}</div>
                         {gr.partidos.filter(p => p.f === fecha).map(p => {
                           const idx = gr.partidos.indexOf(p);
                           const m = ms[idx];
@@ -223,14 +228,14 @@ export default function Admin({ onBack }) {
                           const wL = ok && gl > gv, wV = ok && gv > gl;
                           return (
                             <div key={idx} style={{ padding: "8px 14px", borderBottom: "1px solid #ffffff04", background: ok ? "#ffffff03" : "transparent" }}>
-                              <div style={{ fontSize: 9, color: "#2a4a2a", marginBottom: 5 }}>📅 {p.fecha}</div>
+                              <div style={{ fontSize: 9, color: "#3a2a5a", marginBottom: 5 }}>📅 {p.fecha}</div>
                               <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
                                 <div style={{ flex: 1, fontSize: 11, textAlign: "right", fontWeight: wL ? "bold" : "normal", color: wL ? B.text : ok ? B.muted : "#bbb" }}>{p.local}</div>
                                 <input type="number" min="0" max="20" value={m?.local || ""} onChange={e => setGol(grupoActivo, idx, "local", e.target.value)}
-                                  style={{ width: 36, height: 32, textAlign: "center", background: ok ? "#141f0a" : "#ffffff08", border: `1px solid ${ok ? B.admin + "70" : "#ffffff15"}`, borderRadius: 6, color: ok ? B.admin : B.muted, fontSize: 15, fontWeight: "bold", outline: "none" }} />
+                                  style={{ width: 36, height: 32, textAlign: "center", background: ok ? "#1e1430" : "#ffffff08", border: `1px solid ${ok ? B.admin + "70" : "#ffffff15"}`, borderRadius: 6, color: ok ? B.admin : B.muted, fontSize: 15, fontWeight: "bold", outline: "none" }} />
                                 <div style={{ width: 14, textAlign: "center", fontSize: 11, color: ok ? B.admin : "#222", fontWeight: "bold" }}>{ok ? "–" : "·"}</div>
                                 <input type="number" min="0" max="20" value={m?.visita || ""} onChange={e => setGol(grupoActivo, idx, "visita", e.target.value)}
-                                  style={{ width: 36, height: 32, textAlign: "center", background: ok ? "#141f0a" : "#ffffff08", border: `1px solid ${ok ? "#ffffff30" : "#ffffff15"}`, borderRadius: 6, color: ok ? B.text : B.muted, fontSize: 15, fontWeight: "bold", outline: "none" }} />
+                                  style={{ width: 36, height: 32, textAlign: "center", background: ok ? "#1e1430" : "#ffffff08", border: `1px solid ${ok ? "#ffffff30" : "#ffffff15"}`, borderRadius: 6, color: ok ? B.text : B.muted, fontSize: 15, fontWeight: "bold", outline: "none" }} />
                                 <div style={{ flex: 1, fontSize: 11, fontWeight: wV ? "bold" : "normal", color: wV ? B.text : ok ? B.muted : "#bbb" }}>{p.visita}</div>
                                 {ok && <div style={{ fontSize: 10, color: B.admin, minWidth: 40, textAlign: "right" }}>{wL ? "L gana" : wV ? "V gana" : "Empate"}</div>}
                               </div>
@@ -246,8 +251,8 @@ export default function Admin({ onBack }) {
 
             {/* Navegación grupos */}
             <div style={{ display: "flex", gap: 8 }}>
-              <button onClick={() => { const i = KEYS.indexOf(grupoActivo); if (i > 0) setGrupoActivo(KEYS[i - 1]); }} disabled={grupoActivo === "A"} style={{ flex: 1, padding: 8, borderRadius: 9, border: "1px solid #0a1a0a", background: grupoActivo === "A" ? "#050805" : "#0a140a", color: grupoActivo === "A" ? "#1a3a1a" : B.muted, fontSize: 12, cursor: grupoActivo === "A" ? "not-allowed" : "pointer" }}>← Anterior</button>
-              <button onClick={() => { const i = KEYS.indexOf(grupoActivo); if (i < KEYS.length - 1) setGrupoActivo(KEYS[i + 1]); }} disabled={grupoActivo === "L"} style={{ flex: 1, padding: 8, borderRadius: 9, border: "none", background: grupoActivo === "L" ? "#050805" : B.admin, color: grupoActivo === "L" ? "#1a3a1a" : "#000", fontSize: 12, fontWeight: "bold", cursor: grupoActivo === "L" ? "not-allowed" : "pointer" }}>Siguiente →</button>
+              <button onClick={() => { const i = KEYS.indexOf(grupoActivo); if (i > 0) setGrupoActivo(KEYS[i - 1]); }} disabled={grupoActivo === "A"} style={{ flex: 1, padding: 8, borderRadius: 9, border: "1px solid #0a1a0a", background: grupoActivo === "A" ? "#050805" : "#180e26", color: grupoActivo === "A" ? "#2a1a50" : B.muted, fontSize: 12, cursor: grupoActivo === "A" ? "not-allowed" : "pointer" }}>← Anterior</button>
+              <button onClick={() => { const i = KEYS.indexOf(grupoActivo); if (i < KEYS.length - 1) setGrupoActivo(KEYS[i + 1]); }} disabled={grupoActivo === "L"} style={{ flex: 1, padding: 8, borderRadius: 9, border: "none", background: grupoActivo === "L" ? "#050805" : B.admin, color: grupoActivo === "L" ? "#2a1a50" : "#000", fontSize: 12, fontWeight: "bold", cursor: grupoActivo === "L" ? "not-allowed" : "pointer" }}>Siguiente →</button>
             </div>
           </>
         )}
@@ -265,7 +270,7 @@ export default function Admin({ onBack }) {
                 const done = matches.filter(m => m.ganador).length;
                 const active = r.id === rondaActiva;
                 return (
-                  <button key={r.id} onClick={() => setRondaActiva(r.id)} style={{ padding: "6px 10px", borderRadius: 8, border: `2px solid ${active ? B.admin : "transparent"}`, background: active ? B.adminDim : "#ffffff06", color: active ? B.admin : done === r.partidos ? "#4caf50" : B.muted, fontSize: 10, cursor: "pointer", fontWeight: "bold", whiteSpace: "nowrap", flexShrink: 0 }}>
+                  <button key={r.id} onClick={() => setRondaActiva(r.id)} style={{ padding: "6px 10px", borderRadius: 8, border: `2px solid ${active ? B.admin : "transparent"}`, background: active ? B.adminDim : "#ffffff06", color: active ? B.admin : done === r.partidos ? "#9b5de5" : B.muted, fontSize: 10, cursor: "pointer", fontWeight: "bold", whiteSpace: "nowrap", flexShrink: 0 }}>
                     {r.emoji} {r.label} <span style={{ opacity: 0.7 }}>({done}/{r.partidos})</span>
                   </button>
                 );
@@ -289,11 +294,11 @@ export default function Admin({ onBack }) {
                         </div>
                         <div style={{ display: "flex", gap: 6, alignItems: "center", marginBottom: 6 }}>
                           <input value={match.local} onChange={e => setKO(rondaActiva, i, "local", e.target.value)} placeholder="Local..." style={{ flex: 1, background: "#ffffff08", border: `1px solid ${match.ganador === match.local && match.local ? B.admin + "60" : "#ffffff12"}`, borderRadius: 6, padding: "5px 8px", color: match.ganador === match.local ? B.admin : B.text, fontSize: 11, outline: "none", fontWeight: match.ganador === match.local ? "bold" : "normal" }} />
-                          <input type="number" min="0" max="20" value={match.localGoles} onChange={e => setKO(rondaActiva, i, "localGoles", e.target.value)} style={{ width: 34, height: 28, textAlign: "center", background: "#141f0a", border: `1px solid ${hasScore ? B.admin + "60" : "#ffffff12"}`, borderRadius: 6, color: hasScore ? B.admin : B.muted, fontSize: 14, fontWeight: "bold", outline: "none" }} />
+                          <input type="number" min="0" max="20" value={match.localGoles} onChange={e => setKO(rondaActiva, i, "localGoles", e.target.value)} style={{ width: 34, height: 28, textAlign: "center", background: "#1e1430", border: `1px solid ${hasScore ? B.admin + "60" : "#ffffff12"}`, borderRadius: 6, color: hasScore ? B.admin : B.muted, fontSize: 14, fontWeight: "bold", outline: "none" }} />
                         </div>
                         <div style={{ display: "flex", gap: 6, alignItems: "center", marginBottom: empate ? 8 : 0 }}>
                           <input value={match.visita} onChange={e => setKO(rondaActiva, i, "visita", e.target.value)} placeholder="Visitante..." style={{ flex: 1, background: "#ffffff08", border: `1px solid ${match.ganador === match.visita && match.visita ? B.admin + "60" : "#ffffff12"}`, borderRadius: 6, padding: "5px 8px", color: match.ganador === match.visita ? B.admin : B.text, fontSize: 11, outline: "none", fontWeight: match.ganador === match.visita ? "bold" : "normal" }} />
-                          <input type="number" min="0" max="20" value={match.visitaGoles} onChange={e => setKO(rondaActiva, i, "visitaGoles", e.target.value)} style={{ width: 34, height: 28, textAlign: "center", background: "#141f0a", border: `1px solid ${hasScore ? "#ffffff25" : "#ffffff12"}`, borderRadius: 6, color: hasScore ? B.text : B.muted, fontSize: 14, fontWeight: "bold", outline: "none" }} />
+                          <input type="number" min="0" max="20" value={match.visitaGoles} onChange={e => setKO(rondaActiva, i, "visitaGoles", e.target.value)} style={{ width: 34, height: 28, textAlign: "center", background: "#1e1430", border: `1px solid ${hasScore ? "#ffffff25" : "#ffffff12"}`, borderRadius: 6, color: hasScore ? B.text : B.muted, fontSize: 14, fontWeight: "bold", outline: "none" }} />
                         </div>
                         {/* Penaltis */}
                         {empate && (
@@ -361,15 +366,15 @@ export default function Admin({ onBack }) {
             <div style={{ background: B.card, border: "1px solid #4caf5020", borderRadius: 12, padding: 14 }}>
               <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10 }}>
                 <span style={{ fontSize: 20 }}>👟</span>
-                <div style={{ fontSize: 13, fontWeight: "bold", color: "#4caf50" }}>Bota de Oro — Goleador oficial</div>
-                {resultados.goleador && <div style={{ marginLeft: "auto", fontSize: 11, color: "#4caf50", fontWeight: "bold" }}>{resultados.goleador}</div>}
+                <div style={{ fontSize: 13, fontWeight: "bold", color: "#9b5de5" }}>Bota de Oro — Goleador oficial</div>
+                {resultados.goleador && <div style={{ marginLeft: "auto", fontSize: 11, color: "#9b5de5", fontWeight: "bold" }}>{resultados.goleador}</div>}
               </div>
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 6, marginBottom: resultados.goleador === "Otro..." ? 8 : 0 }}>
                 {GOLEADORES.map(g => (
                   <button key={g.nombre} onClick={() => setResultados(prev => ({ ...prev, goleador: g.nombre === prev.goleador ? "" : g.nombre }))}
-                    style={{ padding: "7px 10px", borderRadius: 8, textAlign: "left", border: `1px solid ${resultados.goleador === g.nombre ? "#4caf50" : "#ffffff0d"}`, background: resultados.goleador === g.nombre ? "#4caf5012" : "#ffffff04", color: resultados.goleador === g.nombre ? "#4caf50" : B.muted, cursor: "pointer", display: "flex", alignItems: "center", gap: 6 }}>
+                    style={{ padding: "7px 10px", borderRadius: 8, textAlign: "left", border: `1px solid ${resultados.goleador === g.nombre ? "#9b5de5" : "#ffffff0d"}`, background: resultados.goleador === g.nombre ? "#4caf5012" : "#ffffff04", color: resultados.goleador === g.nombre ? "#9b5de5" : B.muted, cursor: "pointer", display: "flex", alignItems: "center", gap: 6 }}>
                     <span>{g.sel}</span>
-                    <div style={{ flex: 1 }}><div style={{ fontSize: 11, fontWeight: resultados.goleador === g.nombre ? "bold" : "normal" }}>{g.nombre}</div>{g.club && <div style={{ fontSize: 9, color: "#2a4a2a" }}>{g.club}</div>}</div>
+                    <div style={{ flex: 1 }}><div style={{ fontSize: 11, fontWeight: resultados.goleador === g.nombre ? "bold" : "normal" }}>{g.nombre}</div>{g.club && <div style={{ fontSize: 9, color: "#3a2a5a" }}>{g.club}</div>}</div>
                     {resultados.goleador === g.nombre && <span>✓</span>}
                   </button>
                 ))}
@@ -421,8 +426,8 @@ export default function Admin({ onBack }) {
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, fontSize: 11 }}>
                 {[
                   { label: "Resultado exacto (grupos)", pts: 5, color: B.primary },
-                  { label: "Solo ganador/empate (grupos)", pts: 3, color: "#4caf50" },
-                  { label: "Ganador correcto (eliminatorias)", pts: 3, color: "#4caf50" },
+                  { label: "Solo ganador/empate (grupos)", pts: 3, color: "#9b5de5" },
+                  { label: "Ganador correcto (eliminatorias)", pts: 3, color: "#9b5de5" },
                   { label: "Resultado exacto (eliminatorias)", pts: 5, color: B.primary },
                   { label: "Campeón correcto", pts: 5, color: B.primary },
                   { label: "Subcampeón correcto", pts: 5, color: B.primary },
