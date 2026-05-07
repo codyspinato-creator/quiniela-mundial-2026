@@ -93,7 +93,12 @@ function MatchCard({ match, idx, rondaColor, onChange, autoFilled=false }) {
       boxShadow: ganador ? `0 0 10px ${rondaColor}18` : "none",
     }}>
       <div style={{ fontSize:9, color:B.muted, marginBottom:7, display:"flex", justifyContent:"space-between", alignItems:"center" }}>
-        <span>Partido {idx+1}</span>
+        <span>
+          {match.num
+            ? <><span style={{color:"#3a5bd9",fontWeight:"800"}}>{match.num}</span>{match.fecha && <span style={{color:"#bbb",fontWeight:"normal"}}> · {match.fecha}</span>}{match.sede && <span style={{color:"#aaa",fontWeight:"normal"}}> · 📍{match.sede}</span>}</>
+            : `Partido ${idx+1}`
+          }
+        </span>
         <div style={{display:"flex",gap:4,alignItems:"center"}}>
           {autoFilled && <span style={{fontSize:8,background:"#eeeefc",border:"1px solid #00cc0030",color:"#3a5bd9",borderRadius:10,padding:"1px 6px"}}>⚡ Auto</span>}
           {ganador && <span style={{ color:rondaColor, fontWeight:"bold" }}>✓ {ganador.split(" ").slice(0,2).join(" ")}</span>}
