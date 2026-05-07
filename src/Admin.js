@@ -10,7 +10,7 @@ const B = {
   primary: "#3a5bd9", primary2: "#2a4bc9", primaryDim: "#3a5bd915",
   bg: "#f5f5f7", card: "#ffffff", border: "#e0e0e8",
   text: "#111111", muted: "#888899",
-  admin: "#f77f00", adminDim: "#f77f0015",
+  admin: "#7c3aed", adminDim: "#7c3aed15",
   logoMF: "/logo-mundofutbol.png",
 };
 
@@ -154,7 +154,7 @@ export default function Admin({ onBack }) {
             onChange={e => setPassInput(e.target.value)}
             onKeyDown={e => e.key === "Enter" && handleLogin()}
             placeholder="Contraseña..."
-            style={{ width: "100%", background: "#f8f8fc", border: `1px solid ${B.admin}50`, borderRadius: 8, padding: "10px 12px", color: B.text, fontSize: 14, outline: "none", boxSizing: "border-box", marginBottom: 8 }}
+            style={{ width: "100%", background: "#ffffff", border: `1px solid ${B.admin}50`, borderRadius: 8, padding: "10px 12px", color: B.text, fontSize: 14, outline: "none", boxSizing: "border-box", marginBottom: 8 }}
           />
           {passError && <div style={{ fontSize: 11, color: "#f44336", marginBottom: 8 }}>{passError}</div>}
           <button onClick={handleLogin} style={{ width: "100%", padding: 11, borderRadius: 9, border: "none", background: `linear-gradient(135deg,${B.admin},#e05c00)`, color: "#ffffff", fontWeight: "bold", fontSize: 14, cursor: "pointer" }}>
@@ -177,7 +177,7 @@ export default function Admin({ onBack }) {
       <div style={{ background: "#ffffff", borderBottom: `2px solid ${B.admin}`, padding: "10px 14px", position: "sticky", top: 0, zIndex: 100, boxShadow: `0 4px 20px ${B.admin}20` }}>
         <div style={{ maxWidth: 620, margin: "0 auto" }}>
           <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 8 }}>
-            <button onClick={onBack} style={{ background: "#ffffff08", border: "none", borderRadius: 8, padding: "5px 9px", color: "#aaa", cursor: "pointer", fontSize: 11 }}>← Salir</button>
+            <button onClick={onBack} style={{ background: "#f0f0f5", border: "1px solid #e0e0e8", borderRadius: 8, padding: "5px 9px", color: "#555", cursor: "pointer", fontSize: 11 }}>← Salir</button>
             <div>
               <div style={{ fontSize: 8, letterSpacing: 3, color: B.admin }}>PANEL ADMINISTRADOR</div>
               <div style={{ fontSize: 14, fontWeight: "bold" }}>🔐 MundoFutbol 2026</div>
@@ -215,7 +215,7 @@ export default function Admin({ onBack }) {
                 const done = ms.filter(m => !isNaN(parseInt(m.local)) && m.local !== "").length;
                 const active = g === grupoActivo;
                 return (
-                  <button key={g} onClick={() => setGrupoActivo(g)} style={{ width: 36, height: 36, borderRadius: 7, fontSize: 12, fontWeight: "bold", border: active ? `2px solid ${B.admin}` : "2px solid transparent", background: done === 6 ? (active ? B.admin : "#fff8f0") : active ? "#fff0e0" : "#f8f8fc", color: done === 6 ? (active ? "#ffffff" : B.admin) : active ? B.admin : "#888", cursor: "pointer" }}>
+                  <button key={g} onClick={() => setGrupoActivo(g)} style={{ width: 36, height: 36, borderRadius: 7, fontSize: 12, fontWeight: "bold", border: active ? `2px solid ${B.admin}` : "2px solid transparent", background: done === 6 ? (active ? B.admin : "#f5f0ff") : active ? "#f5f0ff" : "#f5f5f7", color: done === 6 ? (active ? "#ffffff" : B.admin) : active ? B.admin : "#888", cursor: "pointer" }}>
                     {done === 6 && !active ? "✓" : g}
                   </button>
                 );
@@ -235,7 +235,7 @@ export default function Admin({ onBack }) {
                   <div style={{ background: "#ffffff" }}>
                     {[1, 2, 3].map(fecha => (
                       <div key={fecha}>
-                        <div style={{ padding: "4px 14px", background: "#ffffff04", fontSize: 9, color: "#4a2a6a", letterSpacing: 2, textTransform: "uppercase", borderBottom: "1px solid #ffffff06" }}>Jornada {fecha}</div>
+                        <div style={{ padding: "4px 14px", background: "#f8f8fc", fontSize: 9, color: "#888", letterSpacing: 2, textTransform: "uppercase", borderBottom: "1px solid #eeeeef" }}>Jornada {fecha}</div>
                         {gr.partidos.filter(p => p.f === fecha).map(p => {
                           const idx = gr.partidos.indexOf(p);
                           const m = ms[idx];
@@ -243,17 +243,17 @@ export default function Admin({ onBack }) {
                           const ok = !isNaN(gl) && !isNaN(gv) && m?.local !== "" && m?.visita !== "";
                           const wL = ok && gl > gv, wV = ok && gv > gl;
                           return (
-                            <div key={idx} style={{ padding: "8px 14px", borderBottom: "1px solid #ffffff04", background: ok ? "#ffffff03" : "transparent" }}>
-                              <div style={{ fontSize: 9, color: "#3a2a5a", marginBottom: 5 }}>📅 {p.fecha}</div>
+                            <div key={idx} style={{ padding: "8px 14px", borderBottom: "1px solid #eeeeef", background: "transparent" }}>
+                              <div style={{ fontSize: 9, color: "#888", marginBottom: 5 }}>📅 {p.fecha}</div>
                               <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                                <div style={{ flex: 1, fontSize: 11, textAlign: "right", fontWeight: wL ? "bold" : "normal", color: wL ? B.text : ok ? B.muted : "#bbb" }}>{p.local}</div>
+                                <div style={{ flex: 1, fontSize: 11, textAlign: "right", fontWeight: wL ? "bold" : "normal", color: wL ? "#111" : ok ? "#333" : "#888" }}>{p.local}</div>
                                 <input type="number" min="0" max="20" value={m?.local || ""} onChange={e => setGol(grupoActivo, idx, "local", e.target.value)}
-                                  style={{ width: 36, height: 32, textAlign: "center", background: ok ? "#1e1430" : "#ffffff08", border: `1px solid ${ok ? B.admin + "70" : "#ffffff15"}`, borderRadius: 6, color: ok ? B.admin : B.muted, fontSize: 15, fontWeight: "bold", outline: "none" }} />
+                                  style={{ width: 36, height: 32, textAlign: "center", background: "#f0f0f0", border: `2px solid ${ok ? B.admin : "#e0e0e8"}`, borderRadius: 6, color: ok ? B.admin : "#bbb", fontSize: 15, fontWeight: "bold", outline: "none" }} />
                                 <div style={{ width: 14, textAlign: "center", fontSize: 11, color: ok ? B.admin : "#222", fontWeight: "bold" }}>{ok ? "–" : "·"}</div>
                                 <input type="number" min="0" max="20" value={m?.visita || ""} onChange={e => setGol(grupoActivo, idx, "visita", e.target.value)}
-                                  style={{ width: 36, height: 32, textAlign: "center", background: ok ? "#1e1430" : "#ffffff08", border: `1px solid ${ok ? "#ffffff30" : "#ffffff15"}`, borderRadius: 6, color: ok ? B.text : B.muted, fontSize: 15, fontWeight: "bold", outline: "none" }} />
-                                <div style={{ flex: 1, fontSize: 11, fontWeight: wV ? "bold" : "normal", color: wV ? B.text : ok ? B.muted : "#bbb" }}>{p.visita}</div>
-                                {ok && <div style={{ fontSize: 10, color: B.admin, minWidth: 40, textAlign: "right" }}>{wL ? "L gana" : wV ? "V gana" : "Empate"}</div>}
+                                  style={{ width: 36, height: 32, textAlign: "center", background: "#f0f0f0", border: `2px solid ${ok ? B.admin : "#e0e0e8"}`, borderRadius: 6, color: ok ? "#111" : "#bbb", fontSize: 15, fontWeight: "bold", outline: "none" }} />
+                                <div style={{ flex: 1, fontSize: 11, fontWeight: wV ? "bold" : "normal", color: wV ? "#111" : ok ? "#333" : "#888" }}>{p.visita}</div>
+                                {ok && <div style={{ fontSize: 10, color: B.admin, fontWeight:"bold", minWidth: 40, textAlign: "right" }}>{wL ? "L gana" : wV ? "V gana" : "Empate"}</div>}
                               </div>
                             </div>
                           );
@@ -267,8 +267,8 @@ export default function Admin({ onBack }) {
 
             {/* Navegación grupos */}
             <div style={{ display: "flex", gap: 8 }}>
-              <button onClick={() => { const i = KEYS.indexOf(grupoActivo); if (i > 0) setGrupoActivo(KEYS[i - 1]); }} disabled={grupoActivo === "A"} style={{ flex: 1, padding: 8, borderRadius: 9, border: "1px solid #0a1a0a", background: grupoActivo === "A" ? "#f5f5f7" : "#f0f0ff", color: grupoActivo === "A" ? "#2a1a50" : B.muted, fontSize: 12, cursor: grupoActivo === "A" ? "not-allowed" : "pointer" }}>← Anterior</button>
-              <button onClick={() => { const i = KEYS.indexOf(grupoActivo); if (i < KEYS.length - 1) setGrupoActivo(KEYS[i + 1]); }} disabled={grupoActivo === "L"} style={{ flex: 1, padding: 8, borderRadius: 9, border: "none", background: grupoActivo === "L" ? "#f5f5f7" : B.admin, color: grupoActivo === "L" ? "#2a1a50" : "#000", fontSize: 12, fontWeight: "bold", cursor: grupoActivo === "L" ? "not-allowed" : "pointer" }}>Siguiente →</button>
+              <button onClick={() => { const i = KEYS.indexOf(grupoActivo); if (i > 0) setGrupoActivo(KEYS[i - 1]); }} disabled={grupoActivo === "A"} style={{ flex: 1, padding: 8, borderRadius: 9, border: "1px solid #e0e0e8", background: grupoActivo === "A" ? "#f5f5f7" : "#f0f0ff", color: grupoActivo === "A" ? "#ccc" : "#7c3aed", fontSize: 12, cursor: grupoActivo === "A" ? "not-allowed" : "pointer" }}>← Anterior</button>
+              <button onClick={() => { const i = KEYS.indexOf(grupoActivo); if (i < KEYS.length - 1) setGrupoActivo(KEYS[i + 1]); }} disabled={grupoActivo === "L"} style={{ flex: 1, padding: 8, borderRadius: 9, border: "none", background: grupoActivo === "L" ? "#f5f5f7" : B.admin, color: grupoActivo === "L" ? "#ccc" : "#ffffff", fontSize: 12, fontWeight: "bold", cursor: grupoActivo === "L" ? "not-allowed" : "pointer" }}>Siguiente →</button>
             </div>
           </>
         )}
@@ -303,26 +303,26 @@ export default function Admin({ onBack }) {
                     const hasScore = !isNaN(gl) && !isNaN(gv) && match.localGoles !== "" && match.visitaGoles !== "";
                     const empate = hasScore && gl === gv;
                     return (
-                      <div key={i} style={{ background: B.card, border: `1px solid ${match.ganador ? B.admin + "50" : "#ffffff08"}`, borderRadius: 12, padding: "10px 12px", marginBottom: ronda.partidos < 4 ? 8 : 0 }}>
+                      <div key={i} style={{ background: B.card, border: `1px solid ${match.ganador ? B.admin + "80" : "#e0e0e8"}`, borderRadius: 12, padding: "10px 12px", marginBottom: ronda.partidos < 4 ? 8 : 0 }}>
                         <div style={{ fontSize: 9, color: B.muted, marginBottom: 7, display: "flex", justifyContent: "space-between" }}>
                           <span>Partido {i + 1}</span>
                           {match.ganador && <span style={{ color: B.admin, fontWeight: "bold" }}>✓ {match.ganador.split(" ").slice(0, 2).join(" ")}</span>}
                         </div>
                         <div style={{ display: "flex", gap: 6, alignItems: "center", marginBottom: 6 }}>
-                          <input value={match.local} onChange={e => setKO(rondaActiva, i, "local", e.target.value)} placeholder="Local..." style={{ flex: 1, background: "#f8f8fc", border: `1px solid ${match.ganador === match.local && match.local ? B.admin : "#e0e0e8"}`, borderRadius: 6, padding: "5px 8px", color: match.ganador === match.local ? B.admin : "#333", fontSize: 11, outline: "none", fontWeight: match.ganador === match.local ? "bold" : "normal" }} />
-                          <input type="number" min="0" max="20" value={match.localGoles} onChange={e => setKO(rondaActiva, i, "localGoles", e.target.value)} style={{ width: 34, height: 28, textAlign: "center", background: "#1e1430", border: `1px solid ${hasScore ? B.admin + "60" : "#ffffff12"}`, borderRadius: 6, color: hasScore ? B.admin : B.muted, fontSize: 14, fontWeight: "bold", outline: "none" }} />
+                          <input value={match.local} onChange={e => setKO(rondaActiva, i, "local", e.target.value)} placeholder="Local..." style={{ flex: 1, background: "#ffffff", border: `1px solid ${match.ganador === match.local && match.local ? B.admin : "#e0e0e8"}`, borderRadius: 6, padding: "5px 8px", color: match.ganador === match.local ? B.admin : "#111", fontSize: 11, outline: "none", fontWeight: match.ganador === match.local ? "bold" : "normal" }} />
+                          <input type="number" min="0" max="20" value={match.localGoles} onChange={e => setKO(rondaActiva, i, "localGoles", e.target.value)} style={{ width: 34, height: 28, textAlign: "center", background: "#f0f0f0", border: `2px solid ${hasScore ? B.admin : "#e0e0e8"}`, borderRadius: 6, color: hasScore ? B.admin : "#bbb", fontSize: 14, fontWeight: "bold", outline: "none" }} />
                         </div>
                         <div style={{ display: "flex", gap: 6, alignItems: "center", marginBottom: empate ? 8 : 0 }}>
-                          <input value={match.visita} onChange={e => setKO(rondaActiva, i, "visita", e.target.value)} placeholder="Visitante..." style={{ flex: 1, background: "#f8f8fc", border: `1px solid ${match.ganador === match.visita && match.visita ? B.admin : "#e0e0e8"}`, borderRadius: 6, padding: "5px 8px", color: match.ganador === match.visita ? B.admin : "#333", fontSize: 11, outline: "none", fontWeight: match.ganador === match.visita ? "bold" : "normal" }} />
-                          <input type="number" min="0" max="20" value={match.visitaGoles} onChange={e => setKO(rondaActiva, i, "visitaGoles", e.target.value)} style={{ width: 34, height: 28, textAlign: "center", background: "#1e1430", border: `1px solid ${hasScore ? "#ffffff25" : "#ffffff12"}`, borderRadius: 6, color: hasScore ? B.text : B.muted, fontSize: 14, fontWeight: "bold", outline: "none" }} />
+                          <input value={match.visita} onChange={e => setKO(rondaActiva, i, "visita", e.target.value)} placeholder="Visitante..." style={{ flex: 1, background: "#ffffff", border: `1px solid ${match.ganador === match.visita && match.visita ? B.admin : "#e0e0e8"}`, borderRadius: 6, padding: "5px 8px", color: match.ganador === match.visita ? B.admin : "#111", fontSize: 11, outline: "none", fontWeight: match.ganador === match.visita ? "bold" : "normal" }} />
+                          <input type="number" min="0" max="20" value={match.visitaGoles} onChange={e => setKO(rondaActiva, i, "visitaGoles", e.target.value)} style={{ width: 34, height: 28, textAlign: "center", background: "#f0f0f0", border: `2px solid ${hasScore ? B.admin : "#e0e0e8"}`, borderRadius: 6, color: hasScore ? "#111" : "#bbb", fontSize: 14, fontWeight: "bold", outline: "none" }} />
                         </div>
                         {/* Penaltis */}
                         {empate && (
-                          <div style={{ marginTop: 8, padding: "6px 8px", background: "#f8f8fc", borderRadius: 8, border: "1px solid #e8e8f0" }}>
+                          <div style={{ marginTop: 8, padding: "6px 8px", background: "#ffffff", borderRadius: 8, border: "1px solid #e8e8f0" }}>
                             <div style={{ fontSize: 9, color: B.muted, marginBottom: 5 }}>🥅 Penaltis — ganador oficial:</div>
                             <div style={{ display: "flex", gap: 6 }}>
                               {[match.local, match.visita].filter(Boolean).map(eq => (
-                                <button key={eq} onClick={() => { setKO(rondaActiva, i, "penaltis", true); setKO(rondaActiva, i, "penaltisGanador", eq); setKO(rondaActiva, i, "ganador", eq); }} style={{ flex: 1, padding: "5px 8px", borderRadius: 7, border: `1px solid ${match.ganador === eq ? B.admin : "#e0e0e8"}`, background: match.ganador === eq ? "#fff8f0" : "#f8f8fc", color: match.ganador === eq ? B.admin : B.muted, fontSize: 11, cursor: "pointer", fontWeight: match.ganador === eq ? "bold" : "normal" }}>
+                                <button key={eq} onClick={() => { setKO(rondaActiva, i, "penaltis", true); setKO(rondaActiva, i, "penaltisGanador", eq); setKO(rondaActiva, i, "ganador", eq); }} style={{ flex: 1, padding: "5px 8px", borderRadius: 7, border: `1px solid ${match.ganador === eq ? B.admin : "#e0e0e8"}`, background: match.ganador === eq ? "#f5f0ff" : "#f8f8fc", color: match.ganador === eq ? B.admin : B.muted, fontSize: 11, cursor: "pointer", fontWeight: match.ganador === eq ? "bold" : "normal" }}>
                                   {eq.split(" ").slice(0, 2).join(" ")}
                                 </button>
                               ))}
@@ -390,7 +390,7 @@ export default function Admin({ onBack }) {
                   <button key={g.nombre} onClick={() => setResultados(prev => ({ ...prev, goleador: g.nombre === prev.goleador ? "" : g.nombre }))}
                     style={{ padding: "7px 10px", borderRadius: 8, textAlign: "left", border: `1px solid ${resultados.goleador === g.nombre ? "#9b5de5" : "#ffffff0d"}`, background: resultados.goleador === g.nombre ? "#4caf5012" : "#ffffff04", color: resultados.goleador === g.nombre ? "#9b5de5" : B.muted, cursor: "pointer", display: "flex", alignItems: "center", gap: 6 }}>
                     <span>{g.sel}</span>
-                    <div style={{ flex: 1 }}><div style={{ fontSize: 11, fontWeight: resultados.goleador === g.nombre ? "bold" : "normal" }}>{g.nombre}</div>{g.club && <div style={{ fontSize: 9, color: "#3a2a5a" }}>{g.club}</div>}</div>
+                    <div style={{ flex: 1 }}><div style={{ fontSize: 11, fontWeight: resultados.goleador === g.nombre ? "bold" : "normal" }}>{g.nombre}</div>{g.club && <div style={{ fontSize: 9, color: "#888" }}>{g.club}</div>}</div>
                     {resultados.goleador === g.nombre && <span>✓</span>}
                   </button>
                 ))}
@@ -460,7 +460,7 @@ export default function Admin({ onBack }) {
             {/* Tabla de puntuación */}
             <div style={{ background: B.card, border: `1px solid ${B.border}`, borderRadius: 12, overflow: "hidden", marginBottom: 14 }}>
               {/* Header tabla */}
-              <div style={{ display: "grid", gridTemplateColumns: "32px 1fr 52px 52px 52px 60px", gap: 4, padding: "8px 12px", background: "#f5f5f7", fontSize: 9, color: B.muted, letterSpacing: 1, textTransform: "uppercase" }}>
+              <div style={{ display: "grid", gridTemplateColumns: "32px 1fr 52px 52px 52px 60px", gap: 4, padding: "8px 12px", background: "#ffffff", fontSize: 9, color: B.muted, letterSpacing: 1, textTransform: "uppercase" }}>
                 <div>#</div><div>Participante</div><div style={{ textAlign: "center" }}>Grp</div><div style={{ textAlign: "center" }}>Elim</div><div style={{ textAlign: "center" }}>Ext</div><div style={{ textAlign: "center" }}>TOTAL</div>
               </div>
               {ranking.length === 0 && <div style={{ padding: 20, textAlign: "center", color: B.muted, fontSize: 12 }}>No hay participantes aún</div>}
@@ -497,13 +497,13 @@ export default function Admin({ onBack }) {
                   { label: "Tercer lugar correcto", pts: 5, color: B.primary },
                   { label: "Goleador correcto", pts: 5, color: B.primary },
                 ].map(({ label, pts, color }) => (
-                  <div key={label} style={{ display: "flex", alignItems: "center", gap: 8, padding: "6px 10px", background: "#ffffff04", border: "1px solid #ffffff08", borderRadius: 8 }}>
+                  <div key={label} style={{ display: "flex", alignItems: "center", gap: 8, padding: "6px 10px", background: "#f8f8fc", border: "1px solid #e8e8f0", borderRadius: 8 }}>
                     <div style={{ fontSize: 14, fontWeight: "bold", color, minWidth: 24, textAlign: "center" }}>+{pts}</div>
                     <div style={{ fontSize: 10, color: B.muted, lineHeight: 1.3 }}>{label}</div>
                   </div>
                 ))}
               </div>
-              <div style={{ marginTop: 10, padding: "8px 10px", background: "#ffffff04", borderRadius: 8, fontSize: 10, color: B.muted }}>
+              <div style={{ marginTop: 10, padding: "8px 10px", background: "#f8f8fc", borderRadius: 8, fontSize: 10, color: B.muted }}>
                 📊 Máximo posible: Grupos <strong style={{ color: B.text }}>360 pts</strong> + Eliminatorias <strong style={{ color: B.text }}>160 pts</strong> + Especiales <strong style={{ color: B.text }}>20 pts</strong> = <strong style={{ color: B.primary }}>540 pts</strong>
               </div>
             </div>
