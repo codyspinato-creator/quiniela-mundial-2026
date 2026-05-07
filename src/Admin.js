@@ -7,10 +7,10 @@ import { calcTotalPoints } from "./scoring";
 
 // ─── BRAND ───────────────────────────────────────────────────────────────────
 const B = {
-  primary: "#9b5de5", primary2: "#7b3fc4", primaryDim: "#9b5de518",
-  bg: "#0e0618", card: "#160d22", border: "#9b5de530",
-  text: "#f0ecff", muted: "#7a6a99",
-  admin: "#fee440", adminDim: "#fee44018",
+  primary: "#3a5bd9", primary2: "#2a4bc9", primaryDim: "#3a5bd915",
+  bg: "#f5f5f7", card: "#ffffff", border: "#e0e0e8",
+  text: "#111111", muted: "#888899",
+  admin: "#f77f00", adminDim: "#f77f0015",
   logoMF: "/logo-mundofutbol.png",
 };
 
@@ -138,7 +138,7 @@ export default function Admin({ onBack }) {
     <div style={{ minHeight: "100vh", background: B.bg, display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "Georgia,serif", padding: 20 }}>
       <div style={{ maxWidth: 340, width: "100%" }}>
         <div style={{
-          background:"linear-gradient(135deg,#7b1c2e,#4a0e5c,#1a0a40)",
+          background:"linear-gradient(135deg,#2a4bc9,#7c3aed)",
           borderRadius:16,padding:"20px",marginBottom:20,textAlign:"center",
           border:"1px solid #9b5de530",position:"relative",overflow:"hidden"
         }}>
@@ -154,10 +154,10 @@ export default function Admin({ onBack }) {
             onChange={e => setPassInput(e.target.value)}
             onKeyDown={e => e.key === "Enter" && handleLogin()}
             placeholder="Contraseña..."
-            style={{ width: "100%", background: "#ffffff07", border: `1px solid ${B.admin}30`, borderRadius: 8, padding: "10px 12px", color: B.text, fontSize: 14, outline: "none", boxSizing: "border-box", marginBottom: 8 }}
+            style={{ width: "100%", background: "#f8f8fc", border: `1px solid ${B.admin}50`, borderRadius: 8, padding: "10px 12px", color: B.text, fontSize: 14, outline: "none", boxSizing: "border-box", marginBottom: 8 }}
           />
           {passError && <div style={{ fontSize: 11, color: "#f44336", marginBottom: 8 }}>{passError}</div>}
-          <button onClick={handleLogin} style={{ width: "100%", padding: 11, borderRadius: 9, border: "none", background: `linear-gradient(135deg,${B.admin},#d97706)`, color: "#000", fontWeight: "bold", fontSize: 14, cursor: "pointer" }}>
+          <button onClick={handleLogin} style={{ width: "100%", padding: 11, borderRadius: 9, border: "none", background: `linear-gradient(135deg,${B.admin},#e05c00)`, color: "#ffffff", fontWeight: "bold", fontSize: 14, cursor: "pointer" }}>
             Entrar al Panel →
           </button>
           <div style={{ textAlign: "center", marginTop: 12 }}>
@@ -174,7 +174,7 @@ export default function Admin({ onBack }) {
   return (
     <div style={{ minHeight: "100vh", background: B.bg, color: B.text, fontFamily: "Georgia,serif" }}>
       {/* HEADER ADMIN */}
-      <div style={{ background: "linear-gradient(135deg,#12091f,#1a0a2e)", borderBottom: `2px solid ${B.admin}`, padding: "10px 14px", position: "sticky", top: 0, zIndex: 100, boxShadow: `0 4px 20px ${B.admin}20` }}>
+      <div style={{ background: "#ffffff", borderBottom: `2px solid ${B.admin}`, padding: "10px 14px", position: "sticky", top: 0, zIndex: 100, boxShadow: `0 4px 20px ${B.admin}20` }}>
         <div style={{ maxWidth: 620, margin: "0 auto" }}>
           <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 8 }}>
             <button onClick={onBack} style={{ background: "#ffffff08", border: "none", borderRadius: 8, padding: "5px 9px", color: "#aaa", cursor: "pointer", fontSize: 11 }}>← Salir</button>
@@ -184,14 +184,14 @@ export default function Admin({ onBack }) {
             </div>
             <div style={{ marginLeft: "auto", display: "flex", gap: 8, alignItems: "center" }}>
               <span style={{ fontSize: 10, color: B.muted }}>{participantes.length} participantes</span>
-              <button onClick={saveResultados} disabled={saving} style={{ padding: "5px 12px", borderRadius: 7, border: "none", background: saving ? "#333" : B.admin, color: saving ? "#666" : "#000", fontSize: 11, cursor: saving ? "not-allowed" : "pointer", fontWeight: "bold" }}>
+              <button onClick={saveResultados} disabled={saving} style={{ padding: "5px 12px", borderRadius: 7, border: "none", background: saving ? "#e0e0e8" : B.admin, color: saving ? "#888" : "#ffffff", fontSize: 11, cursor: saving ? "not-allowed" : "pointer", fontWeight: "bold" }}>
                 {saving ? "..." : saveMsg || "💾 Guardar"}
               </button>
             </div>
           </div>
           <div style={{ display: "flex", gap: 4, overflowX: "auto" }}>
             {[["grupos", "📋 Grupos"], ["knockout", "⚔️ Eliminatorias"], ["especiales", "🏆 Especiales"], ["ranking", "🥇 Ranking"], ["codigo", "🔑 Código"]].map(([id, label]) => (
-              <button key={id} onClick={() => setAdminTab(id)} style={{ padding: "5px 10px", borderRadius: 6, border: "none", background: adminTab === id ? B.admin : "#ffffff0d", color: adminTab === id ? "#000" : B.muted, fontSize: 10, cursor: "pointer", fontWeight: "bold", whiteSpace: "nowrap", flexShrink: 0 }}>{label}</button>
+              <button key={id} onClick={() => setAdminTab(id)} style={{ padding: "5px 10px", borderRadius: 6, border: "none", background: adminTab === id ? B.admin : "#f0f0f8", color: adminTab === id ? "#ffffff" : "#555", fontSize: 10, cursor: "pointer", fontWeight: "bold", whiteSpace: "nowrap", flexShrink: 0 }}>{label}</button>
             ))}
           </div>
         </div>
@@ -215,7 +215,7 @@ export default function Admin({ onBack }) {
                 const done = ms.filter(m => !isNaN(parseInt(m.local)) && m.local !== "").length;
                 const active = g === grupoActivo;
                 return (
-                  <button key={g} onClick={() => setGrupoActivo(g)} style={{ width: 36, height: 36, borderRadius: 7, fontSize: 12, fontWeight: "bold", border: active ? `2px solid ${B.admin}` : "2px solid transparent", background: done === 6 ? (active ? B.admin : B.adminDim) : active ? "#ffffff15" : "#ffffff08", color: done === 6 ? (active ? "#000" : B.admin) : active ? B.text : B.muted, cursor: "pointer" }}>
+                  <button key={g} onClick={() => setGrupoActivo(g)} style={{ width: 36, height: 36, borderRadius: 7, fontSize: 12, fontWeight: "bold", border: active ? `2px solid ${B.admin}` : "2px solid transparent", background: done === 6 ? (active ? B.admin : "#fff8f0") : active ? "#fff0e0" : "#f8f8fc", color: done === 6 ? (active ? "#ffffff" : B.admin) : active ? B.admin : "#888", cursor: "pointer" }}>
                     {done === 6 && !active ? "✓" : g}
                   </button>
                 );
@@ -309,20 +309,20 @@ export default function Admin({ onBack }) {
                           {match.ganador && <span style={{ color: B.admin, fontWeight: "bold" }}>✓ {match.ganador.split(" ").slice(0, 2).join(" ")}</span>}
                         </div>
                         <div style={{ display: "flex", gap: 6, alignItems: "center", marginBottom: 6 }}>
-                          <input value={match.local} onChange={e => setKO(rondaActiva, i, "local", e.target.value)} placeholder="Local..." style={{ flex: 1, background: "#ffffff08", border: `1px solid ${match.ganador === match.local && match.local ? B.admin + "60" : "#ffffff12"}`, borderRadius: 6, padding: "5px 8px", color: match.ganador === match.local ? B.admin : B.text, fontSize: 11, outline: "none", fontWeight: match.ganador === match.local ? "bold" : "normal" }} />
+                          <input value={match.local} onChange={e => setKO(rondaActiva, i, "local", e.target.value)} placeholder="Local..." style={{ flex: 1, background: "#f8f8fc", border: `1px solid ${match.ganador === match.local && match.local ? B.admin : "#e0e0e8"}`, borderRadius: 6, padding: "5px 8px", color: match.ganador === match.local ? B.admin : "#333", fontSize: 11, outline: "none", fontWeight: match.ganador === match.local ? "bold" : "normal" }} />
                           <input type="number" min="0" max="20" value={match.localGoles} onChange={e => setKO(rondaActiva, i, "localGoles", e.target.value)} style={{ width: 34, height: 28, textAlign: "center", background: "#1e1430", border: `1px solid ${hasScore ? B.admin + "60" : "#ffffff12"}`, borderRadius: 6, color: hasScore ? B.admin : B.muted, fontSize: 14, fontWeight: "bold", outline: "none" }} />
                         </div>
                         <div style={{ display: "flex", gap: 6, alignItems: "center", marginBottom: empate ? 8 : 0 }}>
-                          <input value={match.visita} onChange={e => setKO(rondaActiva, i, "visita", e.target.value)} placeholder="Visitante..." style={{ flex: 1, background: "#ffffff08", border: `1px solid ${match.ganador === match.visita && match.visita ? B.admin + "60" : "#ffffff12"}`, borderRadius: 6, padding: "5px 8px", color: match.ganador === match.visita ? B.admin : B.text, fontSize: 11, outline: "none", fontWeight: match.ganador === match.visita ? "bold" : "normal" }} />
+                          <input value={match.visita} onChange={e => setKO(rondaActiva, i, "visita", e.target.value)} placeholder="Visitante..." style={{ flex: 1, background: "#f8f8fc", border: `1px solid ${match.ganador === match.visita && match.visita ? B.admin : "#e0e0e8"}`, borderRadius: 6, padding: "5px 8px", color: match.ganador === match.visita ? B.admin : "#333", fontSize: 11, outline: "none", fontWeight: match.ganador === match.visita ? "bold" : "normal" }} />
                           <input type="number" min="0" max="20" value={match.visitaGoles} onChange={e => setKO(rondaActiva, i, "visitaGoles", e.target.value)} style={{ width: 34, height: 28, textAlign: "center", background: "#1e1430", border: `1px solid ${hasScore ? "#ffffff25" : "#ffffff12"}`, borderRadius: 6, color: hasScore ? B.text : B.muted, fontSize: 14, fontWeight: "bold", outline: "none" }} />
                         </div>
                         {/* Penaltis */}
                         {empate && (
-                          <div style={{ marginTop: 8, padding: "6px 8px", background: "#ffffff05", borderRadius: 8, border: "1px solid #ffffff10" }}>
+                          <div style={{ marginTop: 8, padding: "6px 8px", background: "#f8f8fc", borderRadius: 8, border: "1px solid #e8e8f0" }}>
                             <div style={{ fontSize: 9, color: B.muted, marginBottom: 5 }}>🥅 Penaltis — ganador oficial:</div>
                             <div style={{ display: "flex", gap: 6 }}>
                               {[match.local, match.visita].filter(Boolean).map(eq => (
-                                <button key={eq} onClick={() => { setKO(rondaActiva, i, "penaltis", true); setKO(rondaActiva, i, "penaltisGanador", eq); setKO(rondaActiva, i, "ganador", eq); }} style={{ flex: 1, padding: "5px 8px", borderRadius: 7, border: `1px solid ${match.ganador === eq ? B.admin : "#ffffff15"}`, background: match.ganador === eq ? B.adminDim : "#ffffff06", color: match.ganador === eq ? B.admin : B.muted, fontSize: 11, cursor: "pointer", fontWeight: match.ganador === eq ? "bold" : "normal" }}>
+                                <button key={eq} onClick={() => { setKO(rondaActiva, i, "penaltis", true); setKO(rondaActiva, i, "penaltisGanador", eq); setKO(rondaActiva, i, "ganador", eq); }} style={{ flex: 1, padding: "5px 8px", borderRadius: 7, border: `1px solid ${match.ganador === eq ? B.admin : "#e0e0e8"}`, background: match.ganador === eq ? "#fff8f0" : "#f8f8fc", color: match.ganador === eq ? B.admin : B.muted, fontSize: 11, cursor: "pointer", fontWeight: match.ganador === eq ? "bold" : "normal" }}>
                                   {eq.split(" ").slice(0, 2).join(" ")}
                                 </button>
                               ))}
@@ -410,7 +410,7 @@ export default function Admin({ onBack }) {
               🔑 Define el código que los participantes necesitan para entrar a la quiniela. Compártelo solo con las personas que quieras que participen.
             </div>
 
-            <div style={{ background:B.card, border:`1px solid ${B.border}`, borderRadius:14, padding:20, marginBottom:14 }}>
+            <div style={{ background:"#ffffff", border:"1px solid #e0e0e8", borderRadius:14, padding:20, marginBottom:14, boxShadow:"0 2px 12px rgba(0,0,0,0.06)" }}>
               <div style={{ fontSize:13, fontWeight:"bold", color:B.text, marginBottom:4 }}>Código de acceso actual</div>
               <div style={{ fontSize:11, color:B.muted, marginBottom:16 }}>
                 Los participantes deben ingresar este código al entrar. Si lo cambias, las personas con el código antiguo no podrán volver a entrar (aunque sus quinielas se conservan).
@@ -422,12 +422,12 @@ export default function Admin({ onBack }) {
                   value={codigoAcceso}
                   onChange={e => setCodigoAcceso(e.target.value)}
                   placeholder="Escribe el código de acceso..."
-                  style={{ width:"100%", background:"#ffffff08", border:`1px solid ${B.admin}50`, borderRadius:8, padding:"12px 14px 12px 40px", color:B.text, fontSize:16, outline:"none", boxSizing:"border-box", letterSpacing:2, fontWeight:"bold" }}
+                  style={{ width:"100%", background:"#f8f8fc", border:`1px solid ${B.admin}60`, borderRadius:8, padding:"12px 14px 12px 40px", color:B.text, fontSize:16, outline:"none", boxSizing:"border-box", letterSpacing:2, fontWeight:"bold" }}
                 />
                 <span style={{ position:"absolute", left:12, top:"50%", transform:"translateY(-50%)", fontSize:16 }}>🔑</span>
               </div>
 
-              <button onClick={saveCodigo} style={{ width:"100%", padding:12, borderRadius:9, border:"none", background:codigoSaved ? B.primary : `linear-gradient(135deg,${B.admin},#d97706)`, color:"#000", fontWeight:"bold", fontSize:14, cursor:"pointer" }}>
+              <button onClick={saveCodigo} style={{ width:"100%", padding:12, borderRadius:9, border:"none", background:codigoSaved ? "#00c853" : `linear-gradient(135deg,${B.admin},#e05c00)`, color:"#ffffff", fontWeight:"bold", fontSize:14, cursor:"pointer" }}>
                 {codigoSaved ? "✓ Código guardado" : "Guardar código"}
               </button>
             </div>
@@ -460,12 +460,12 @@ export default function Admin({ onBack }) {
             {/* Tabla de puntuación */}
             <div style={{ background: B.card, border: `1px solid ${B.border}`, borderRadius: 12, overflow: "hidden", marginBottom: 14 }}>
               {/* Header tabla */}
-              <div style={{ display: "grid", gridTemplateColumns: "32px 1fr 52px 52px 52px 60px", gap: 4, padding: "8px 12px", background: "#0a1a0a", fontSize: 9, color: B.muted, letterSpacing: 1, textTransform: "uppercase" }}>
+              <div style={{ display: "grid", gridTemplateColumns: "32px 1fr 52px 52px 52px 60px", gap: 4, padding: "8px 12px", background: "#f5f5f7", fontSize: 9, color: B.muted, letterSpacing: 1, textTransform: "uppercase" }}>
                 <div>#</div><div>Participante</div><div style={{ textAlign: "center" }}>Grp</div><div style={{ textAlign: "center" }}>Elim</div><div style={{ textAlign: "center" }}>Ext</div><div style={{ textAlign: "center" }}>TOTAL</div>
               </div>
               {ranking.length === 0 && <div style={{ padding: 20, textAlign: "center", color: B.muted, fontSize: 12 }}>No hay participantes aún</div>}
               {ranking.map((p, rank) => (
-                <div key={p.id} style={{ display: "grid", gridTemplateColumns: "32px 1fr 52px 52px 52px 60px", gap: 4, padding: "10px 12px", borderTop: "1px solid #0a180a", background: rank === 0 ? "#0a1a08" : "transparent", alignItems: "center" }}>
+                <div key={p.id} style={{ display: "grid", gridTemplateColumns: "32px 1fr 52px 52px 52px 60px", gap: 4, padding: "10px 12px", borderTop: "1px solid #eeeeef", background: rank === 0 ? "#eff4ff" : "transparent", alignItems: "center" }}>
                   <div style={{ fontSize: rank < 3 ? 16 : 13, textAlign: "center" }}>
                     {rank === 0 ? "🥇" : rank === 1 ? "🥈" : rank === 2 ? "🥉" : <span style={{ color: B.muted }}>{rank + 1}</span>}
                   </div>
@@ -484,7 +484,7 @@ export default function Admin({ onBack }) {
             </div>
 
             {/* Leyenda de puntuación */}
-            <div style={{ background: B.card, border: `1px solid ${B.border}`, borderRadius: 12, padding: 14 }}>
+            <div style={{ background: "#ffffff", border: "1px solid #e0e0e8", borderRadius: 12, padding: 14 }}>
               <div style={{ fontSize: 10, letterSpacing: 3, color: B.primary, textTransform: "uppercase", marginBottom: 10 }}>Sistema de Puntuación</div>
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, fontSize: 11 }}>
                 {[
