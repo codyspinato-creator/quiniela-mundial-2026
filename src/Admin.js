@@ -232,7 +232,7 @@ export default function Admin({ onBack }) {
                     <div style={{ fontSize: 14, fontWeight: "bold" }}>Grupo {grupoActivo} — Resultados Oficiales</div>
                     <div style={{ fontSize: 10, color: "#ffffff70" }}>{gr.equipos.map(e => e.split(" ").slice(1).join(" ")).join(" · ")}</div>
                   </div>
-                  <div style={{ background: "#170e24" }}>
+                  <div style={{ background: "#ffffff" }}>
                     {[1, 2, 3].map(fecha => (
                       <div key={fecha}>
                         <div style={{ padding: "4px 14px", background: "#ffffff04", fontSize: 9, color: "#4a2a6a", letterSpacing: 2, textTransform: "uppercase", borderBottom: "1px solid #ffffff06" }}>Jornada {fecha}</div>
@@ -267,8 +267,8 @@ export default function Admin({ onBack }) {
 
             {/* Navegación grupos */}
             <div style={{ display: "flex", gap: 8 }}>
-              <button onClick={() => { const i = KEYS.indexOf(grupoActivo); if (i > 0) setGrupoActivo(KEYS[i - 1]); }} disabled={grupoActivo === "A"} style={{ flex: 1, padding: 8, borderRadius: 9, border: "1px solid #0a1a0a", background: grupoActivo === "A" ? "#050805" : "#180e26", color: grupoActivo === "A" ? "#2a1a50" : B.muted, fontSize: 12, cursor: grupoActivo === "A" ? "not-allowed" : "pointer" }}>← Anterior</button>
-              <button onClick={() => { const i = KEYS.indexOf(grupoActivo); if (i < KEYS.length - 1) setGrupoActivo(KEYS[i + 1]); }} disabled={grupoActivo === "L"} style={{ flex: 1, padding: 8, borderRadius: 9, border: "none", background: grupoActivo === "L" ? "#050805" : B.admin, color: grupoActivo === "L" ? "#2a1a50" : "#000", fontSize: 12, fontWeight: "bold", cursor: grupoActivo === "L" ? "not-allowed" : "pointer" }}>Siguiente →</button>
+              <button onClick={() => { const i = KEYS.indexOf(grupoActivo); if (i > 0) setGrupoActivo(KEYS[i - 1]); }} disabled={grupoActivo === "A"} style={{ flex: 1, padding: 8, borderRadius: 9, border: "1px solid #0a1a0a", background: grupoActivo === "A" ? "#f5f5f7" : "#f0f0ff", color: grupoActivo === "A" ? "#2a1a50" : B.muted, fontSize: 12, cursor: grupoActivo === "A" ? "not-allowed" : "pointer" }}>← Anterior</button>
+              <button onClick={() => { const i = KEYS.indexOf(grupoActivo); if (i < KEYS.length - 1) setGrupoActivo(KEYS[i + 1]); }} disabled={grupoActivo === "L"} style={{ flex: 1, padding: 8, borderRadius: 9, border: "none", background: grupoActivo === "L" ? "#f5f5f7" : B.admin, color: grupoActivo === "L" ? "#2a1a50" : "#000", fontSize: 12, fontWeight: "bold", cursor: grupoActivo === "L" ? "not-allowed" : "pointer" }}>Siguiente →</button>
             </div>
           </>
         )}
