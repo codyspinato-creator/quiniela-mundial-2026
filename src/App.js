@@ -319,6 +319,7 @@ export default function App() {
   const [myId,setMyId]=useState(""); const [myNombre,setMyNombre]=useState("");
   const [loginInput,setLoginInput]=useState(""); const [loginError,setLoginError]=useState("");
   const [codigoInput,setCodigoInput]=useState("");
+  const [emailInput,setEmailInput]=useState("");
   const [saving,setSaving]=useState(false); const [saveMsg,setSaveMsg]=useState("");
   const [portalData,setPortalData]=useState([]); const [portalLoading,setPortalLoading]=useState(false);
   const [selectedUser,setSelectedUser]=useState(null);
@@ -366,6 +367,7 @@ export default function App() {
         setScores(d.scores||{}); setCampeon(d.campeon||""); setSegundo(d.segundo||"");
         setTercero(d.tercero||""); setGoleador(d.goleador||""); setGoleadorCustom(d.goleadorCustom||"");
         setKnockout(d.knockout||emptyKnockout());
+        setEmailInput(d.email||"");
       }
     }catch(e){}
     setLoginError(""); setScreen("quiniela");
@@ -375,7 +377,7 @@ export default function App() {
     setSaving(true); setSaveMsg("");
     try{
       await setDoc(doc(db,"quinielas",myId),{
-        nombre:myNombre, scores, campeon, segundo, tercero,
+        nombre:myNombre, email:emailInput.trim(), scores, campeon, segundo, tercero,
         goleador, goleadorCustom, knockout, updatedAt:Date.now(),
       });
       setSaveMsg("¡Guardado! ✓");
@@ -484,6 +486,17 @@ export default function App() {
               style={{width:"100%",background:"#f8f8fc",border:"1px solid #ddd",borderRadius:8,padding:"10px 12px 10px 36px",color:"#111",fontSize:14,outline:"none",boxSizing:"border-box"}}
             />
             <span style={{position:"absolute",left:12,top:"50%",transform:"translateY(-50%)",fontSize:14,opacity:0.5}}>🔑</span>
+          </div>
+          <div style={{fontSize:12,color:"#444455",fontWeight:"600",marginBottom:6}}>Correo electrónico</div>
+          <div style={{position:"relative",marginBottom:12}}>
+            <input
+              type="email" value={emailInput}
+              onChange={e=>setEmailInput(e.target.value)}
+              onKeyDown={e=>e.key==="Enter"&&handleLogin()}
+              placeholder="tu@correo.com"
+              style={{width:"100%",background:"#f8f8fc",border:"1px solid #ddd",borderRadius:8,padding:"10px 12px 10px 36px",color:"#111",fontSize:14,outline:"none",boxSizing:"border-box"}}
+            />
+            <span style={{position:"absolute",left:12,top:"50%",transform:"translateY(-50%)",fontSize:14,opacity:0.5}}>✉️</span>
           </div>
           {loginError&&<div style={{fontSize:11,color:"#f44336",marginBottom:8,padding:"6px 10px",background:"#f4433615",borderRadius:6,border:"1px solid #f4433630"}}>{loginError}</div>}
           <button onClick={handleLogin} style={{width:"100%",padding:12,borderRadius:9,border:"none",background:"linear-gradient(135deg,#3a5bd9,#7c3aed)",color:"#ffffff",fontWeight:"bold",fontSize:14,cursor:"pointer",boxShadow:`0 4px 20px rgba(58,91,217,0.25)`,marginTop:4}}>Entrar a mi Quiniela →</button>

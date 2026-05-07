@@ -460,24 +460,25 @@ export default function Admin({ onBack }) {
             {/* Tabla de puntuación */}
             <div style={{ background: B.card, border: `1px solid ${B.border}`, borderRadius: 12, overflow: "hidden", marginBottom: 14 }}>
               {/* Header tabla */}
-              <div style={{ display: "grid", gridTemplateColumns: "32px 1fr 52px 52px 52px 60px", gap: 4, padding: "8px 12px", background: "#ffffff", fontSize: 9, color: B.muted, letterSpacing: 1, textTransform: "uppercase" }}>
-                <div>#</div><div>Participante</div><div style={{ textAlign: "center" }}>Grp</div><div style={{ textAlign: "center" }}>Elim</div><div style={{ textAlign: "center" }}>Ext</div><div style={{ textAlign: "center" }}>TOTAL</div>
+              <div style={{ display: "grid", gridTemplateColumns: "32px 1fr 180px 36px 36px 36px 52px", gap: 4, padding: "8px 12px", background: "#f8f8fc", fontSize: 9, color: "#888", letterSpacing: 1, textTransform: "uppercase", fontWeight: "600" }}>
+                <div>#</div><div>Participante</div><div>Correo</div><div style={{ textAlign: "center" }}>G</div><div style={{ textAlign: "center" }}>E</div><div style={{ textAlign: "center" }}>X</div><div style={{ textAlign: "center" }}>PTS</div>
               </div>
               {ranking.length === 0 && <div style={{ padding: 20, textAlign: "center", color: B.muted, fontSize: 12 }}>No hay participantes aún</div>}
               {ranking.map((p, rank) => (
-                <div key={p.id} style={{ display: "grid", gridTemplateColumns: "32px 1fr 52px 52px 52px 60px", gap: 4, padding: "10px 12px", borderTop: "1px solid #eeeeef", background: rank === 0 ? "#eff4ff" : "transparent", alignItems: "center" }}>
+                <div key={p.id} style={{ display: "grid", gridTemplateColumns: "32px 1fr 180px 36px 36px 36px 52px", gap: 4, padding: "10px 12px", borderTop: "1px solid #eeeeef", background: rank === 0 ? "#eff4ff" : "transparent", alignItems: "center" }}>
                   <div style={{ fontSize: rank < 3 ? 16 : 13, textAlign: "center" }}>
                     {rank === 0 ? "🥇" : rank === 1 ? "🥈" : rank === 2 ? "🥉" : <span style={{ color: B.muted }}>{rank + 1}</span>}
                   </div>
                   <div>
                     <div style={{ fontSize: 13, fontWeight: rank < 3 ? "bold" : "normal", color: rank === 0 ? B.primary : B.text }}>{p.nombre}</div>
-                    <div style={{ display: "flex", gap: 6, marginTop: 2 }}>
-                      {p.campeon && <span style={{ fontSize: 9, color: B.muted }}>🏆 {p.campeon.split(" ").slice(1).join(" ")}</span>}
-                    </div>
+                    {p.campeon && <div style={{ fontSize: 9, color: B.muted, marginTop: 1 }}>🏆 {p.campeon.split(" ").slice(1).join(" ")}</div>}
                   </div>
-                  <div style={{ textAlign: "center", fontSize: 13, color: B.muted }}>{p.score.groups}</div>
-                  <div style={{ textAlign: "center", fontSize: 13, color: B.muted }}>{p.score.knockout}</div>
-                  <div style={{ textAlign: "center", fontSize: 13, color: B.muted }}>{p.score.special}</div>
+                  <div style={{ fontSize: 10, color: "#555", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", padding: "2px 0" }}>
+                    {p.email ? <a href={`mailto:${p.email}`} style={{ color: "#3a5bd9", textDecoration: "none" }}>{p.email}</a> : <span style={{ color: "#ccc", fontStyle: "italic" }}>—</span>}
+                  </div>
+                  <div style={{ textAlign: "center", fontSize: 12, color: "#555" }}>{p.score.groups}</div>
+                  <div style={{ textAlign: "center", fontSize: 12, color: "#555" }}>{p.score.knockout}</div>
+                  <div style={{ textAlign: "center", fontSize: 12, color: "#555" }}>{p.score.special}</div>
                   <div style={{ textAlign: "center", fontSize: 16, fontWeight: "bold", color: rank === 0 ? B.primary : rank < 3 ? B.primary2 : B.text }}>{p.score.total}</div>
                 </div>
               ))}
