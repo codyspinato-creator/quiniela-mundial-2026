@@ -1,6 +1,6 @@
 // src/Admin.js
 import { useState, useEffect, useCallback } from "react";
-import { doc, setDoc, getDoc, collection, getDocs } from "firebase/firestore";
+import { doc, setDoc, getDoc, collection, getDocs, deleteDoc } from "firebase/firestore";
 import { db } from "./firebase";
 import { GRUPOS, KEYS, SELECCIONES, GOLEADORES } from "./data";
 import { calcTotalPoints } from "./scoring";
@@ -41,6 +41,8 @@ export default function Admin({ onBack }) {
   const [passError, setPassError] = useState("");
   const [codigoAcceso, setCodigoAcceso] = useState("");
   const [codigoSaved, setCodigoSaved] = useState(false);
+  const [deletingId, setDeletingId] = useState(null);
+  const [confirmDelete, setConfirmDelete] = useState(null); // id to confirm
 
   const [resultados, setResultados] = useState(emptyResultados());
   const [participantes, setParticipantes] = useState([]);
@@ -59,6 +61,21 @@ export default function Admin({ onBack }) {
       setCodigoSaved(true);
       setTimeout(() => setCodigoSaved(false), 3000);
     } catch (e) { console.error(e); }
+  };
+
+  // ── Delete quiniela ────────────────────────────────────────────────────────
+  const deleteQuiniela = async (id, nombre) => {
+    if (confirmDelete !== id) {
+      setConfirmDelete(id); // first click: ask confirm
+      return;
+    }
+    setDeletingId(id);
+    try {
+      await deleteDoc(doc(db, "quinielas", id));
+      setParticipantes(prev => prev.filter(p => p.id !== id));
+      setConfirmDelete(null);
+    } catch (e) { console.error(e); }
+    setDeletingId(false);
   };
 
   // ── Load oficial results + participants ────────────────────────────────────
@@ -460,12 +477,12 @@ export default function Admin({ onBack }) {
             {/* Tabla de puntuación */}
             <div style={{ background: B.card, border: `1px solid ${B.border}`, borderRadius: 12, overflow: "hidden", marginBottom: 14 }}>
               {/* Header tabla */}
-              <div style={{ display: "grid", gridTemplateColumns: "32px 1fr 180px 36px 36px 36px 52px", gap: 4, padding: "8px 12px", background: "#f8f8fc", fontSize: 9, color: "#888", letterSpacing: 1, textTransform: "uppercase", fontWeight: "600" }}>
-                <div>#</div><div>Participante</div><div>Correo</div><div style={{ textAlign: "center" }}>G</div><div style={{ textAlign: "center" }}>E</div><div style={{ textAlign: "center" }}>X</div><div style={{ textAlign: "center" }}>PTS</div>
+              <div style={{ display: "grid", gridTemplateColumns: "32px 1fr 180px 36px 36px 36px 52px 52px", gap: 4, padding: "8px 12px", background: "#f8f8fc", fontSize: 9, color: "#888", letterSpacing: 1, textTransform: "uppercase", fontWeight: "600" }}>
+                <div>#</div><div>Participante</div><div>Correo</div><div style={{ textAlign: "center" }}>G</div><div style={{ textAlign: "center" }}>E</div><div style={{ textAlign: "center" }}>X</div><div style={{ textAlign: "center" }}>PTS</div><div></div>
               </div>
               {ranking.length === 0 && <div style={{ padding: 20, textAlign: "center", color: B.muted, fontSize: 12 }}>No hay participantes aún</div>}
               {ranking.map((p, rank) => (
-                <div key={p.id} style={{ display: "grid", gridTemplateColumns: "32px 1fr 180px 36px 36px 36px 52px", gap: 4, padding: "10px 12px", borderTop: "1px solid #eeeeef", background: rank === 0 ? "#eff4ff" : "transparent", alignItems: "center" }}>
+                <div key={p.id} style={{ display: "grid", gridTemplateColumns: "32px 1fr 180px 36px 36px 36px 52px 52px", gap: 4, padding: "10px 12px", borderTop: "1px solid #eeeeef", background: rank === 0 ? "#eff4ff" : "transparent", alignItems: "center" }}>
                   <div style={{ fontSize: rank < 3 ? 16 : 13, textAlign: "center" }}>
                     {rank === 0 ? "🥇" : rank === 1 ? "🥈" : rank === 2 ? "🥉" : <span style={{ color: B.muted }}>{rank + 1}</span>}
                   </div>
