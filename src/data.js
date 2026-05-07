@@ -145,8 +145,8 @@ export const R16_BRACKET = [
 // Cuartos P97-P100
 export const QF_BRACKET = [
   { num:"P97",  l:"W0", v:"W1", fecha:"9 jul",  sede:"Boston"       }, // GP89 vs GP90
-  { num:"P98",  l:"W2", v:"W3", fecha:"10 jul", sede:"Los Ángeles"  }, // GP91 vs GP92
-  { num:"P99",  l:"W4", v:"W5", fecha:"11 jul", sede:"Miami"        }, // GP93 vs GP94
+  { num:"P98",  l:"W4", v:"W5", fecha:"10 jul", sede:"Los Ángeles"  }, // GP93 vs GP94
+  { num:"P99",  l:"W2", v:"W3", fecha:"11 jul", sede:"Miami"        }, // GP91 vs GP92
   { num:"P100", l:"W6", v:"W7", fecha:"11 jul", sede:"Kansas City"  }, // GP95 vs GP96
 ];
 
