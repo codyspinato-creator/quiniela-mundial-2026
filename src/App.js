@@ -19,7 +19,7 @@ const B = {
   rainbow:   "linear-gradient(90deg,#3a5bd9,#7c3aed,#e63946,#f77f00,#00c853)",
   // Backgrounds - white theme
   bg:        "#f5f5f7",   // gris muy claro (Apple-style)
-  card:      "#111111",   // blanco puro
+  card:      "#ffffff",   // blanco puro
   cardAlt:   "#f0f0f5",   // gris muy suave
   border:    "#e0e0e8",
   borderStrong: "#c0c0cc",
