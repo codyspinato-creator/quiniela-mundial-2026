@@ -89,51 +89,74 @@ export function completionPct(quiniela) {
 }
 
 
-// ─── BRACKET SEEDING FIFA 2026 OFICIAL ───────────────────────────────────────
+// ─── BRACKET FIFA 2026 OFICIAL ────────────────────────────────────────────────
+// Dieciseisavos P73-P88, Octavos P89-P96, Cuartos P97-P100, Semis P101-P102
+// Tercer Puesto P103, Final P104
+
 export const R32_BRACKET = [
-  // ZONA ALTA
-  { local:"1A", visita:"3°",  sede:"Ciudad de México" },
-  { local:"1E", visita:"2F",  sede:"Boston"           },
-  { local:"1F", visita:"2E",  sede:"Houston"          },
-  { local:"1I", visita:"2J",  sede:"Filadelfia"       },
-  { local:"1L", visita:"2K",  sede:"Toronto"          },
-  { local:"2A", visita:"2B",  sede:"Los Ángeles"      },
-  { local:"1G", visita:"3°",  sede:"Seattle"          },
-  { local:"1K", visita:"3°",  sede:"Kansas City"      },
-  // ZONA BAJA
-  { local:"1B", visita:"3°",  sede:"Vancouver"        },
-  { local:"1D", visita:"2C",  sede:"Dallas"           },
-  { local:"1C", visita:"2D",  sede:"Atlanta"          },
-  { local:"1J", visita:"3°",  sede:"Miami"            },
-  { local:"1H", visita:"2G",  sede:"Nueva York/NJ"    },
-  { local:"2K", visita:"2L",  sede:"Toronto"          },
-  { local:"1B", visita:"3°",  sede:"Vancouver"        },
-  { local:"1G", visita:"2H",  sede:"Seattle"          },
+  // P73  (idx 0)
+  { num:"P73",  local:"2A", visita:"2B",       fecha:"28 jun", sede:"Los Ángeles"    },
+  // P74  (idx 1)
+  { num:"P74",  local:"1E", visita:"3ABCDF",   fecha:"29 jun", sede:"Boston"         },
+  // P75  (idx 2)
+  { num:"P75",  local:"1F", visita:"2C",       fecha:"29 jun", sede:"Monterrey"      },
+  // P76  (idx 3)
+  { num:"P76",  local:"1C", visita:"2F",       fecha:"29 jun", sede:"Houston"        },
+  // P77  (idx 4)
+  { num:"P77",  local:"1I", visita:"3CDFGH",   fecha:"30 jun", sede:"Nueva York/NJ"  },
+  // P78  (idx 5)
+  { num:"P78",  local:"2E", visita:"2I",       fecha:"30 jun", sede:"Dallas"         },
+  // P79  (idx 6)
+  { num:"P79",  local:"1A", visita:"3CEFHI",   fecha:"30 jun", sede:"Ciudad de México"},
+  // P80  (idx 7)
+  { num:"P80",  local:"1L", visita:"3EHIJK",   fecha:"1 jul",  sede:"Atlanta"        },
+  // P81  (idx 8)
+  { num:"P81",  local:"1D", visita:"3BEFIJ",   fecha:"1 jul",  sede:"San Francisco"  },
+  // P82  (idx 9)
+  { num:"P82",  local:"1G", visita:"3AEHIJ",   fecha:"1 jul",  sede:"Seattle"        },
+  // P83  (idx 10)
+  { num:"P83",  local:"2K", visita:"2L",       fecha:"2 jul",  sede:"Toronto"        },
+  // P84  (idx 11)
+  { num:"P84",  local:"1H", visita:"2J",       fecha:"2 jul",  sede:"Los Ángeles"    },
+  // P85  (idx 12)
+  { num:"P85",  local:"1B", visita:"3EFGIJ",   fecha:"2 jul",  sede:"Vancouver"      },
+  // P86  (idx 13)
+  { num:"P86",  local:"1J", visita:"2H",       fecha:"3 jul",  sede:"Miami"          },
+  // P87  (idx 14)
+  { num:"P87",  local:"1K", visita:"3DEIJL",   fecha:"3 jul",  sede:"Kansas City"    },
+  // P88  (idx 15)
+  { num:"P88",  local:"2D", visita:"2G",       fecha:"3 jul",  sede:"Dallas"         },
 ];
 
+// Octavos P89-P96
+// idx en R32: P73=0, P74=1, P75=2, P76=3, P77=4, P78=5, P79=6, P80=7
+//             P81=8, P82=9, P83=10, P84=11, P85=12, P86=13, P87=14, P88=15
 export const R16_BRACKET = [
-  { l:"W1",  v:"W0",  sede:"Filadelfia"   },
-  { l:"W2",  v:"W3",  sede:"Houston"      },
-  { l:"W5",  v:"W4",  sede:"Los Ángeles"  },
-  { l:"W6",  v:"W7",  sede:"Seattle"      },
-  { l:"W9",  v:"W8",  sede:"Dallas"       },
-  { l:"W10", v:"W11", sede:"Atlanta"      },
-  { l:"W12", v:"W13", sede:"Miami"        },
-  { l:"W14", v:"W15", sede:"Vancouver"    },
+  { num:"P89",  l:"W1",  v:"W4",  fecha:"4 jul",  sede:"Filadelfia"    }, // GP74 vs GP77
+  { num:"P90",  l:"W0",  v:"W2",  fecha:"4 jul",  sede:"Houston"       }, // GP73 vs GP75
+  { num:"P91",  l:"W3",  v:"W5",  fecha:"5 jul",  sede:"Nueva York/NJ" }, // GP76 vs GP78
+  { num:"P92",  l:"W6",  v:"W7",  fecha:"5 jul",  sede:"Ciudad de México"}, // GP79 vs GP80
+  { num:"P93",  l:"W10", v:"W11", fecha:"6 jul",  sede:"Dallas"        }, // GP83 vs GP84
+  { num:"P94",  l:"W8",  v:"W9",  fecha:"6 jul",  sede:"Seattle"       }, // GP81 vs GP82
+  { num:"P95",  l:"W13", v:"W15", fecha:"7 jul",  sede:"Atlanta"       }, // GP86 vs GP88
+  { num:"P96",  l:"W12", v:"W14", fecha:"7 jul",  sede:"Vancouver"     }, // GP85 vs GP87
 ];
 
+// Cuartos P97-P100
 export const QF_BRACKET = [
-  { l:"W0", v:"W1", sede:"Boston",       fecha:"9 jul"  },
-  { l:"W2", v:"W3", sede:"Los Ángeles",  fecha:"10 jul" },
-  { l:"W4", v:"W5", sede:"Miami",        fecha:"11 jul" },
-  { l:"W6", v:"W7", sede:"Kansas City",  fecha:"11 jul" },
+  { num:"P97",  l:"W0", v:"W1", fecha:"9 jul",  sede:"Boston"       }, // GP89 vs GP90
+  { num:"P98",  l:"W2", v:"W3", fecha:"10 jul", sede:"Los Ángeles"  }, // GP91 vs GP92
+  { num:"P99",  l:"W4", v:"W5", fecha:"11 jul", sede:"Miami"        }, // GP93 vs GP94
+  { num:"P100", l:"W6", v:"W7", fecha:"11 jul", sede:"Kansas City"  }, // GP95 vs GP96
 ];
 
+// Semifinales P101-P102
 export const SF_BRACKET = [
-  { l:"W0", v:"W1", sede:"Dallas (AT&T Stadium)",           fecha:"14 jul" },
-  { l:"W2", v:"W3", sede:"Atlanta (Mercedes-Benz Stadium)",  fecha:"15 jul" },
+  { num:"P101", l:"W0", v:"W1", fecha:"14 jul", sede:"Dallas (AT&T Stadium)"           }, // GP97 vs GP98
+  { num:"P102", l:"W2", v:"W3", fecha:"15 jul", sede:"Atlanta (Mercedes-Benz Stadium)" }, // GP99 vs GP100
 ];
 
+// ─── Clasificados de grupos ───────────────────────────────────────────────────
 export function getGroupClassified(scores) {
   const result = {};
   const thirds = [];
@@ -143,10 +166,26 @@ export function getGroupClassified(scores) {
     const tabla = calcTabla(gr.equipos, gr.partidos, ms);
     if (tabla[0]&&tabla[0][1].jj>0) result["1"+g] = tabla[0][0];
     if (tabla[1]&&tabla[1][1].jj>0) result["2"+g] = tabla[1][0];
-    if (tabla[2]&&tabla[2][1].jj>0) thirds.push({group:g,team:tabla[2][0],pts:tabla[2][1].pts,dif:tabla[2][1].gf-tabla[2][1].gc,gf:tabla[2][1].gf});
+    if (tabla[2]&&tabla[2][1].jj>0) thirds.push({
+      group:g, team:tabla[2][0],
+      pts:tabla[2][1].pts, dif:tabla[2][1].gf-tabla[2][1].gc, gf:tabla[2][1].gf
+    });
   });
+  // Sort best thirds
   thirds.sort((a,b)=>b.pts!==a.pts?b.pts-a.pts:b.dif!==a.dif?b.dif-a.dif:b.gf-a.gf);
+  // Assign by slot rules (which groups the third came from)
+  // Each R32 slot specifies which groups are eligible (e.g. "3ABCDF")
+  // We assign best available third that matches the group filter
+  result["_thirds"] = thirds; // store sorted thirds for slot matching
   return result;
+}
+
+// Get best third that came from one of the allowed groups and hasn't been used
+function getBestThird(thirds, allowedGroups, used) {
+  for (const t of thirds) {
+    if (allowedGroups.includes(t.group) && !used.has(t.team)) return t.team;
+  }
+  return "";
 }
 
 function makeMatch(i, local, visita, existing) {
@@ -162,36 +201,76 @@ function makeMatch(i, local, visita, existing) {
 }
 
 export function buildBracket(scores, knockout) {
-  const c = getGroupClassified(scores||{});
-  const ko = {};
+  try {
+    const c = getGroupClassified(scores||{});
+    const thirds = c["_thirds"] || [];
+    const usedThirds = new Set();
+    const ko = {};
 
-  ko.r32 = R32_BRACKET.map((s,i) => {
-    const local = c[s.local]||"";
-    const visita = s.visita==="3°" ? "" : (c[s.visita]||"");
-    return { ...makeMatch(i, local, visita, knockout?.r32?.[i]), sede:s.sede };
-  });
+    ko.r32 = R32_BRACKET.map((s,i) => {
+      let local = "", visita = "";
+      // local is always a group winner/runner-up
+      if (s.local.startsWith("1") || s.local.startsWith("2")) {
+        local = c[s.local]||"";
+      }
+      // visita: if it starts with "3" it's a third-place slot
+      if (s.visita.startsWith("3")) {
+        const allowedGroups = s.visita.slice(1).split(""); // e.g. "ABCDF" → ["A","B","C","D","F"]
+        visita = getBestThird(thirds, allowedGroups, usedThirds);
+        if (visita) usedThirds.add(visita);
+      } else {
+        visita = c[s.visita]||"";
+      }
+      // If local is also 2nd place
+      if (s.local.startsWith("2")) local = c[s.local]||"";
 
-  ko.r16 = R16_BRACKET.map((s,i) => {
-    const li=parseInt(s.l.replace("W","")), vi=parseInt(s.v.replace("W",""));
-    return { ...makeMatch(i, ko.r32[li]?.ganador||"", ko.r32[vi]?.ganador||"", knockout?.r16?.[i]), sede:s.sede };
-  });
+      return {
+        ...makeMatch(i, local, visita, knockout?.r32?.[i]),
+        num: s.num, sede: s.sede, fecha: s.fecha
+      };
+    });
 
-  ko.qf = QF_BRACKET.map((s,i) => {
-    const li=parseInt(s.l.replace("W","")), vi=parseInt(s.v.replace("W",""));
-    return { ...makeMatch(i, ko.r16[li]?.ganador||"", ko.r16[vi]?.ganador||"", knockout?.qf?.[i]), sede:s.sede, fecha:s.fecha };
-  });
+    ko.r16 = R16_BRACKET.map((s,i) => {
+      const li=parseInt(s.l.replace("W","")), vi=parseInt(s.v.replace("W",""));
+      return {
+        ...makeMatch(i, ko.r32[li]?.ganador||"", ko.r32[vi]?.ganador||"", knockout?.r16?.[i]),
+        num:s.num, sede:s.sede, fecha:s.fecha
+      };
+    });
 
-  ko.sf = SF_BRACKET.map((s,i) => {
-    const li=parseInt(s.l.replace("W","")), vi=parseInt(s.v.replace("W",""));
-    return { ...makeMatch(i, ko.qf[li]?.ganador||"", ko.qf[vi]?.ganador||"", knockout?.sf?.[i]), sede:s.sede, fecha:s.fecha };
-  });
+    ko.qf = QF_BRACKET.map((s,i) => {
+      const li=parseInt(s.l.replace("W","")), vi=parseInt(s.v.replace("W",""));
+      return {
+        ...makeMatch(i, ko.r16[li]?.ganador||"", ko.r16[vi]?.ganador||"", knockout?.qf?.[i]),
+        num:s.num, sede:s.sede, fecha:s.fecha
+      };
+    });
 
-  const sfW0=ko.sf[0]?.ganador||"", sfW1=ko.sf[1]?.ganador||"";
-  ko.final = [{ ...makeMatch(0, sfW0, sfW1, knockout?.final?.[0]), sede:"MetLife Stadium, Nueva York/NJ", fecha:"19 jul" }];
+    ko.sf = SF_BRACKET.map((s,i) => {
+      const li=parseInt(s.l.replace("W","")), vi=parseInt(s.v.replace("W",""));
+      return {
+        ...makeMatch(i, ko.qf[li]?.ganador||"", ko.qf[vi]?.ganador||"", knockout?.sf?.[i]),
+        num:s.num, sede:s.sede, fecha:s.fecha
+      };
+    });
 
-  const sf0L=ko.sf[0]?.ganador?(ko.sf[0].ganador===ko.sf[0].local?ko.sf[0].visita:ko.sf[0].local):"";
-  const sf1L=ko.sf[1]?.ganador?(ko.sf[1].ganador===ko.sf[1].local?ko.sf[1].visita:ko.sf[1].local):"";
-  ko.third = [{ ...makeMatch(0, sf0L, sf1L, knockout?.third?.[0]), sede:"Hard Rock Stadium, Miami", fecha:"18 jul" }];
+    const sfW0=ko.sf[0]?.ganador||"", sfW1=ko.sf[1]?.ganador||"";
+    ko.final = [{
+      ...makeMatch(0, sfW0, sfW1, knockout?.final?.[0]),
+      num:"P104", sede:"MetLife Stadium, Nueva York/NJ", fecha:"19 jul"
+    }];
 
-  return ko;
+    const sf0L = ko.sf[0]?.ganador
+      ? (ko.sf[0].ganador===ko.sf[0].local ? ko.sf[0].visita : ko.sf[0].local) : "";
+    const sf1L = ko.sf[1]?.ganador
+      ? (ko.sf[1].ganador===ko.sf[1].local ? ko.sf[1].visita : ko.sf[1].local) : "";
+    ko.third = [{
+      ...makeMatch(0, sf0L, sf1L, knockout?.third?.[0]),
+      num:"P103", sede:"Hard Rock Stadium, Miami", fecha:"18 jul"
+    }];
+
+    return ko;
+  } catch(e) {
+    return knockout || {};
+  }
 }
