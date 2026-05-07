@@ -19,7 +19,7 @@ const B = {
   rainbow:   "linear-gradient(90deg,#3a5bd9,#7c3aed,#e63946,#f77f00,#00c853)",
   // Backgrounds - white theme
   bg:        "#f5f5f7",   // gris muy claro (Apple-style)
-  card:      "#ffffff",   // blanco puro
+  card:      "#111111",   // blanco puro
   cardAlt:   "#f0f0f5",   // gris muy suave
   border:    "#e0e0e8",
   borderStrong: "#c0c0cc",
@@ -694,7 +694,7 @@ export default function App() {
               <div style={{background:"#f5f5f7"}}>
                 {[1,2,3].map(fecha=>(
                   <div key={fecha}>
-                    <div style={{padding:"5px 14px",background:"#00000004",fontSize:9,color:"#e0e0f0",letterSpacing:2,textTransform:"uppercase",borderTop:fecha>1?"1px solid #ffffff05":"none",borderBottom:"1px solid #ffffff05"}}>Jornada {fecha}</div>
+                    <div style={{padding:"5px 14px",background:"#f0f0f5",fontSize:9,color:"#333",fontWeight:"600",letterSpacing:2,textTransform:"uppercase",borderTop:fecha>1?"1px solid #e0e0e8":"none",borderBottom:"1px solid #e0e0e8"}}>Jornada {fecha}</div>
                     {gr.partidos.filter(p=>p.f===fecha).map(p=>{
                       const idx=gr.partidos.indexOf(p);const m=ms[idx];
                       const gl=parseInt(m.local),gv=parseInt(m.visita);
@@ -702,11 +702,11 @@ export default function App() {
                       const wL=ok&&gl>gv,wV=ok&&gv>gl,emp=ok&&gl===gv;
                       return(
                         <div key={idx} style={{padding:"9px 14px",borderBottom:"1px solid #eeeeef",background:"#ffffff"}}>
-                          <div style={{fontSize:9,color:"#e0e0f0",marginBottom:5}}>📅 {p.fecha}</div>
+                          <div style={{fontSize:9,color:"#777",marginBottom:5}}>📅 {p.fecha}</div>
                           <div style={{display:"flex",alignItems:"center",gap:6}}>
                             <div style={{flex:1,fontSize:11,textAlign:"right",fontWeight:wL?"bold":"normal",color:wL?"#111":ok?"#333":"#aaa"}}>{p.local}</div>
                             <input type="number" min="0" max="20" value={m.local} onChange={e=>setGol(grupo,idx,"local",e.target.value)} style={{width:34,height:32,textAlign:"center",background:"#f0f0f5",border:`2px solid ${ok?"#3a5bd9":"#e0e0e8"}`,borderRadius:6,color:ok?"#3a5bd9":"#bbb",fontSize:15,fontWeight:"bold",outline:"none"}}/>
-                            <div style={{width:16,textAlign:"center",fontSize:12,color:wL?B.primary:wV?"#f44336":emp?"#ff9800":"#e8e8f5",fontWeight:"bold"}}>{ok?(wL?"▸":wV?"◂":"="):"·"}</div>
+                            <div style={{width:16,textAlign:"center",fontSize:12,color:wL?"#3a5bd9":wV?"#e63946":emp?"#f77f00":"#ccc",fontWeight:"bold"}}>{ok?(wL?"▸":wV?"◂":"="):"·"}</div>
                             <input type="number" min="0" max="20" value={m.visita} onChange={e=>setGol(grupo,idx,"visita",e.target.value)} style={{width:34,height:32,textAlign:"center",background:"#f0f0f5",border:`2px solid ${ok?"#3a5bd9":"#e0e0e8"}`,borderRadius:6,color:ok?"#333":"#bbb",fontSize:15,fontWeight:"bold",outline:"none"}}/>
                             <div style={{flex:1,fontSize:11,fontWeight:wV?"bold":"normal",color:wV?"#111":ok?"#333":"#aaa"}}>{p.visita}</div>
                           </div>
@@ -717,10 +717,10 @@ export default function App() {
                 ))}
               </div>
               <div style={{background:"#f5f5f7",padding:"10px 14px",borderTop:"1px solid #e8e8f0"}}>
-                <div style={{fontSize:8,letterSpacing:2,color:"#e8e8f5",textTransform:"uppercase",marginBottom:7}}>Clasificación proyectada</div>
+                <div style={{fontSize:8,letterSpacing:2,color:"#555",fontWeight:"600",textTransform:"uppercase",marginBottom:7}}>Clasificación proyectada</div>
                 <table style={{width:"100%",borderCollapse:"collapse",fontSize:10}}>
-                  <thead><tr>{["#","Equipo","PJ","GF","GC","DIF","PTS"].map(h=><th key={h} style={{color:"#e8e8f5",textAlign:h==="Equipo"?"left":"center",padding:"0 4px 4px",fontWeight:"normal"}}>{h}</th>)}</tr></thead>
-                  <tbody>{tabla.map(([eq,st],i)=>(<tr key={eq} style={{borderTop:"1px solid #f0f0f0"}}><td style={{padding:4,textAlign:"center"}}>{i<2?<span style={{background:gr.accent,color:gr.color||"#000",borderRadius:4,padding:"1px 4px",fontSize:9,fontWeight:"900"}}>{i+1}</span>:<span style={{color:"#bbb"}}>{i+1}</span>}</td><td style={{padding:4,color:i<2?"#111":"#888",fontWeight:i<2?"bold":"normal",fontSize:11}}>{eq.split(" ").slice(0,2).join(" ")}</td>{[st.jj,st.gf,st.gc,st.gf-st.gc,st.pts].map((v,vi)=><td key={vi} style={{textAlign:"center",padding:4,color:vi===4?(i<2?"#3a5bd9":"#aaa"):"#ccc",fontWeight:vi===4&&i<2?"bold":"normal"}}>{v}</td>)}</tr>))}</tbody>
+                  <thead><tr>{["#","Equipo","PJ","GF","GC","DIF","PTS"].map(h=><th key={h} style={{color:"#888",textAlign:h==="Equipo"?"left":"center",padding:"0 4px 4px",fontWeight:"600"}}>{h}</th>)}</tr></thead>
+                  <tbody>{tabla.map(([eq,st],i)=>(<tr key={eq} style={{borderTop:"1px solid #f0f0f0"}}><td style={{padding:4,textAlign:"center"}}>{i<2?<span style={{background:gr.accent,color:gr.color||"#000",borderRadius:4,padding:"1px 4px",fontSize:9,fontWeight:"900"}}>{i+1}</span>:<span style={{color:"#888"}}>{i+1}</span>}</td><td style={{padding:4,color:i<2?"#111":"#888",fontWeight:i<2?"bold":"normal",fontSize:11}}>{eq.split(" ").slice(0,2).join(" ")}</td>{[st.jj,st.gf,st.gc,st.gf-st.gc,st.pts].map((v,vi)=><td key={vi} style={{textAlign:"center",padding:4,color:vi===4?(i<2?"#3a5bd9":"#555"):"#666",fontWeight:vi===4&&i<2?"bold":"normal"}}>{v}</td>)}</tr>))}</tbody>
                 </table>
               </div>
             </div>
