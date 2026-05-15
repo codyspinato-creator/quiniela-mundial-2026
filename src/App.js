@@ -28,6 +28,7 @@ const B = {
   textSub:   "#444455",   // gris oscuro
   muted:     "#888899",   // gris medio
   logoMF:    "/logo-mf.png",
+  logoKOTO:   "/KOTO.png",
   logoMundial:"/logo-mundial.png",
 };
 
@@ -701,18 +702,18 @@ export default function App() {
           <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:6}}>
             <Logos size={28}/>
             <div style={{flex:1}}/>
-            <div style={{textAlign:"center"}}><div style={{fontSize:7,color:"#888899",fontWeight:"600"}}>GRUPOS</div><div style={{fontSize:12,fontWeight:"bold",color:pct===100?"#00c853":"#3a5bd9"}}>{rellenados}/{totalP}</div></div>
-            <div style={{textAlign:"center"}}><div style={{fontSize:7,color:"#888899",fontWeight:"600"}}>ELIM.</div><div style={{fontSize:12,fontWeight:"bold",color:koFilled===koTotal?"#00c853":"#3a5bd9"}}>{koFilled}/{koTotal}</div></div>
-            <div style={{textAlign:"center"}}><div style={{fontSize:7,color:"#888899",fontWeight:"600"}}>EXTRAS</div><div style={{fontSize:12,fontWeight:"bold",color:predCount===4?"#00c853":"#3a5bd9"}}>{predCount}/4</div></div>
+            <div style={{textAlign:"center"}}><div style={{fontSize:7,color:"#ffffffaa",fontWeight:"600"}}>GRUPOS</div><div style={{fontSize:12,fontWeight:"bold",color:pct===100?"#00ff88":"#ffffff"}}>{rellenados}/{totalP}</div></div>
+            <div style={{textAlign:"center"}}><div style={{fontSize:7,color:"#ffffffaa",fontWeight:"600"}}>ELIM.</div><div style={{fontSize:12,fontWeight:"bold",color:koFilled===koTotal?"#00ff88":"#ffffff"}}>{koFilled}/{koTotal}</div></div>
+            <div style={{textAlign:"center"}}><div style={{fontSize:7,color:"#ffffffaa",fontWeight:"600"}}>EXTRAS</div><div style={{fontSize:12,fontWeight:"bold",color:predCount===4?"#00ff88":"#ffffff"}}>{predCount}/4</div></div>
             <button onClick={()=>setScreen("portal")} style={{background:"#00000008",border:`1px solid ${B.border}`,borderRadius:8,padding:"5px 8px",color:"#aaa",cursor:"pointer",fontSize:9,whiteSpace:"nowrap"}}>👥 Portal</button>
           </div>
           <div style={{height:3,background:"#00000008",borderRadius:2,overflow:"hidden",marginBottom:6}}>
             <div style={{height:"100%",width:pct+"%",background:pct===100?"#00c853":"linear-gradient(90deg,#3a5bd9,#7c3aed)",transition:"width 0.3s",boxShadow:`0 0 0px transparent`}}/>
           </div>
           <div style={{display:"flex",gap:3,alignItems:"center"}}>
-            <div style={{fontSize:10,color:"#3a5bd9",fontWeight:"700",marginRight:4,whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis",maxWidth:80}}>⚽ {myNombre}</div>
+            <div style={{fontSize:10,color:"#ffffff",fontWeight:"700",marginRight:4,whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis",maxWidth:80}}>⚽ {myNombre}</div>
             {TABS.map(({id,label})=>(<button key={id} onClick={()=>setTab(id)} style={{padding:"3px 7px",borderRadius:6,border:"none",background:tab===id?B.primary:"#0000000c",color:tab===id?"#000":B.muted,fontSize:9,cursor:"pointer",fontWeight:"bold",whiteSpace:"nowrap"}}>{label}</button>))}
-            <button onClick={saveQuiniela} disabled={saving} style={{marginLeft:"auto",padding:"3px 8px",borderRadius:6,border:"none",background:saving?"#e0e0e8":saveMsg.includes("✓")?"#00c853":"#3a5bd9",color:saving?"#aaa":"#ffffff",fontSize:9,cursor:saving?"not-allowed":"pointer",fontWeight:"bold",flexShrink:0}}>{saving?"...":saveMsg||"💾"}</button>
+            <button onClick={saveQuiniela} disabled={saving} style={{marginLeft:"auto",padding:"3px 8px",borderRadius:6,border:"none",background:saving?"#ffffff30":saveMsg.includes("✓")?"#00c853":"#ffffff",color:saving?"#aaa":saveMsg.includes("✓")?"#ffffff":"#1a2a6c",fontSize:9,cursor:saving?"not-allowed":"pointer",fontWeight:"bold",flexShrink:0}}>{saving?"...":saveMsg||"💾"}</button>
           </div>
         </div>
       </div>
