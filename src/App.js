@@ -67,10 +67,11 @@ function emptyKnockout() {
 // ─── HELPERS ─────────────────────────────────────────────────────────────────
 function Logos({ size = 40, center = false }) {
   return (
-    <div style={{ display:"flex", alignItems:"center", gap:10, justifyContent:center?"center":"flex-start" }}>
-      <img src={B.logoMF} alt="MundoFutbol" style={{ height:size, objectFit:"contain", filter:"drop-shadow(0 0 6px #00cc0050)" }} onError={e=>{ e.target.style.display="none"; }} />
-      <div style={{ width:1, height:size*0.7, background:"#e0e0e8" }} />
-      <img src={B.logoMundial} alt="FIFA World Cup 2026" style={{ height:size*0.85, objectFit:"contain" }} onError={e=>{ e.target.style.display="none"; }} />
+    <div style={{ display:"flex", alignItems:"center", gap:8, justifyContent:center?"center":"flex-start" }}>
+      <img src={B.logoMF} alt="MundoFutbol" style={{ height:size, objectFit:"contain", filter:"brightness(0) invert(1)" }} onError={e=>{ e.target.style.display="none"; }} />
+      <img src={B.logoKOTO} alt="KOTO" style={{ height:size*0.7, objectFit:"contain", filter:"brightness(0) invert(1)" }} onError={e=>{ e.target.style.display="none"; }} />
+      <div style={{ width:1, height:size*0.7, background:"#ffffff40" }} />
+      <img src={B.logoMundial} alt="FIFA 2026" style={{ height:size*0.85, objectFit:"contain" }} onError={e=>{ e.target.style.display="none"; }} />
     </div>
   );
 }
@@ -460,12 +461,17 @@ export default function App() {
             padding:"28px 20px 24px 24px",
             flex:1, display:"flex", flexDirection:"column", justifyContent:"center",
           }}>
-            {/* MF Logo */}
-            <img src={B.logoMF} alt="MundoFutbol"
-              style={{ height:52, objectFit:"contain", objectPosition:"left", marginBottom:10,
-                filter:"drop-shadow(0 0 6px rgba(255,255,255,0.3))" }}
-              onError={e=>{ e.target.style.display="none"; }}
-            />
+            {/* MF + KOTO Logos */}
+            <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:10}}>
+              <img src={B.logoMF} alt="MundoFutbol"
+                style={{height:46,objectFit:"contain",filter:"drop-shadow(0 0 6px rgba(255,255,255,0.3))"}}
+                onError={e=>{ e.target.style.display="none"; }}
+              />
+              <img src={B.logoKOTO} alt="KOTO"
+                style={{height:34,objectFit:"contain",filter:"drop-shadow(0 0 4px rgba(255,255,255,0.2))"}}
+                onError={e=>{ e.target.style.display="none"; }}
+              />
+            </div>
             <div style={{fontSize:8,letterSpacing:5,color:"rgba(255,255,255,0.75)",textTransform:"uppercase",fontWeight:"600",marginBottom:2}}>Copa del Mundo</div>
             <div style={{fontSize:28,fontWeight:"900",color:"#ffffff",letterSpacing:-0.5,lineHeight:1,textTransform:"uppercase"}}>QUINIELA</div>
             <div style={{fontSize:28,fontWeight:"900",color:"#ffffff",letterSpacing:-0.5,lineHeight:1,textTransform:"uppercase",marginBottom:6}}>2026</div>
@@ -712,7 +718,7 @@ export default function App() {
           </div>
           <div style={{display:"flex",gap:3,alignItems:"center"}}>
             <div style={{fontSize:10,color:"#ffffff",fontWeight:"700",marginRight:4,whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis",maxWidth:80}}>⚽ {myNombre}</div>
-            {TABS.map(({id,label})=>(<button key={id} onClick={()=>setTab(id)} style={{padding:"3px 7px",borderRadius:6,border:"none",background:tab===id?B.primary:"#0000000c",color:tab===id?"#000":B.muted,fontSize:9,cursor:"pointer",fontWeight:"bold",whiteSpace:"nowrap"}}>{label}</button>))}
+            {TABS.map(({id,label})=>(<button key={id} onClick={()=>setTab(id)} style={{padding:"3px 7px",borderRadius:6,border:"none",background:tab===id?"#ffffff":"#ffffff20",color:tab===id?"#1a2a6c":"#ffffffcc",fontSize:9,cursor:"pointer",fontWeight:"bold",whiteSpace:"nowrap"}}>{label}</button>))}
             <button onClick={saveQuiniela} disabled={saving} style={{marginLeft:"auto",padding:"3px 8px",borderRadius:6,border:"none",background:saving?"#ffffff30":saveMsg.includes("✓")?"#00c853":"#ffffff",color:saving?"#aaa":saveMsg.includes("✓")?"#ffffff":"#1a2a6c",fontSize:9,cursor:saving?"not-allowed":"pointer",fontWeight:"bold",flexShrink:0}}>{saving?"...":saveMsg||"💾"}</button>
           </div>
         </div>
