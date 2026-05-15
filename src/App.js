@@ -508,7 +508,7 @@ export default function App() {
             autoFocus value={loginInput}
             onChange={e=>setLoginInput(e.target.value)}
             onKeyDown={e=>e.key==="Enter"&&handleLogin()}
-            placeholder="Tu nombre o alias..."
+            placeholder="Tu nombre completo..."
             style={{width:"100%",background:"#f8f8fc",border:"1px solid #ddd",borderRadius:8,padding:"10px 12px",color:"#111",fontSize:14,outline:"none",boxSizing:"border-box",marginBottom:12}}
           />
           <div style={{fontSize:12,color:"#444455",fontWeight:"600",marginBottom:6}}>Código de acceso</div>
