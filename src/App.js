@@ -468,7 +468,7 @@ export default function App() {
                 onError={e=>{ e.target.style.display="none"; }}
               />
               <img src={B.logoKOTO} alt="KOTO"
-                style={{height:46,objectFit:"contain",filter:"drop-shadow(0 0 4px rgba(255,255,255,0.2))"}}
+                style={{height:48,objectFit:"contain",filter:"drop-shadow(0 0 4px rgba(255,255,255,0.2))"}}
                 onError={e=>{ e.target.style.display="none"; }}
               />
             </div>
