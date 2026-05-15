@@ -69,7 +69,7 @@ function Logos({ size = 40, center = false }) {
   return (
     <div style={{ display:"flex", alignItems:"center", gap:8, justifyContent:center?"center":"flex-start" }}>
       <img src={B.logoMF} alt="MundoFutbol" style={{ height:size, objectFit:"contain", filter:"brightness(0) invert(1)" }} onError={e=>{ e.target.style.display="none"; }} />
-      <img src={B.logoKOTO} alt="KOTO" style={{ height:size*0.7, objectFit:"contain", filter:"brightness(0) invert(1)" }} onError={e=>{ e.target.style.display="none"; }} />
+      <img src={B.logoKOTO} alt="KOTO" style={{ height:size*0.85, objectFit:"contain", filter:"brightness(0) invert(1)" }} onError={e=>{ e.target.style.display="none"; }} />
       <div style={{ width:1, height:size*0.7, background:"#ffffff40" }} />
       <img src={B.logoMundial} alt="FIFA 2026" style={{ height:size*0.85, objectFit:"contain" }} onError={e=>{ e.target.style.display="none"; }} />
     </div>
@@ -468,7 +468,7 @@ export default function App() {
                 onError={e=>{ e.target.style.display="none"; }}
               />
               <img src={B.logoKOTO} alt="KOTO"
-                style={{height:34,objectFit:"contain",filter:"drop-shadow(0 0 4px rgba(255,255,255,0.2))"}}
+                style={{height:46,objectFit:"contain",filter:"drop-shadow(0 0 4px rgba(255,255,255,0.2))"}}
                 onError={e=>{ e.target.style.display="none"; }}
               />
             </div>
@@ -553,11 +553,11 @@ export default function App() {
       const q=selectedUser; const qc=completionPct(q);
       return(
         <div style={{minHeight:"100vh",background:B.bg,color:B.text,fontFamily:"'SF Pro Display','Helvetica Neue',Arial,sans-serif"}}>
-          <div style={{background:"#f5f5f7",borderBottom:`2px solid ${B.primary}`,padding:"10px 14px",position:"sticky",top:0,zIndex:100}}>
+          <div style={{background:"#1a2a6c",borderBottom:"none",boxShadow:"0 2px 16px rgba(26,42,108,0.25)",padding:"10px 14px",position:"sticky",top:0,zIndex:100}}>
             <div style={{maxWidth:560,margin:"0 auto",display:"flex",alignItems:"center",gap:10}}>
               <button onClick={()=>setSelectedUser(null)} style={{background:"#00000008",border:"none",borderRadius:8,padding:"6px 10px",color:"#aaa",cursor:"pointer",fontSize:12}}>← Volver</button>
-              <div><div style={{fontSize:8,color:B.primary,letterSpacing:3}}>QUINIELA DE</div><div style={{fontSize:15,fontWeight:"bold"}}>{q.nombre}</div></div>
-              <div style={{marginLeft:"auto",textAlign:"right"}}><div style={{fontSize:9,color:B.muted}}>Grupos</div><div style={{fontSize:14,fontWeight:"bold",color:qc.pct===100?B.primary:B.muted}}>{qc.pct}%</div></div>
+              <div><div style={{fontSize:8,color:B.primary,letterSpacing:3}}>QUINIELA DE</div><div style={{fontSize:15,fontWeight:"bold",color:"#ffffff"}}>{q.nombre}</div></div>
+              <div style={{marginLeft:"auto",textAlign:"right"}}><div style={{fontSize:9,color:B.muted}}>Grupos</div><div style={{fontSize:14,fontWeight:"bold",color:qc.pct===100?"#00ff88":"#ffffff"}}>{qc.pct}%</div></div>
             </div>
           </div>
           <div style={{maxWidth:560,margin:"0 auto",padding:"14px 12px 40px"}}>
@@ -609,12 +609,12 @@ export default function App() {
 
     return(
       <div style={{minHeight:"100vh",background:B.bg,color:B.text,fontFamily:"'SF Pro Display','Helvetica Neue',Arial,sans-serif"}}>
-        <div style={{background:"#f5f5f7",borderBottom:`2px solid ${B.primary}`,padding:"10px 14px",position:"sticky",top:0,zIndex:100}}>
+        <div style={{background:"#1a2a6c",borderBottom:"none",boxShadow:"0 2px 16px rgba(26,42,108,0.25)",padding:"10px 14px",position:"sticky",top:0,zIndex:100}}>
           <div style={{maxWidth:560,margin:"0 auto",display:"flex",alignItems:"center",gap:10}}>
             <button onClick={()=>setScreen(myId?"quiniela":"login")} style={{background:"#00000008",border:"none",borderRadius:8,padding:"6px 10px",color:"#aaa",cursor:"pointer",fontSize:12}}>← {myId?"Mi quiniela":"Inicio"}</button>
             <Logos size={26} />
             <div style={{marginLeft:"auto",display:"flex",gap:8,alignItems:"center"}}>
-              <span style={{fontSize:11,color:B.muted}}>{portalData.length} participantes</span>
+              <span style={{fontSize:11,color:"#ffffffaa"}}>{portalData.length} participantes</span>
               <button onClick={loadPortal} style={{background:"#00000008",border:"none",borderRadius:6,padding:"5px 8px",color:"#aaa",cursor:"pointer",fontSize:13}}>{portalLoading?"⏳":"↻"}</button>
             </div>
           </div>
@@ -703,7 +703,7 @@ export default function App() {
   return(
     <div style={{minHeight:"100vh",background:B.bg,color:B.text,fontFamily:"'SF Pro Display','Helvetica Neue',Arial,sans-serif"}}>
       {/* HEADER */}
-      <div style={{background:"#f5f5f7",borderBottom:`2px solid ${B.primary}`,padding:"9px 14px",position:"sticky",top:0,zIndex:100,boxShadow:`0 4px 20px ${B.primary}12`}}>
+      <div style={{background:"#1a2a6c",borderBottom:"none",boxShadow:"0 2px 16px rgba(26,42,108,0.3)",padding:"9px 14px",position:"sticky",top:0,zIndex:100}}>
         <div style={{maxWidth:560,margin:"0 auto"}}>
           <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:6}}>
             <Logos size={28}/>
