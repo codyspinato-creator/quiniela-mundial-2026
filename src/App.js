@@ -522,13 +522,13 @@ export default function App() {
             />
             <span style={{position:"absolute",left:12,top:"50%",transform:"translateY(-50%)",fontSize:14,opacity:0.5}}>🔑</span>
           </div>
-          <div style={{fontSize:12,color:"#444455",fontWeight:"600",marginBottom:6}}>Correo electrónico</div>
+          <div style={{fontSize:12,color:"#444455",fontWeight:"600",marginBottom:6}}>WhatsApp</div>
           <div style={{position:"relative",marginBottom:12}}>
             <input
-              type="email" value={emailInput}
+              type="tel" value={emailInput}
               onChange={e=>setEmailInput(e.target.value)}
               onKeyDown={e=>e.key==="Enter"&&handleLogin()}
-              placeholder="tu@correo.com"
+              placeholder="+58 123 4567890"
               style={{width:"100%",background:"#f8f8fc",border:"1px solid #ddd",borderRadius:8,padding:"10px 12px 10px 36px",color:"#111",fontSize:14,outline:"none",boxSizing:"border-box"}}
             />
             <span style={{position:"absolute",left:12,top:"50%",transform:"translateY(-50%)",fontSize:14,opacity:0.5}}>✉️</span>
