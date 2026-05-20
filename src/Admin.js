@@ -478,7 +478,7 @@ export default function Admin({ onBack }) {
             <div style={{ background: B.card, border: `1px solid ${B.border}`, borderRadius: 12, overflow: "hidden", marginBottom: 14 }}>
               {/* Header tabla */}
               <div style={{ display: "grid", gridTemplateColumns: "32px 1fr 180px 36px 36px 36px 52px 52px", gap: 4, padding: "8px 12px", background: "#f8f8fc", fontSize: 9, color: "#888", letterSpacing: 1, textTransform: "uppercase", fontWeight: "600" }}>
-                <div>#</div><div>Participante</div><div>Correo</div><div style={{ textAlign: "center" }}>G</div><div style={{ textAlign: "center" }}>E</div><div style={{ textAlign: "center" }}>X</div><div style={{ textAlign: "center" }}>PTS</div><div></div>
+                <div>#</div><div>Participante</div><div>WhatsApp</div><div style={{ textAlign: "center" }}>G</div><div style={{ textAlign: "center" }}>E</div><div style={{ textAlign: "center" }}>X</div><div style={{ textAlign: "center" }}>PTS</div><div></div>
               </div>
               {ranking.length === 0 && <div style={{ padding: 20, textAlign: "center", color: B.muted, fontSize: 12 }}>No hay participantes aún</div>}
               {ranking.map((p, rank) => (
