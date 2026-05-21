@@ -346,6 +346,8 @@ export default function App() {
     const name=loginInput.trim();
     if(!name||name.length<2){setLoginError("Escribe tu nombre (mínimo 2 caracteres)");return;}
     if(!codigoInput.trim()){setLoginError("Ingresa el código de acceso");return;}
+    if(!emailInput.trim()){setLoginError("Ingresa tu número de WhatsApp");return;}
+
     // Verify access code against Firestore admin/config
     try{
       const cfgSnap=await getDoc(doc(db,"admin","config"));
