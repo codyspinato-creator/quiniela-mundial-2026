@@ -534,7 +534,7 @@ export default function Admin({ onBack }) {
             <div style={{ background: "#ffffff", border: "1px solid #e0e0e8", borderRadius: 12, padding: 14 }}>
               <div style={{ fontSize: 10, letterSpacing: 3, color: B.primary, textTransform: "uppercase", marginBottom: 10 }}>Sistema de Puntuación</div>
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
-                {[["Resultado exacto (grupos)",5,B.primary],["Solo ganador/empate",3,"#9b5de5"],["Ganador correcto (elim.)",3,"#9b5de5"],["Resultado exacto (elim.)",5,B.primary],["Campeón correcto",5,B.primary],["Subcampeón correcto",5,B.primary],["Tercer lugar correcto",5,B.primary],["Goleador correcto",5,B.primary]].map(([label,pts,color]) => (
+                {[["Resultado exacto (grupos)",5,B.primary],["Solo ganador/empate",3,"#9b5de5"],["Ganador correcto (elim.)",3,"#9b5de5"],["Resultado exacto (elim.)",5,B.primary],["Campeón correcto",10,B.primary],["Subcampeón correcto",5,B.primary],["Tercer lugar correcto",5,B.primary],["Goleador correcto",10,B.primary]].map(([label,pts,color]) => (
                   <div key={label} style={{ display: "flex", alignItems: "center", gap: 8, padding: "6px 10px", background: "#f8f8fc", border: "1px solid #e8e8f0", borderRadius: 8 }}>
                     <div style={{ fontSize: 14, fontWeight: "bold", color, minWidth: 24, textAlign: "center" }}>+{pts}</div>
                     <div style={{ fontSize: 10, color: B.muted, lineHeight: 1.3 }}>{label}</div>
