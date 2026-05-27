@@ -67,7 +67,7 @@ export default function Admin({ onBack }) {
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [saveMsg, setSaveMsg] = useState("");
-  const [autoMsg, setAutoMsg] = useState("");
+  
 
   const [adminTab, setAdminTab] = useState("grupos");
   const [grupoActivo, setGrupoActivo] = useState("A");
