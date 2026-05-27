@@ -74,18 +74,7 @@ export default function Admin({ onBack }) {
   const [rondaActiva, setRondaActiva] = useState("r32");
 
   // ── Auto-populate bracket from group results ───────────────────────────────
-  const autoPopulateBracket = () => {
-    try {
-      const newKO = buildBracket(resultados.scores, resultados.knockout);
-      setResultados(prev => ({ ...prev, knockout: newKO }));
-      setAutoMsg("✓ Cruces actualizados automáticamente");
-      setTimeout(() => setAutoMsg(""), 3000);
-    } catch(e) {
-      console.error(e);
-      setAutoMsg("Error al calcular cruces");
-      setTimeout(() => setAutoMsg(""), 3000);
-    }
-  };
+  
 
   // ── Save access code ───────────────────────────────────────────────────────
   const saveCodigo = async () => {
