@@ -3,7 +3,6 @@ import { useState, useEffect, useCallback } from "react";
 import { doc, setDoc, getDoc, collection, getDocs, deleteDoc } from "firebase/firestore";
 import { db } from "./firebase";
 import { GRUPOS, KEYS, SELECCIONES, GOLEADORES, buildBracket } from "./data";
-import { buildBracket } from "./data";
 import { calcTotalPoints } from "./scoring";
 
 // ─── BRAND ───────────────────────────────────────────────────────────────────
