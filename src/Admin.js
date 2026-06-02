@@ -162,7 +162,7 @@ export default function Admin({ onBack }) {
   }).sort((a, b) => b.score.total - a.score.total);
 
   // ── Password ───────────────────────────────────────────────────────────────
-  const ADMIN_PASS = "mundofutbol2026";
+  const ADMIN_PASS = "mf25778035";
   const handleLogin = () => {
     if (passInput === ADMIN_PASS) { setAuthed(true); setPassError(""); }
     else { setPassError("Contraseña incorrecta"); }
