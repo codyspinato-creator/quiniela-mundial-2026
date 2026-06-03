@@ -12,7 +12,7 @@ const B = {
   bg:"#f5f5f7",card:"#ffffff",cardAlt:"#f0f0f5",border:"#e0e0e8",borderStrong:"#c0c0cc",
   text:"#111111",textSub:"#444455",muted:"#888899",
   logoMF:"/logo-mf.png",logoKOTO:"/KOTO.png",logoMundial:"/logo-mundial.png",
-  adminWhatsApp:"584226396277",
+  adminWhatsApp:"5200000000000",
 };
 
 const RONDAS=[
@@ -176,20 +176,22 @@ export default function App(){
   const handleLogin=async()=>{
     const name=loginInput.trim();
     if(!name||name.length<2){setLoginError("Escribe tu nombre (mínimo 2 caracteres)");return;}
-    if(!codigoInput.trim()){setLoginError("Ingresa el código de acceso");return;}
-    if(!emailInput.trim()){setLoginError("Ingresa tu número de WhatsApp");return;}
     setLoginError("");
-    try{const cfgSnap=await getDoc(doc(db,"admin","config"));if(cfgSnap.exists()){const cfg=cfgSnap.data();if(cfg.codigoAcceso&&codigoInput.trim()!==cfg.codigoAcceso){setLoginError("Código de acceso incorrecto ❌");return;}}}catch(e){}
     const id=name.toLowerCase().replace(/[^a-z0-9]/gi,"_").substring(0,24);
+    // Check if user already exists — if so, skip code/whatsapp
     try{
       const snap=await getDoc(doc(db,"quinielas",id));
       if(snap.exists()){
         const d=snap.data();
         if(d.passwordHash){setPendingUser({id,nombre:name,data:d});setLoginStep("checkpass");return;}
         else{setPendingUser({id,nombre:name,data:d});setLoginStep("newpass");return;}
-      }else{setPendingUser({id,nombre:name,data:null});setLoginStep("newpass");return;}
+      }
     }catch(e){}
-    enterQuiniela(id,name,null,null);
+    // New user — require code + whatsapp
+    if(!codigoInput.trim()){setLoginError("Ingresa el código de acceso");return;}
+    if(!emailInput.trim()){setLoginError("Ingresa tu número de WhatsApp");return;}
+    try{const cfgSnap=await getDoc(doc(db,"admin","config"));if(cfgSnap.exists()){const cfg=cfgSnap.data();if(cfg.codigoAcceso&&codigoInput.trim()!==cfg.codigoAcceso){setLoginError("Código de acceso incorrecto ❌");return;}}}catch(e){}
+    setPendingUser({id,nombre:name,data:null});setLoginStep("newpass");
   };
 
   const handleSetPassword=async()=>{
@@ -327,6 +329,7 @@ export default function App(){
         <div style={cardStyle}>
           <div style={{fontSize:12,color:"#444455",fontWeight:"600",marginBottom:6}}>Tu nombre</div>
           <input autoFocus value={loginInput} onChange={e=>setLoginInput(e.target.value)} onKeyDown={e=>e.key==="Enter"&&handleLogin()} placeholder="Tu nombre completo..." style={{...inputStyle,marginBottom:12}}/>
+          <div style={{fontSize:11,color:"#888",background:"#f5f5f7",border:"1px solid #e0e0e8",borderRadius:8,padding:"8px 12px",marginBottom:10,textAlign:"center"}}>¿Primera vez? Completa los campos de abajo</div>
           <div style={{fontSize:12,color:"#444455",fontWeight:"600",marginBottom:6}}>Código de acceso</div>
           <div style={{position:"relative",marginBottom:12}}>
             <input type="password" value={codigoInput} onChange={e=>setCodigoInput(e.target.value)} onKeyDown={e=>e.key==="Enter"&&handleLogin()} placeholder="Código de la quiniela..." style={{...inputStyle,paddingLeft:36}}/>
@@ -345,7 +348,7 @@ export default function App(){
             <button onClick={()=>setScreen("admin")} style={{background:"transparent",border:"none",color:"#888",fontSize:11,cursor:"pointer"}}>Admin</button>
           </div>
         </div>
-        <div style={{textAlign:"center",marginTop:14,fontSize:10,color:"#888"}}>Usa el mismo nombre para recuperar tu quiniela</div>
+        <div style={{textAlign:"center",marginTop:14,fontSize:10,color:"#888"}}>Si ya tienes cuenta, solo escribe tu nombre y presiona Continuar</div>
       </div>
     </div>
   );
