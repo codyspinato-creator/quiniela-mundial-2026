@@ -12,7 +12,7 @@ const B = {
   bg:"#f5f5f7",card:"#ffffff",cardAlt:"#f0f0f5",border:"#e0e0e8",borderStrong:"#c0c0cc",
   text:"#111111",textSub:"#444455",muted:"#888899",
   logoMF:"/logo-mf.png",logoKOTO:"/KOTO.png",logoMundial:"/logo-mundial.png",
-  adminWhatsApp:"584226396277",
+  adminWhatsApp:"5200000000000",
 };
 
 const RONDAS=[
@@ -176,17 +176,30 @@ export default function App(){
   const handleLogin=async()=>{
     const name=loginInput.trim();
     if(!name||name.length<2){setLoginError("Escribe tu nombre (mínimo 2 caracteres)");return;}
-    setLoginError("");
+    setLoginError("Verificando...");
     const id=name.toLowerCase().replace(/[^a-z0-9]/gi,"_").substring(0,24);
     // Check if user already exists — if so, skip code/whatsapp
+    let existingUser=null;
+    let fetchError=false;
     try{
       const snap=await getDoc(doc(db,"quinielas",id));
-      if(snap.exists()){
-        const d=snap.data();
-        if(d.passwordHash){setPendingUser({id,nombre:name,data:d});setLoginStep("checkpass");return;}
-        else{setPendingUser({id,nombre:name,data:d});setLoginStep("newpass");return;}
-      }
-    }catch(e){}
+      if(snap.exists()) existingUser={id,nombre:name,data:snap.data()};
+    }catch(e){fetchError=true;}
+
+    setLoginError("");
+
+    if(fetchError){
+      setLoginError("Error de conexión. Verifica tu internet e intenta de nuevo.");
+      return;
+    }
+
+    if(existingUser){
+      // User exists — go straight to password, no code needed
+      const d=existingUser.data;
+      if(d.passwordHash){setPendingUser(existingUser);setLoginStep("checkpass");return;}
+      else{setPendingUser(existingUser);setLoginStep("newpass");return;}
+    }
+
     // New user — require code + whatsapp
     if(!codigoInput.trim()){setLoginError("Ingresa el código de acceso");return;}
     if(!emailInput.trim()){setLoginError("Ingresa tu número de WhatsApp");return;}
