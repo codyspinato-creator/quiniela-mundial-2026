@@ -12,7 +12,7 @@ const B = {
   bg:"#f5f5f7",card:"#ffffff",cardAlt:"#f0f0f5",border:"#e0e0e8",borderStrong:"#c0c0cc",
   text:"#111111",textSub:"#444455",muted:"#888899",
   logoMF:"/logo-mf.png",logoKOTO:"/KOTO.png",logoMundial:"/logo-mundial.png",
-  adminWhatsApp:"5200000000000",
+  adminWhatsApp:"584226396277",
 };
 
 const RONDAS=[
