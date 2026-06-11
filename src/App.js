@@ -186,6 +186,8 @@ export default function App(){
   const[goleadorCustom,setGoleadorCustom]=useState("");
   const[knockout,setKnockout]=useState(emptyKnockout());
   const[tab,setTab]=useState("partidos");const[grupo,setGrupo]=useState("A");
+  const[portalTab,setPortalTab]=useState("ranking");
+  const[detailTab,setDetailTab]=useState("grupos");
 
   // Countdown to deadline
   const countdown=useCountdown();
@@ -385,7 +387,6 @@ export default function App(){
       const q=selectedUser;
       const qc=completionPct(q);
       const qScore=resultadosOficiales&&Object.keys(resultadosOficiales).length>0?calcTotalPoints(q,resultadosOficiales):null;
-      const[detailTab,setDetailTab]=useState("grupos");
       return(
         <div style={{minHeight:"100vh",background:B.bg,color:B.text,fontFamily:"'SF Pro Display','Helvetica Neue',Arial,sans-serif"}}>
           <div style={{background:"#1a2a6c",boxShadow:"0 2px 16px rgba(26,42,108,0.25)",padding:"10px 14px",position:"sticky",top:0,zIndex:100}}>
@@ -492,7 +493,6 @@ export default function App(){
     }
 
     // ── Portal list ────────────────────────────────────────────────────────────
-    const[portalTab,setPortalTab]=useState("ranking");
     const rankedPortal=portalData.map(p=>({...p,score:calcTotalPoints(p,resultadosOficiales)})).sort((a,b)=>b.score.total-a.score.total);
     return(
       <div style={{minHeight:"100vh",background:B.bg,color:B.text,fontFamily:"'SF Pro Display','Helvetica Neue',Arial,sans-serif"}}>
