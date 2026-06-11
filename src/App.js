@@ -14,8 +14,7 @@ const B = {
   logoMF:"/logo-mf.png",logoKOTO:"/KOTO.png",logoMundial:"/logo-mundial.png",
   adminWhatsApp:"5200000000000",
 };
-const DEADLINE = new Date("2026-06-11T18:00:00Z");
-const isPastDeadline = () => new Date() >= DEADLINE;
+
 const RONDAS=[
   {id:"r32",label:"Dieciseisavos",short:"1/16",emoji:"\u2694\uFE0F",partidos:16,color:"#4a7a9b"},
   {id:"r16",label:"Octavos",short:"1/8",emoji:"\uD83D\uDD25",partidos:8,color:"#7a4a9b"},
@@ -35,6 +34,24 @@ async function hashPassword(password){
   const hashBuffer=await crypto.subtle.digest("SHA-256",data);
   const hashArray=Array.from(new Uint8Array(hashBuffer));
   return hashArray.map(b=>b.toString(16).padStart(2,"0")).join("").substring(0,32);
+}
+
+// ─── DEADLINE + COUNTDOWN ─────────────────────────────────────────────────────
+const DEADLINE = new Date("2026-06-11T18:30:00Z"); // 2:30pm EST = 18:30 UTC
+
+function useCountdown(){
+  const[timeLeft,setTimeLeft]=useState(()=>Math.max(0,DEADLINE-Date.now()));
+  useEffect(()=>{
+    if(timeLeft<=0) return;
+    const t=setInterval(()=>setTimeLeft(prev=>{const n=Math.max(0,DEADLINE-Date.now());return n;}),1000);
+    return()=>clearInterval(t);
+  },[]);
+  if(timeLeft<=0) return null;
+  const h=Math.floor(timeLeft/3600000);
+  const m=Math.floor((timeLeft%3600000)/60000);
+  const s=Math.floor((timeLeft%60000)/1000);
+  const pad=n=>String(n).padStart(2,"0");
+  return h>0?`${h}h ${pad(m)}m`:m>0?`${pad(m)}m ${pad(s)}s`:`${pad(s)}s`;
 }
 
 function ReglasScreen({onBack}){
@@ -170,6 +187,10 @@ export default function App(){
   const[knockout,setKnockout]=useState(emptyKnockout());
   const[tab,setTab]=useState("partidos");const[grupo,setGrupo]=useState("A");
 
+  // Countdown to deadline
+  const countdown=useCountdown();
+  const isPastDeadline=Date.now()>=DEADLINE.getTime();
+
   useEffect(()=>{try{const newKO=buildBracket(scores,knockout);setKnockout(newKO);}catch(e){}
   // eslint-disable-next-line react-hooks/exhaustive-deps
   },[scores]);
@@ -179,29 +200,19 @@ export default function App(){
     if(!name||name.length<2){setLoginError("Escribe tu nombre (mínimo 2 caracteres)");return;}
     setLoginError("Verificando...");
     const id=name.toLowerCase().replace(/[^a-z0-9]/gi,"_").substring(0,24);
-    // Check if user already exists — if so, skip code/whatsapp
     let existingUser=null;
     let fetchError=false;
     try{
       const snap=await getDoc(doc(db,"quinielas",id));
       if(snap.exists()) existingUser={id,nombre:name,data:snap.data()};
     }catch(e){fetchError=true;}
-
     setLoginError("");
-
-    if(fetchError){
-      setLoginError("Error de conexión. Verifica tu internet e intenta de nuevo.");
-      return;
-    }
-
+    if(fetchError){setLoginError("Error de conexión. Verifica tu internet e intenta de nuevo.");return;}
     if(existingUser){
-      // User exists — go straight to password, no code needed
       const d=existingUser.data;
       if(d.passwordHash){setPendingUser(existingUser);setLoginStep("checkpass");return;}
       else{setPendingUser(existingUser);setLoginStep("newpass");return;}
     }
-
-    // New user — require code + whatsapp
     if(!codigoInput.trim()){setLoginError("Ingresa el código de acceso");return;}
     if(!emailInput.trim()){setLoginError("Ingresa tu número de WhatsApp");return;}
     try{const cfgSnap=await getDoc(doc(db,"admin","config"));if(cfgSnap.exists()){const cfg=cfgSnap.data();if(cfg.codigoAcceso&&codigoInput.trim()!==cfg.codigoAcceso){setLoginError("Código de acceso incorrecto ❌");return;}}}catch(e){}
@@ -239,7 +250,7 @@ export default function App(){
   };
 
   const saveQuiniela=async()=>{
-    if(isPastDeadline()){setSaveMsg("⏰ Tiempo agotado");setTimeout(()=>setSaveMsg(""),3000);return;}
+    if(isPastDeadline){setSaveMsg("⏰ Cerrado");setTimeout(()=>setSaveMsg(""),3000);return;}
     setSaving(true);setSaveMsg("");
     try{const snap=await getDoc(doc(db,"quinielas",myId));const existingHash=snap.exists()?snap.data().passwordHash:undefined;await setDoc(doc(db,"quinielas",myId),{nombre:myNombre,email:emailInput.trim(),...(existingHash&&{passwordHash:existingHash}),scores,campeon,segundo,tercero,goleador,goleadorCustom,knockout,updatedAt:Date.now()});setSaveMsg("¡Guardado! ✓");}
     catch(e){setSaveMsg("Error ✗");}
@@ -387,12 +398,7 @@ export default function App(){
                 {[{icon:"🥇",label:"Campeón",val:q.campeon,color:B.primary},{icon:"🥈",label:"Subcampeón",val:q.segundo,color:"#888"},{icon:"🥉",label:"3er Lugar",val:q.tercero,color:"#a07040"},{icon:"👟",label:"Bota de Oro",val:q.goleador==="Otro..."?q.goleadorCustom:q.goleador,color:"#3a5bd9"}].map(({icon,label,val,color})=>(<div key={label} style={{background:"#f8f8fc",border:`1px solid ${val?color+"35":"#e0e0e8"}`,borderRadius:10,padding:"10px 12px"}}><div style={{fontSize:9,color:B.muted,marginBottom:4}}>{icon} {label}</div><div style={{fontSize:12,fontWeight:"bold",color:val?color:"#ccc"}}>{val||"—"}</div></div>))}
               </div>
             </div>
-            {KEYS.map(g=>{
-              const gr2=GRUPOS[g];const ms2=GRUPOS[g].partidos.map((_,i)=>(q.scores||{})[g]?.[i]||{local:"",visita:""});
-              const tab2=calcTabla(gr2.equipos,gr2.partidos,ms2);
-              const done=ms2.every(m=>!isNaN(parseInt(m.local))&&m.local!==""&&!isNaN(parseInt(m.visita))&&m.visita!=="");
-              return(<div key={g} style={{background:"#ffffff",border:`1px solid ${done?gr2.color+"45":"#e0e0e8"}`,borderRadius:10,padding:"9px 13px",marginBottom:7}}><div style={{display:"flex",alignItems:"center",gap:8,marginBottom:done?8:0}}><div style={{width:26,height:26,borderRadius:6,background:done?gr2.color:"#f0f0f0",color:done?gr2.accent:"#888",display:"flex",alignItems:"center",justifyContent:"center",fontSize:12,fontWeight:"900"}}>{g}</div><div style={{fontSize:10,color:B.muted}}>{gr2.equipos.map(e=>e.split(" ").slice(1).join(" ")).join(" · ")}</div><span style={{marginLeft:"auto",fontSize:9,color:done?B.primary:"#ccc"}}>{done?"✓":"pendiente"}</span></div>{done&&(<div style={{display:"flex",gap:4}}>{tab2.map(([eq,st],i)=>(<div key={eq} style={{flex:1,textAlign:"center",background:i<2?gr2.color+"25":"#f5f5f5",border:`1px solid ${i<2?gr2.color+"40":"#e0e0e0"}`,borderRadius:6,padding:"4px 2px"}}><div style={{fontSize:8,color:i<2?gr2.accent:"#888",marginBottom:1}}>{i+1}°</div><div style={{fontSize:9,color:i<2?B.text:"#888",fontWeight:i<2?"bold":"normal"}}>{eq.split(" ").slice(1).join(" ").substring(0,7)}</div><div style={{fontSize:10,color:i<2?gr2.accent:"#888",fontWeight:"bold"}}>{st.pts}pts</div></div>))}</div>)}</div>);
-            })}
+            {KEYS.map(g=>{const gr2=GRUPOS[g];const ms2=GRUPOS[g].partidos.map((_,i)=>(q.scores||{})[g]?.[i]||{local:"",visita:""});const tab2=calcTabla(gr2.equipos,gr2.partidos,ms2);const done=ms2.every(m=>!isNaN(parseInt(m.local))&&m.local!==""&&!isNaN(parseInt(m.visita))&&m.visita!=="");return(<div key={g} style={{background:"#ffffff",border:`1px solid ${done?gr2.color+"45":"#e0e0e8"}`,borderRadius:10,padding:"9px 13px",marginBottom:7}}><div style={{display:"flex",alignItems:"center",gap:8,marginBottom:done?8:0}}><div style={{width:26,height:26,borderRadius:6,background:done?gr2.color:"#f0f0f0",color:done?gr2.accent:"#888",display:"flex",alignItems:"center",justifyContent:"center",fontSize:12,fontWeight:"900"}}>{g}</div><div style={{fontSize:10,color:B.muted}}>{gr2.equipos.map(e=>e.split(" ").slice(1).join(" ")).join(" · ")}</div><span style={{marginLeft:"auto",fontSize:9,color:done?B.primary:"#ccc"}}>{done?"✓":"pendiente"}</span></div>{done&&(<div style={{display:"flex",gap:4}}>{tab2.map(([eq,st],i)=>(<div key={eq} style={{flex:1,textAlign:"center",background:i<2?gr2.color+"25":"#f5f5f5",border:`1px solid ${i<2?gr2.color+"40":"#e0e0e0"}`,borderRadius:6,padding:"4px 2px"}}><div style={{fontSize:8,color:i<2?gr2.accent:"#888",marginBottom:1}}>{i+1}°</div><div style={{fontSize:9,color:i<2?B.text:"#888",fontWeight:i<2?"bold":"normal"}}>{eq.split(" ").slice(1).join(" ").substring(0,7)}</div><div style={{fontSize:10,color:i<2?gr2.accent:"#888",fontWeight:"bold"}}>{st.pts}pts</div></div>))}</div>)}</div>);})}
           </div>
         </div>
       );
@@ -412,25 +418,15 @@ export default function App(){
         <div style={{maxWidth:560,margin:"0 auto",padding:"14px 12px 40px"}}>
           {portalLoading&&<div style={{textAlign:"center",padding:40,color:B.muted}}>⏳ Cargando...</div>}
           {!portalLoading&&portalData.length===0&&(<div style={{textAlign:"center",padding:40}}><div style={{fontSize:40,marginBottom:12}}>🏜️</div><div style={{fontSize:14,color:B.muted,marginBottom:8}}>Aún no hay quinielas guardadas</div><button onClick={()=>setScreen(myId?"quiniela":"login")} style={{padding:"9px 20px",borderRadius:9,border:"none",background:"#3a5bd9",color:"#ffffff",fontWeight:"bold",fontSize:13,cursor:"pointer"}}>{myId?"Ir a mi quiniela":"Crear quiniela"}</button></div>)}
-          {!portalLoading&&portalData.length>0&&(
-            <>
-              <div style={{background:"#ffffff",border:"1px solid #e0e0e8",borderRadius:12,padding:14,marginBottom:16}}>
-                <div style={{fontSize:10,letterSpacing:3,color:B.primary,textTransform:"uppercase",marginBottom:12}}>Estadísticas del grupo</div>
-                {(()=>{const cc={},gc={};portalData.forEach(q=>{if(q.campeon)cc[q.campeon]=(cc[q.campeon]||0)+1;const g=q.goleador==="Otro..."?q.goleadorCustom:q.goleador;if(g)gc[g]=(gc[g]||0)+1;});const topC=Object.entries(cc).sort((a,b)=>b[1]-a[1]).slice(0,3);const topG=Object.entries(gc).sort((a,b)=>b[1]-a[1])[0];return(<div><div style={{fontSize:11,color:B.muted,marginBottom:6}}>Campeon más elegido</div><div style={{display:"flex",gap:6,flexWrap:"wrap",marginBottom:10}}>{topC.map(([sel,n])=>(<div key={sel} style={{background:"#eff4ff",border:"1px solid #3a5bd960",borderRadius:8,padding:"5px 10px",display:"flex",alignItems:"center",gap:6}}><span style={{fontSize:13}}>{sel.split(" ")[0]}</span><span style={{fontSize:11,color:B.primary,fontWeight:"bold"}}>{sel.split(" ").slice(1).join(" ")}</span><span style={{fontSize:10,color:B.muted,background:"#f0f0f0",borderRadius:10,padding:"1px 5px"}}>{n}</span></div>))}</div>{topG&&<div style={{fontSize:11,color:B.muted}}>Goleador favorito: <span style={{color:"#3a5bd9",fontWeight:"bold"}}>{topG[0]}</span></div>}</div>);})()}
-              </div>
-              {resultadosOficiales&&Object.keys(resultadosOficiales).length>0&&(
-                <div style={{marginBottom:14}}>
-                  <div style={{fontSize:10,letterSpacing:3,color:B.primary,textTransform:"uppercase",marginBottom:8}}>Ranking de puntuación</div>
-                  {portalData.map(p=>({...p,score:calcTotalPoints(p,resultadosOficiales)})).sort((a,b)=>b.score.total-a.score.total).slice(0,3).map((p,rank)=>(<div key={p.id} style={{display:"flex",alignItems:"center",gap:8,padding:"6px 10px",background:rank===0?"#eff4ff":"#ffffff",border:`1px solid ${rank===0?"#3a5bd9":"#e0e0e8"}`,borderRadius:8,marginBottom:4}}><span style={{fontSize:14}}>{rank===0?"🥇":rank===1?"🥈":"🥉"}</span><span style={{fontSize:13,fontWeight:"bold",color:rank===0?B.primary:B.text,flex:1}}>{p.nombre}</span><span style={{fontSize:15,fontWeight:"bold",color:rank===0?B.primary:B.muted}}>{p.score.total} pts</span></div>))}
-                </div>
-              )}
-              <div style={{fontSize:10,letterSpacing:3,color:"#888",textTransform:"uppercase",marginBottom:10}}>Participantes ({portalData.length})</div>
-              {portalData.map(q=>{
-                const qc=completionPct(q);const isMe=q.id===myId;
-                return(<div key={q.id} onClick={()=>setSelectedUser(q)} style={{background:isMe?"#eff4ff":"#ffffff",border:`1px solid ${isMe?"#3a5bd9":"#e0e0e8"}`,borderRadius:12,padding:"12px 14px",marginBottom:8,cursor:"pointer"}}><div style={{display:"flex",alignItems:"center",gap:10}}><div style={{width:36,height:36,borderRadius:10,background:isMe?"#dde8ff":"#f0f0f0",display:"flex",alignItems:"center",justifyContent:"center",fontSize:15,fontWeight:"bold",color:isMe?B.primary:"#888",flexShrink:0}}>{q.nombre.charAt(0).toUpperCase()}</div><div style={{flex:1,minWidth:0}}><div style={{display:"flex",alignItems:"center",gap:6,marginBottom:3}}><span style={{fontSize:13,fontWeight:"bold",color:isMe?"#3a5bd9":"#111"}}>{q.nombre}</span>{isMe&&<span style={{fontSize:9,background:"#dde8ff",border:"1px solid #3a5bd9",color:B.primary,borderRadius:10,padding:"1px 6px"}}>Tú</span>}</div>{q.campeon&&<span style={{fontSize:9,color:B.primary}}>{q.campeon.split(" ").slice(1).join(" ")}</span>}</div><div style={{textAlign:"right",flexShrink:0}}>{resultadosOficiales&&Object.keys(resultadosOficiales).length>0?(<div><div style={{fontSize:16,fontWeight:"bold",color:B.primary}}>{calcTotalPoints(q,resultadosOficiales).total} pts</div></div>):(<div style={{fontSize:14,fontWeight:"bold",color:qc.pct===100?B.primary:"#888"}}>{qc.pct}%</div>)}</div><div style={{color:"#ccc",fontSize:16}}>›</div></div><div style={{height:2,background:"#f0f0f0",borderRadius:1,overflow:"hidden",marginTop:8}}><div style={{height:"100%",width:qc.pct+"%",background:qc.pct===100?B.primary:"linear-gradient(90deg,#2a4bc9,#3a5bd9)",transition:"width 0.3s"}}/></div></div>);
-              })}
-            </>
-          )}
+          {!portalLoading&&portalData.length>0&&(<>
+            <div style={{background:"#ffffff",border:"1px solid #e0e0e8",borderRadius:12,padding:14,marginBottom:16}}>
+              <div style={{fontSize:10,letterSpacing:3,color:B.primary,textTransform:"uppercase",marginBottom:12}}>Estadísticas del grupo</div>
+              {(()=>{const cc={},gc={};portalData.forEach(q=>{if(q.campeon)cc[q.campeon]=(cc[q.campeon]||0)+1;const g=q.goleador==="Otro..."?q.goleadorCustom:q.goleador;if(g)gc[g]=(gc[g]||0)+1;});const topC=Object.entries(cc).sort((a,b)=>b[1]-a[1]).slice(0,3);const topG=Object.entries(gc).sort((a,b)=>b[1]-a[1])[0];return(<div><div style={{fontSize:11,color:B.muted,marginBottom:6}}>Campeón más elegido</div><div style={{display:"flex",gap:6,flexWrap:"wrap",marginBottom:10}}>{topC.map(([sel,n])=>(<div key={sel} style={{background:"#eff4ff",border:"1px solid #3a5bd960",borderRadius:8,padding:"5px 10px",display:"flex",alignItems:"center",gap:6}}><span style={{fontSize:13}}>{sel.split(" ")[0]}</span><span style={{fontSize:11,color:B.primary,fontWeight:"bold"}}>{sel.split(" ").slice(1).join(" ")}</span><span style={{fontSize:10,color:B.muted,background:"#f0f0f0",borderRadius:10,padding:"1px 5px"}}>{n}</span></div>))}</div>{topG&&<div style={{fontSize:11,color:B.muted}}>Goleador favorito: <span style={{color:"#3a5bd9",fontWeight:"bold"}}>{topG[0]}</span></div>}</div>);})()}
+            </div>
+            {resultadosOficiales&&Object.keys(resultadosOficiales).length>0&&(<div style={{marginBottom:14}}><div style={{fontSize:10,letterSpacing:3,color:B.primary,textTransform:"uppercase",marginBottom:8}}>Ranking de puntuación</div>{portalData.map(p=>({...p,score:calcTotalPoints(p,resultadosOficiales)})).sort((a,b)=>b.score.total-a.score.total).slice(0,3).map((p,rank)=>(<div key={p.id} style={{display:"flex",alignItems:"center",gap:8,padding:"6px 10px",background:rank===0?"#eff4ff":"#ffffff",border:`1px solid ${rank===0?"#3a5bd9":"#e0e0e8"}`,borderRadius:8,marginBottom:4}}><span style={{fontSize:14}}>{rank===0?"🥇":rank===1?"🥈":"🥉"}</span><span style={{fontSize:13,fontWeight:"bold",color:rank===0?B.primary:B.text,flex:1}}>{p.nombre}</span><span style={{fontSize:15,fontWeight:"bold",color:rank===0?B.primary:B.muted}}>{p.score.total} pts</span></div>))}</div>)}
+            <div style={{fontSize:10,letterSpacing:3,color:"#888",textTransform:"uppercase",marginBottom:10}}>Participantes ({portalData.length})</div>
+            {portalData.map(q=>{const qc=completionPct(q);const isMe=q.id===myId;return(<div key={q.id} onClick={()=>setSelectedUser(q)} style={{background:isMe?"#eff4ff":"#ffffff",border:`1px solid ${isMe?"#3a5bd9":"#e0e0e8"}`,borderRadius:12,padding:"12px 14px",marginBottom:8,cursor:"pointer"}}><div style={{display:"flex",alignItems:"center",gap:10}}><div style={{width:36,height:36,borderRadius:10,background:isMe?"#dde8ff":"#f0f0f0",display:"flex",alignItems:"center",justifyContent:"center",fontSize:15,fontWeight:"bold",color:isMe?B.primary:"#888",flexShrink:0}}>{q.nombre.charAt(0).toUpperCase()}</div><div style={{flex:1,minWidth:0}}><div style={{display:"flex",alignItems:"center",gap:6,marginBottom:3}}><span style={{fontSize:13,fontWeight:"bold",color:isMe?"#3a5bd9":"#111"}}>{q.nombre}</span>{isMe&&<span style={{fontSize:9,background:"#dde8ff",border:"1px solid #3a5bd9",color:B.primary,borderRadius:10,padding:"1px 6px"}}>Tú</span>}</div>{q.campeon&&<span style={{fontSize:9,color:B.primary}}>{q.campeon.split(" ").slice(1).join(" ")}</span>}</div><div style={{textAlign:"right",flexShrink:0}}>{resultadosOficiales&&Object.keys(resultadosOficiales).length>0?(<div style={{fontSize:16,fontWeight:"bold",color:B.primary}}>{calcTotalPoints(q,resultadosOficiales).total} pts</div>):(<div style={{fontSize:14,fontWeight:"bold",color:qc.pct===100?B.primary:"#888"}}>{qc.pct}%</div>)}</div><div style={{color:"#ccc",fontSize:16}}>›</div></div><div style={{height:2,background:"#f0f0f0",borderRadius:1,overflow:"hidden",marginTop:8}}><div style={{height:"100%",width:qc.pct+"%",background:qc.pct===100?B.primary:"linear-gradient(90deg,#2a4bc9,#3a5bd9)",transition:"width 0.3s"}}/></div></div>);})}
+          </>)}
         </div>
       </div>
     );
@@ -452,12 +448,34 @@ export default function App(){
           <div style={{display:"flex",gap:3,alignItems:"center"}}>
             <div style={{fontSize:10,color:"#ffffff",fontWeight:"700",marginRight:4,whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis",maxWidth:80}}>⚽ {myNombre}</div>
             {TABS.map(({id,label})=>(<button key={id} onClick={()=>setTab(id)} style={{padding:"3px 7px",borderRadius:6,border:"none",background:tab===id?"#ffffff":"#ffffff20",color:tab===id?"#1a2a6c":"#ffffffcc",fontSize:9,cursor:"pointer",fontWeight:"bold",whiteSpace:"nowrap"}}>{label}</button>))}
-            <button onClick={saveQuiniela} disabled={saving} style={{marginLeft:"auto",padding:"3px 8px",borderRadius:6,border:"none",background:saving?"#ffffff30":saveMsg.includes("✓")?"#00c853":"#ffffff",color:saving?"#aaa":saveMsg.includes("✓")?"#ffffff":"#1a2a6c",fontSize:9,cursor:saving?"not-allowed":"pointer",fontWeight:"bold",flexShrink:0}}>{saving?"...":saveMsg||"💾"}</button>
+            {/* Countdown + Save button */}
+            <div style={{marginLeft:"auto",display:"flex",alignItems:"center",gap:4,flexShrink:0}}>
+              {countdown&&!isPastDeadline&&(
+                <div style={{background:"#f77f0030",border:"1px solid #f77f0060",borderRadius:6,padding:"2px 6px",textAlign:"center"}}>
+                  <div style={{fontSize:6,color:"#f77f00",fontWeight:"600",letterSpacing:1}}>CIERRA</div>
+                  <div style={{fontSize:9,color:"#ffffff",fontWeight:"bold",fontFamily:"monospace"}}>{countdown}</div>
+                </div>
+              )}
+              {isPastDeadline&&(tab==="partidos"||tab==="predicciones")&&(
+                <div style={{background:"#e6394630",border:"1px solid #e6394660",borderRadius:6,padding:"2px 6px"}}>
+                  <div style={{fontSize:8,color:"#ff6b6b",fontWeight:"bold"}}>🔒 Cerrado</div>
+                </div>
+              )}
+              <button onClick={saveQuiniela} disabled={saving||(isPastDeadline&&(tab==="partidos"||tab==="predicciones"))} style={{padding:"3px 8px",borderRadius:6,border:"none",background:saving?"#ffffff30":saveMsg.includes("✓")?"#00c853":(isPastDeadline&&(tab==="partidos"||tab==="predicciones"))?"#ffffff15":"#ffffff",color:saving?"#aaa":saveMsg.includes("✓")?"#ffffff":(isPastDeadline&&(tab==="partidos"||tab==="predicciones"))?"#ffffff40":"#1a2a6c",fontSize:9,cursor:(saving||(isPastDeadline&&(tab==="partidos"||tab==="predicciones")))?"not-allowed":"pointer",fontWeight:"bold"}}>{saving?"...":saveMsg||"💾"}</button>
+            </div>
           </div>
         </div>
       </div>
 
       <div style={{maxWidth:560,margin:"0 auto",padding:"12px 10px 56px"}}>
+        {/* Lock banner for grupos and predicciones */}
+        {isPastDeadline&&(tab==="partidos"||tab==="predicciones")&&(
+          <div style={{background:"#fff3f0",border:"1px solid #e6394640",borderRadius:10,padding:"10px 14px",marginBottom:12,display:"flex",alignItems:"center",gap:10}}>
+            <span style={{fontSize:20}}>🔒</span>
+            <div><div style={{fontSize:12,fontWeight:"bold",color:"#e63946"}}>Predicciones cerradas</div><div style={{fontSize:11,color:"#888"}}>El torneo ya comenzó. Las eliminatorias siguen abiertas.</div></div>
+          </div>
+        )}
+
         {tab==="partidos"&&(
           <>
             <div style={{display:"flex",flexWrap:"wrap",gap:5,justifyContent:"center",marginBottom:14}}>
@@ -483,9 +501,9 @@ export default function App(){
                           <div style={{fontSize:9,color:"#777",marginBottom:5}}>📅 {p.fecha}</div>
                           <div style={{display:"flex",alignItems:"center",gap:6}}>
                             <div style={{flex:1,fontSize:11,textAlign:"right",fontWeight:wL?"bold":"normal",color:wL?"#111":ok?"#333":"#aaa"}}>{p.local}</div>
-                            <input type="number" min="0" max="20" value={m.local} onChange={e=>setGol(grupo,idx,"local",e.target.value)} style={{width:34,height:32,textAlign:"center",background:"#f0f0f5",border:`2px solid ${ok?"#3a5bd9":"#e0e0e8"}`,borderRadius:6,color:ok?"#3a5bd9":"#bbb",fontSize:15,fontWeight:"bold",outline:"none"}}/>
+                            <input type="number" min="0" max="20" value={m.local} onChange={e=>!isPastDeadline&&setGol(grupo,idx,"local",e.target.value)} readOnly={isPastDeadline} style={{width:34,height:32,textAlign:"center",background:isPastDeadline?"#f5f5f5":"#f0f0f5",border:`2px solid ${ok?"#3a5bd9":"#e0e0e8"}`,borderRadius:6,color:ok?"#3a5bd9":"#bbb",fontSize:15,fontWeight:"bold",outline:"none",cursor:isPastDeadline?"default":"auto"}}/>
                             <div style={{width:16,textAlign:"center",fontSize:12,color:wL?"#3a5bd9":wV?"#e63946":emp?"#f77f00":"#ccc",fontWeight:"bold"}}>{ok?(wL?"▸":wV?"◂":"="):"·"}</div>
-                            <input type="number" min="0" max="20" value={m.visita} onChange={e=>setGol(grupo,idx,"visita",e.target.value)} style={{width:34,height:32,textAlign:"center",background:"#f0f0f5",border:`2px solid ${ok?"#3a5bd9":"#e0e0e8"}`,borderRadius:6,color:ok?"#333":"#bbb",fontSize:15,fontWeight:"bold",outline:"none"}}/>
+                            <input type="number" min="0" max="20" value={m.visita} onChange={e=>!isPastDeadline&&setGol(grupo,idx,"visita",e.target.value)} readOnly={isPastDeadline} style={{width:34,height:32,textAlign:"center",background:isPastDeadline?"#f5f5f5":"#f0f0f5",border:`2px solid ${ok?"#3a5bd9":"#e0e0e8"}`,borderRadius:6,color:ok?"#333":"#bbb",fontSize:15,fontWeight:"bold",outline:"none",cursor:isPastDeadline?"default":"auto"}}/>
                             <div style={{flex:1,fontSize:11,fontWeight:wV?"bold":"normal",color:wV?"#111":ok?"#333":"#aaa"}}>{p.visita}</div>
                           </div>
                         </div>
@@ -506,15 +524,15 @@ export default function App(){
               <button onClick={()=>gIdx>0&&setGrupo(KEYS[gIdx-1])} disabled={gIdx===0} style={{flex:1,padding:8,borderRadius:9,border:"1px solid #e0e0e8",background:gIdx===0?"#f5f5f7":"#f0f0ff",color:gIdx===0?"#ccc":"#7c3aed",fontSize:12,cursor:gIdx===0?"not-allowed":"pointer"}}>← Anterior</button>
               <button onClick={()=>gIdx<KEYS.length-1&&setGrupo(KEYS[gIdx+1])} disabled={gIdx===KEYS.length-1} style={{flex:1,padding:8,borderRadius:9,border:"none",background:gIdx===KEYS.length-1?"#f5f5f7":"#7c3aed",color:gIdx===KEYS.length-1?"#ccc":"#ffffff",fontSize:12,fontWeight:"bold",cursor:gIdx===KEYS.length-1?"not-allowed":"pointer"}}>Siguiente →</button>
             </div>
-            <div style={{background:"#ffffff",border:"1px solid #e0e0e8",borderRadius:10,padding:"10px 14px",textAlign:"center"}}>
+            {!isPastDeadline&&(<div style={{background:"#ffffff",border:"1px solid #e0e0e8",borderRadius:10,padding:"10px 14px",textAlign:"center"}}>
               <div style={{fontSize:10,color:"#888",marginBottom:6}}>¿Listo con los grupos?</div>
               <button onClick={()=>setTab("knockout")} style={{padding:"8px 18px",borderRadius:8,border:"none",background:"linear-gradient(135deg,#3a5bd9,#7c3aed)",color:"#ffffff",fontWeight:"bold",fontSize:12,cursor:"pointer"}}>Continuar a Eliminatorias</button>
-            </div>
+            </div>)}
           </>
         )}
         {tab==="knockout"&&(<KnockoutTab knockout={knockout} setKnockout={setKnockout} scores={scores}/>)}
         {tab==="predicciones"&&(
-          <div>
+          <div style={{pointerEvents:isPastDeadline?"none":"auto",opacity:isPastDeadline?0.7:1}}>
             <div style={{background:"linear-gradient(135deg,#2a4bc9,#7c3aed)",borderRadius:14,padding:16,marginBottom:18,textAlign:"center",boxShadow:"0 4px 20px rgba(58,91,217,0.25)"}}>
               <Logos size={42} center/>
               <div style={{fontSize:16,fontWeight:"bold",color:"#ffffff",marginTop:12,marginBottom:4}}>Predicciones Especiales</div>
@@ -522,13 +540,12 @@ export default function App(){
               <div style={{marginTop:10,display:"flex",justifyContent:"center",gap:8}}>{[campeon,segundo,tercero,goleador||goleadorCustom].map((v,i)=>(<div key={i} style={{width:10,height:10,borderRadius:"50%",background:v?B.primary:"#f0f0f0",boxShadow:v?`0 0 6px ${B.primary}`:"none",transition:"all 0.3s"}}/>))}</div>
             </div>
             {(campeon||segundo||tercero)&&(<div style={{marginBottom:18,display:"flex",alignItems:"flex-end",justifyContent:"center",gap:6,height:110}}>{[{place:2,val:segundo,h:70,bg:"linear-gradient(180deg,#3a3a3a,#1a1a1a)",border:"#555",medal:"🥈"},{place:1,val:campeon,h:90,bg:"linear-gradient(180deg,#9b5de5,#7b3fc4)",border:"#3a5bd9",medal:"🥇"},{place:3,val:tercero,h:55,bg:"linear-gradient(180deg,#5a3a1a,#3a2010)",border:"#7a5a2a",medal:"🥉"}].map(({place,val,h,bg,border,medal})=>(<div key={place} style={{flex:1,display:"flex",flexDirection:"column",alignItems:"center"}}>{val&&<div style={{fontSize:10,color:place===1?B.primary:B.muted,marginBottom:4,textAlign:"center",fontWeight:place===1?"bold":"normal"}}>{val.split(" ").slice(1).join(" ")}</div>}<div style={{width:"100%",height:h,background:bg,borderRadius:"8px 8px 0 0",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",border:`1px solid ${border}`,boxShadow:place===1?`0 0 20px ${B.primary}40`:"none"}}><div style={{fontSize:place===1?26:20}}>{medal}</div>{val&&<div style={{fontSize:place===1?15:12}}>{val.split(" ")[0]}</div>}</div></div>))}</div>)}
-            {[{icon:"🥇",label:"Campeón del Mundo",sub:"¿Quién levantará la copa el 19 de julio?",val:campeon,set:v=>{setCampeon(v);if(segundo===v)setSegundo("");if(tercero===v)setTercero("");},color:B.primary,exclude:[]},{icon:"🥈",label:"Subcampeón",sub:"Finalista perdedor",val:segundo,set:v=>{setSegundo(v);if(tercero===v)setTercero("");},color:"#888",exclude:[campeon]},{icon:"🥉",label:"Tercer Lugar",sub:"Ganador del partido por el bronce",val:tercero,set:setTercero,color:"#a07040",exclude:[campeon,segundo]}].map(({icon,label,sub,val,set,color,exclude})=>(<div key={label} style={{background:"#ffffff",border:`1px solid ${color}30`,borderRadius:12,padding:14,marginBottom:12,boxShadow:"0 2px 8px rgba(0,0,0,0.06)"}}><div style={{display:"flex",alignItems:"center",gap:8,marginBottom:12}}><span style={{fontSize:20}}>{icon}</span><div><div style={{fontSize:13,fontWeight:"bold",color}}>{label}</div><div style={{fontSize:10,color:B.muted}}>{sub}</div></div>{val&&<div style={{marginLeft:"auto",fontSize:16}}>{val.split(" ")[0]}</div>}</div><div style={{display:"flex",flexWrap:"wrap",gap:5}}>{SELECCIONES.filter(s=>!exclude.includes(s)).map(s=>(<button key={s} onClick={()=>set(s===val?"":s)} style={btnStyle(val===s,color)}>{s}</button>))}</div></div>))}
+            {[{icon:"🥇",label:"Campeón del Mundo",sub:"¿Quién levantará la copa el 19 de julio?",val:campeon,set:v=>{setCampeon(v);if(segundo===v)setSegundo("");if(tercero===v)setTercero("");},color:B.primary,exclude:[]},{icon:"🥈",label:"Subcampeón",sub:"Finalista perdedor",val:segundo,set:v=>{setSegundo(v);if(tercero===v)setTercero("");},color:"#888",exclude:[campeon]},{icon:"🥉",label:"Tercer Lugar",sub:"Ganador del partido por el bronce",val:tercero,set:setTercero,color:"#a07040",exclude:[campeon,segundo]}].map(({icon,label,sub,val,set,color,exclude})=>(<div key={label} style={{background:"#ffffff",border:`1px solid ${color}30`,borderRadius:12,padding:14,marginBottom:12,boxShadow:"0 2px 8px rgba(0,0,0,0.06)"}}><div style={{display:"flex",alignItems:"center",gap:8,marginBottom:12}}><span style={{fontSize:20}}>{icon}</span><div><div style={{fontSize:13,fontWeight:"bold",color}}>{label}</div><div style={{fontSize:10,color:B.muted}}>{sub}</div></div>{val&&<div style={{marginLeft:"auto",fontSize:16}}>{val.split(" ")[0]}</div>}</div><div style={{display:"flex",flexWrap:"wrap",gap:5}}>{SELECCIONES.filter(s=>!exclude.includes(s)).map(s=>(<button key={s} onClick={()=>!isPastDeadline&&set(s===val?"":s)} style={{...btnStyle(val===s,color),cursor:isPastDeadline?"default":"pointer"}}>{s}</button>))}</div></div>))}
             <div style={{background:"#ffffff",border:"1px solid #3a5bd930",borderRadius:12,padding:14,marginBottom:18,boxShadow:"0 2px 8px rgba(0,0,0,0.06)"}}>
               <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:12}}><span style={{fontSize:20}}>👟</span><div><div style={{fontSize:13,fontWeight:"bold",color:"#3a5bd9"}}>Bota de Oro</div><div style={{fontSize:10,color:B.muted}}>Máximo goleador del torneo</div></div>{goleador&&goleador!=="Otro..."&&<div style={{marginLeft:"auto",fontSize:11,color:"#3a5bd9",fontWeight:"bold"}}>{GOLEADORES.find(g=>g.nombre===goleador)?.sel} {goleador}</div>}</div>
-              <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:6}}>{GOLEADORES.map(g=>(<button key={g.nombre} onClick={()=>setGoleador(g.nombre===goleador?"":g.nombre)} style={{padding:"7px 10px",borderRadius:8,textAlign:"left",border:`1px solid ${goleador===g.nombre?"#3a5bd9":"#e0e0e0"}`,background:goleador===g.nombre?"#eff4ff":"#f8f8fc",color:goleador===g.nombre?"#3a5bd9":B.muted,cursor:"pointer",transition:"all 0.15s",display:"flex",alignItems:"center",gap:6}}><span style={{fontSize:14}}>{g.sel}</span><div style={{flex:1}}><div style={{fontSize:11,fontWeight:goleador===g.nombre?"bold":"normal"}}>{g.nombre}</div>{g.club&&<div style={{fontSize:9,color:"#aaa"}}>{g.club}</div>}</div>{goleador===g.nombre&&<span>✓</span>}</button>))}</div>
-              {goleador==="Otro..."&&<input type="text" placeholder="Nombre del jugador..." value={goleadorCustom} onChange={e=>setGoleadorCustom(e.target.value)} style={{width:"100%",background:"#f8f8fc",border:"1px solid #e0e0e8",borderRadius:8,padding:"8px 12px",color:B.text,fontSize:13,outline:"none",boxSizing:"border-box",marginTop:10}}/>}
+              <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:6}}>{GOLEADORES.map(g=>(<button key={g.nombre} onClick={()=>!isPastDeadline&&setGoleador(g.nombre===goleador?"":g.nombre)} style={{padding:"7px 10px",borderRadius:8,textAlign:"left",border:`1px solid ${goleador===g.nombre?"#3a5bd9":"#e0e0e0"}`,background:goleador===g.nombre?"#eff4ff":"#f8f8fc",color:goleador===g.nombre?"#3a5bd9":B.muted,cursor:isPastDeadline?"default":"pointer",display:"flex",alignItems:"center",gap:6}}><span style={{fontSize:14}}>{g.sel}</span><div style={{flex:1}}><div style={{fontSize:11,fontWeight:goleador===g.nombre?"bold":"normal"}}>{g.nombre}</div>{g.club&&<div style={{fontSize:9,color:"#aaa"}}>{g.club}</div>}</div>{goleador===g.nombre&&<span>✓</span>}</button>))}</div>
             </div>
-            {podioCompleto&&(<div style={{background:"linear-gradient(135deg,#eff4ff,#f0ecff)",border:"2px solid #3a5bd9",borderRadius:12,padding:14,textAlign:"center"}}><div style={{fontSize:18,marginBottom:6}}>🎉</div><div style={{fontSize:13,fontWeight:"bold",color:"#3a5bd9",marginBottom:8}}>¡Predicciones completas!</div><button onClick={saveQuiniela} style={{padding:"8px 20px",borderRadius:8,border:"none",background:"#3a5bd9",color:"#ffffff",fontWeight:"bold",fontSize:13,cursor:"pointer",marginRight:8}}>💾 Guardar</button><button onClick={()=>setTab("resumen")} style={{padding:"8px 14px",borderRadius:8,border:"1px solid #e0e0e8",background:"transparent",color:"#666",fontSize:12,cursor:"pointer"}}>Ver resumen →</button></div>)}
+            {podioCompleto&&!isPastDeadline&&(<div style={{background:"linear-gradient(135deg,#eff4ff,#f0ecff)",border:"2px solid #3a5bd9",borderRadius:12,padding:14,textAlign:"center"}}><div style={{fontSize:18,marginBottom:6}}>🎉</div><div style={{fontSize:13,fontWeight:"bold",color:"#3a5bd9",marginBottom:8}}>¡Predicciones completas!</div><button onClick={saveQuiniela} style={{padding:"8px 20px",borderRadius:8,border:"none",background:"#3a5bd9",color:"#ffffff",fontWeight:"bold",fontSize:13,cursor:"pointer",marginRight:8}}>💾 Guardar</button><button onClick={()=>setTab("resumen")} style={{padding:"8px 14px",borderRadius:8,border:"1px solid #e0e0e8",background:"transparent",color:"#666",fontSize:12,cursor:"pointer"}}>Ver resumen →</button></div>)}
           </div>
         )}
         {tab==="ranking"&&(
@@ -539,9 +556,7 @@ export default function App(){
             {resultadosOficiales&&Object.keys(resultadosOficiales).length>0&&portalData.length===0&&(<div style={{textAlign:"center",marginTop:16}}><button onClick={loadPortal} style={{padding:"9px 20px",borderRadius:9,border:"none",background:"#3a5bd9",color:"#ffffff",fontWeight:"bold",fontSize:13,cursor:"pointer"}}>Cargar ranking completo</button></div>)}
             <div style={{marginTop:14,background:"#f5f5f7",border:"1px solid #e0e0e8",borderRadius:10,padding:12}}>
               <div style={{fontSize:9,color:B.muted,letterSpacing:2,textTransform:"uppercase",marginBottom:8}}>Sistema de puntos</div>
-              <div style={{display:"flex",flexWrap:"wrap",gap:6}}>
-                {[["Resultado exacto","5 pts",B.primary],["Solo ganador","3 pts","#7c3aed"],["Equipo que avanza","+1 pt","#00c853"],["Campeón","10 pts",B.primary],["Goleador","10 pts",B.primary]].map(([l,v,c])=>(<div key={l} style={{padding:"4px 10px",borderRadius:8,background:c+"15",border:`1px solid ${c}30`,fontSize:10}}><span style={{color:B.muted}}>{l}: </span><span style={{color:c,fontWeight:"bold"}}>{v}</span></div>))}
-              </div>
+              <div style={{display:"flex",flexWrap:"wrap",gap:6}}>{[["Resultado exacto","5 pts",B.primary],["Solo ganador","3 pts","#7c3aed"],["Equipo que avanza","+1 pt","#00c853"],["Campeón","10 pts",B.primary],["Goleador","10 pts",B.primary]].map(([l,v,c])=>(<div key={l} style={{padding:"4px 10px",borderRadius:8,background:c+"15",border:`1px solid ${c}30`,fontSize:10}}><span style={{color:B.muted}}>{l}: </span><span style={{color:c,fontWeight:"bold"}}>{v}</span></div>))}</div>
             </div>
           </div>
         )}
@@ -551,12 +566,12 @@ export default function App(){
               <Logos size={26}/>
               <div style={{fontSize:14,fontWeight:"bold",marginTop:10,marginBottom:6}}>🎯 {myNombre}</div>
               <div style={{display:"flex",gap:6,flexWrap:"wrap",marginBottom:12}}>
-                <span style={tagStyle(rellenados===totalP,B.primary)}>{rellenados===totalP?"✓":"·"} Grupos {rellenados}/{totalP}</span>
-                <span style={tagStyle(koFilled===koTotal,B.primary)}>{koFilled===koTotal?"✓":"·"} Elim. {koFilled}/{koTotal}</span>
-                <span style={tagStyle(podioCompleto,B.primary)}>{podioCompleto?"✓":"·"} Extras {predCount}/4</span>
+                <span style={{fontSize:10,background:rellenados===totalP?B.primary+"18":"#00000006",border:`1px solid ${rellenados===totalP?B.primary:"#00000010"}`,color:rellenados===totalP?B.primary:"#888",borderRadius:20,padding:"2px 8px"}}>{rellenados===totalP?"✓":"·"} Grupos {rellenados}/{totalP}</span>
+                <span style={{fontSize:10,background:koFilled===koTotal?B.primary+"18":"#00000006",border:`1px solid ${koFilled===koTotal?B.primary:"#00000010"}`,color:koFilled===koTotal?B.primary:"#888",borderRadius:20,padding:"2px 8px"}}>{koFilled===koTotal?"✓":"·"} Elim. {koFilled}/{koTotal}</span>
+                <span style={{fontSize:10,background:podioCompleto?B.primary+"18":"#00000006",border:`1px solid ${podioCompleto?B.primary:"#00000010"}`,color:podioCompleto?B.primary:"#888",borderRadius:20,padding:"2px 8px"}}>{podioCompleto?"✓":"·"} Extras {predCount}/4</span>
               </div>
               <div style={{display:"flex",gap:8}}>
-                <button onClick={saveQuiniela} disabled={saving} style={{flex:1,padding:9,borderRadius:9,border:"none",background:saving?"#e0e0e8":"#3a5bd9",color:saving?"#aaa":"#fff",fontWeight:"bold",fontSize:12,cursor:saving?"not-allowed":"pointer"}}>{saving?"Guardando...":saveMsg||"💾 Guardar quiniela"}</button>
+                <button onClick={saveQuiniela} disabled={saving||(isPastDeadline&&(tab==="partidos"||tab==="predicciones"))} style={{flex:1,padding:9,borderRadius:9,border:"none",background:saving?"#e0e0e8":"#3a5bd9",color:saving?"#aaa":"#fff",fontWeight:"bold",fontSize:12,cursor:saving?"not-allowed":"pointer"}}>{saving?"Guardando...":saveMsg||"💾 Guardar quiniela"}</button>
                 <button onClick={()=>setScreen("portal")} style={{flex:1,padding:9,borderRadius:9,border:"1px solid #e0e0e8",background:"#f0f0f8",color:B.muted,fontSize:12,cursor:"pointer"}}>Ver portal</button>
               </div>
             </div>
