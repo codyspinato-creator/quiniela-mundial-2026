@@ -14,7 +14,8 @@ const B = {
   logoMF:"/logo-mf.png",logoKOTO:"/KOTO.png",logoMundial:"/logo-mundial.png",
   adminWhatsApp:"5200000000000",
 };
-
+const DEADLINE = new Date("2026-06-11T18:00:00Z");
+const isPastDeadline = () => new Date() >= DEADLINE;
 const RONDAS=[
   {id:"r32",label:"Dieciseisavos",short:"1/16",emoji:"\u2694\uFE0F",partidos:16,color:"#4a7a9b"},
   {id:"r16",label:"Octavos",short:"1/8",emoji:"\uD83D\uDD25",partidos:8,color:"#7a4a9b"},
@@ -238,6 +239,7 @@ export default function App(){
   };
 
   const saveQuiniela=async()=>{
+    if(isPastDeadline()){setSaveMsg("⏰ Tiempo agotado");setTimeout(()=>setSaveMsg(""),3000);return;}
     setSaving(true);setSaveMsg("");
     try{const snap=await getDoc(doc(db,"quinielas",myId));const existingHash=snap.exists()?snap.data().passwordHash:undefined;await setDoc(doc(db,"quinielas",myId),{nombre:myNombre,email:emailInput.trim(),...(existingHash&&{passwordHash:existingHash}),scores,campeon,segundo,tercero,goleador,goleadorCustom,knockout,updatedAt:Date.now()});setSaveMsg("¡Guardado! ✓");}
     catch(e){setSaveMsg("Error ✗");}
