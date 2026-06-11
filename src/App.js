@@ -37,7 +37,7 @@ async function hashPassword(password){
 }
 
 // ─── DEADLINE + COUNTDOWN ─────────────────────────────────────────────────────
-const DEADLINE = new Date("2026-06-11T19:10:00Z"); // 2:30pm EST = 18:30 UTC
+const DEADLINE = new Date("2026-06-11T19:10:00Z"); // 3:10pm EST = 19:10 UTC
 
 function useCountdown(){
   const[timeLeft,setTimeLeft]=useState(()=>Math.max(0,DEADLINE-Date.now()));
