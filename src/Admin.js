@@ -301,8 +301,20 @@ export default function Admin({ onBack }) {
   const [saving, setSaving] = useState(false);
   const [saveMsg, setSaveMsg] = useState("");
   const [adminTab, setAdminTab] = useState("grupos");
+  const [jornadasCerradas, setJornadasCerradas] = useState({1:true,2:false,3:false});
+  const [jornadasSaved, setJornadasSaved] = useState(false);
   const [grupoActivo, setGrupoActivo] = useState("A");
   const [rondaActiva, setRondaActiva] = useState("r32");
+
+  const saveJornadas = async (newJornadas) => {
+    try {
+      const cfgSnap = await getDoc(doc(db, "admin", "config"));
+      const existing = cfgSnap.exists() ? cfgSnap.data() : {};
+      await setDoc(doc(db, "admin", "config"), { ...existing, jornadasCerradas: newJornadas, updatedAt: Date.now() });
+      setJornadasSaved(true);
+      setTimeout(() => setJornadasSaved(false), 2000);
+    } catch (e) { console.error(e); }
+  };
 
   const saveCodigo = async () => {
     try {
@@ -332,7 +344,10 @@ export default function Admin({ onBack }) {
         setResultados({ ...emptyResultados(), ...data, knockout: { ...emptyKnockout(), ...(data.knockout||{}) } });
       }
       const cfgSnap = await getDoc(doc(db, "admin", "config"));
-      if (cfgSnap.exists()) setCodigoAcceso(cfgSnap.data().codigoAcceso || "");
+      if (cfgSnap.exists()) {
+        setCodigoAcceso(cfgSnap.data().codigoAcceso || "");
+        if (cfgSnap.data().jornadasCerradas) setJornadasCerradas(cfgSnap.data().jornadasCerradas);
+      }
       const pSnap = await getDocs(collection(db, "quinielas"));
       const list = [];
       pSnap.forEach(d => list.push({ id: d.id, ...d.data() }));
@@ -437,7 +452,7 @@ export default function Admin({ onBack }) {
             </div>
           </div>
           <div style={{ display: "flex", gap: 4, overflowX: "auto" }}>
-            {[["grupos","📋 Grupos"],["knockout","⚔️ Eliminatorias"],["especiales","🏆 Especiales"],["ranking","🥇 Ranking"],["codigo","🔑 Código"]].map(([id, label]) => (
+            {[["grupos","📋 Grupos"],["knockout","⚔️ Eliminatorias"],["especiales","🏆 Especiales"],["ranking","🥇 Ranking"],["jornadas","🔓 Jornadas"],["codigo","🔑 Código"]].map(([id, label]) => (
               <button key={id} onClick={() => setAdminTab(id)} style={{ padding: "5px 10px", borderRadius: 6, border: "none", background: adminTab === id ? B.admin : "#f0f0f8", color: adminTab === id ? "#ffffff" : "#555", fontSize: 10, cursor: "pointer", fontWeight: "bold", whiteSpace: "nowrap", flexShrink: 0 }}>{label}</button>
             ))}
           </div>
@@ -587,6 +602,41 @@ export default function Admin({ onBack }) {
             <div style={{background:B.card,border:"1px solid #9b5de520",borderRadius:12,padding:14}}>
               <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:10}}><span style={{fontSize:20}}>👟</span><div style={{fontSize:13,fontWeight:"bold",color:"#9b5de5"}}>Bota de Oro</div>{resultados.goleador&&<div style={{marginLeft:"auto",fontSize:11,color:"#9b5de5",fontWeight:"bold"}}>{resultados.goleador}</div>}</div>
               <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:6}}>{GOLEADORES.map(g=>(<button key={g.nombre} onClick={()=>setResultados(prev=>({...prev,goleador:g.nombre===prev.goleador?"":g.nombre}))} style={{padding:"7px 10px",borderRadius:8,textAlign:"left",border:`1px solid ${resultados.goleador===g.nombre?"#9b5de5":"#e0e0e0"}`,background:resultados.goleador===g.nombre?"#f5f0ff":"#f8f8fc",color:resultados.goleador===g.nombre?"#9b5de5":"#555",cursor:"pointer",display:"flex",alignItems:"center",gap:6}}><span>{g.sel}</span><div style={{flex:1}}><div style={{fontSize:11,fontWeight:resultados.goleador===g.nombre?"bold":"normal"}}>{g.nombre}</div>{g.club&&<div style={{fontSize:9,color:"#aaa"}}>{g.club}</div>}</div>{resultados.goleador===g.nombre&&<span>✓</span>}</button>))}</div>
+            </div>
+          </div>
+        )}
+
+        {/* ═══ JORNADAS ═══ */}
+        {!loading && adminTab === "jornadas" && (
+          <div>
+            <div style={{background:`${B.admin}15`,border:`1px solid ${B.admin}40`,borderRadius:10,padding:"12px 14px",marginBottom:18,fontSize:11,color:B.muted}}>
+              🔓 Controla qué jornadas pueden editar los participantes. Cierra cada jornada <strong style={{color:B.text}}>antes de que empiece a jugarse</strong>.
+            </div>
+            {[1,2,3].map(f=>{
+              const locked = jornadasCerradas[f]===true;
+              const toggle = () => {
+                const updated = {...jornadasCerradas,[f]:!locked};
+                setJornadasCerradas(updated);
+                saveJornadas(updated);
+              };
+              return(
+                <div key={f} style={{background:"#ffffff",border:`2px solid ${locked?"#e63946":"#00c853"}`,borderRadius:12,padding:"14px 18px",marginBottom:12,display:"flex",alignItems:"center",gap:14}}>
+                  <div style={{fontSize:28}}>{locked?"🔒":"🔓"}</div>
+                  <div style={{flex:1}}>
+                    <div style={{fontSize:14,fontWeight:"bold",color:B.text}}>Jornada {f}</div>
+                    <div style={{fontSize:11,color:B.muted,marginTop:2}}>
+                      {locked?"Cerrada — los participantes no pueden editar estos partidos":"Abierta — los participantes pueden editar estos partidos"}
+                    </div>
+                  </div>
+                  <button onClick={toggle} style={{padding:"8px 18px",borderRadius:9,border:"none",background:locked?"#00c85320":"#e6394620",color:locked?"#00a044":"#e63946",fontWeight:"bold",fontSize:12,cursor:"pointer",border:`1px solid ${locked?"#00c85360":"#e6394660"}`}}>
+                    {locked?"🔓 Abrir":"🔒 Cerrar"}
+                  </button>
+                </div>
+              );
+            })}
+            {jornadasSaved&&<div style={{textAlign:"center",fontSize:12,color:"#00c853",fontWeight:"bold",marginTop:8}}>✓ Cambios guardados</div>}
+            <div style={{background:"#f8f8fc",border:"1px solid #e0e0e8",borderRadius:10,padding:"10px 14px",marginTop:8,fontSize:11,color:B.muted}}>
+              💡 Los cambios aplican inmediatamente. El participante verá la jornada bloqueada la próxima vez que recargue.
             </div>
           </div>
         )}

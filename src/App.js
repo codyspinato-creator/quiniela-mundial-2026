@@ -188,6 +188,7 @@ export default function App(){
   const[tab,setTab]=useState("partidos");const[grupo,setGrupo]=useState("A");
   const[portalTab,setPortalTab]=useState("ranking");
   const[detailTab,setDetailTab]=useState("grupos");
+  const[jornadasCerradas,setJornadasCerradas]=useState({1:true,2:false,3:false}); // J1 cerrada por defecto
 
   // Countdown to deadline
   const countdown=useCountdown();
@@ -252,7 +253,7 @@ export default function App(){
   };
 
   const saveQuiniela=async()=>{
-    if(isPastDeadline){setSaveMsg("⏰ Cerrado");setTimeout(()=>setSaveMsg(""),3000);return;}
+    if((isPastDeadline||isGruposFullyLocked)&&(tab==="partidos"||tab==="predicciones")){setSaveMsg("⏰ Cerrado");setTimeout(()=>setSaveMsg(""),3000);return;}
     setSaving(true);setSaveMsg("");
     try{const snap=await getDoc(doc(db,"quinielas",myId));const existingHash=snap.exists()?snap.data().passwordHash:undefined;await setDoc(doc(db,"quinielas",myId),{nombre:myNombre,email:emailInput.trim(),...(existingHash&&{passwordHash:existingHash}),scores,campeon,segundo,tercero,goleador,goleadorCustom,knockout,updatedAt:Date.now()});setSaveMsg("¡Guardado! ✓");}
     catch(e){setSaveMsg("Error ✗");}
@@ -261,7 +262,7 @@ export default function App(){
 
   const loadPortal=useCallback(async()=>{
     setPortalLoading(true);
-    try{const snap=await getDocs(collection(db,"quinielas"));const list=[];snap.forEach(d=>list.push({id:d.id,...d.data()}));setPortalData(list.sort((a,b)=>b.updatedAt-a.updatedAt));const rSnap=await getDoc(doc(db,"admin","resultados"));if(rSnap.exists())setResultadosOficiales(rSnap.data());}catch(e){setPortalData([]);}
+    try{const snap=await getDocs(collection(db,"quinielas"));const list=[];snap.forEach(d=>list.push({id:d.id,...d.data()}));setPortalData(list.sort((a,b)=>b.updatedAt-a.updatedAt));const rSnap=await getDoc(doc(db,"admin","resultados"));if(rSnap.exists())setResultadosOficiales(rSnap.data());const cfgSnap=await getDoc(doc(db,"admin","config"));if(cfgSnap.exists()&&cfgSnap.data().jornadasCerradas)setJornadasCerradas(cfgSnap.data().jornadasCerradas);}catch(e){setPortalData([]);}
     setPortalLoading(false);
   },[]);
 
@@ -270,6 +271,8 @@ export default function App(){
   const getMs=(g)=>GRUPOS[g].partidos.map((_,i)=>scores[g]?.[i]||{local:"",visita:""});
   const setGol=(g,idx,lado,val)=>{setScores(prev=>{const arr=GRUPOS[g].partidos.map((_,i)=>prev[g]?.[i]||{local:"",visita:""});arr[idx]={...arr[idx],[lado]:val};return{...prev,[g]:arr};});};
   const isDone=(g)=>getMs(g).every(m=>!isNaN(parseInt(m.local))&&m.local!==""&&!isNaN(parseInt(m.visita))&&m.visita!=="");
+  const isJornadaLocked=(f)=>jornadasCerradas[f]===true;
+  const isGruposFullyLocked=isJornadaLocked(1)&&isJornadaLocked(2)&&isJornadaLocked(3);
 
   const myQ={scores,campeon,segundo,tercero,goleador:goleador==="Otro..."?goleadorCustom:goleador,knockout};
   const{partidos:rellenados,total:totalP,extras:predCount,pct,koFilled,koTotal}=completionPct(myQ);
@@ -282,7 +285,14 @@ export default function App(){
   const btnStyle=(active,color)=>({padding:"5px 10px",borderRadius:18,fontSize:11,border:`1px solid ${active?color:"#00000010"}`,background:active?color+"20":"#00000006",color:active?color:B.muted,cursor:"pointer",fontWeight:active?"bold":"normal",transition:"all 0.15s"});
   const TABS=[{id:"partidos",label:"Grupos"},{id:"knockout",label:"Eliminatorias"},{id:"predicciones",label:"Predicciones"},{id:"ranking",label:"Ranking"},{id:"resumen",label:"Resumen"}];
 
-  useEffect(()=>{if(screen==="quiniela"&&myId){getDoc(doc(db,"admin","resultados")).then(snap=>{if(snap.exists())setResultadosOficiales(snap.data());}).catch(()=>{});}},[screen,myId]);
+  useEffect(()=>{
+    if(screen==="quiniela"&&myId){
+      getDoc(doc(db,"admin","resultados")).then(snap=>{if(snap.exists())setResultadosOficiales(snap.data());}).catch(()=>{});
+      getDoc(doc(db,"admin","config")).then(snap=>{
+        if(snap.exists()&&snap.data().jornadasCerradas) setJornadasCerradas(snap.data().jornadasCerradas);
+      }).catch(()=>{});
+    }
+  },[screen,myId]);
 
   const inputStyle={width:"100%",background:"#f8f8fc",border:"1px solid #ddd",borderRadius:8,padding:"10px 12px",color:"#111",fontSize:14,outline:"none",boxSizing:"border-box"};
   const cardStyle={background:"#ffffff",border:"1px solid #e0e0e8",borderRadius:16,padding:24,boxShadow:"0 4px 20px rgba(0,0,0,0.08)"};
@@ -624,7 +634,7 @@ export default function App(){
                   <div style={{fontSize:8,color:"#ff6b6b",fontWeight:"bold"}}>🔒 Cerrado</div>
                 </div>
               )}
-              <button onClick={saveQuiniela} disabled={saving||(isPastDeadline&&(tab==="partidos"||tab==="predicciones"))} style={{padding:"3px 8px",borderRadius:6,border:"none",background:saving?"#ffffff30":saveMsg.includes("✓")?"#00c853":(isPastDeadline&&(tab==="partidos"||tab==="predicciones"))?"#ffffff15":"#ffffff",color:saving?"#aaa":saveMsg.includes("✓")?"#ffffff":(isPastDeadline&&(tab==="partidos"||tab==="predicciones"))?"#ffffff40":"#1a2a6c",fontSize:9,cursor:(saving||(isPastDeadline&&(tab==="partidos"||tab==="predicciones")))?"not-allowed":"pointer",fontWeight:"bold"}}>{saving?"...":saveMsg||"💾"}</button>
+              <button onClick={saveQuiniela} disabled={saving||((isPastDeadline||isGruposFullyLocked)&&(tab==="partidos"||tab==="predicciones"))} style={{padding:"3px 8px",borderRadius:6,border:"none",background:saving?"#ffffff30":saveMsg.includes("✓")?"#00c853":((isPastDeadline||isGruposFullyLocked)&&(tab==="partidos"||tab==="predicciones"))?"#ffffff15":"#ffffff",color:saving?"#aaa":saveMsg.includes("✓")?"#ffffff":((isPastDeadline||isGruposFullyLocked)&&(tab==="partidos"||tab==="predicciones"))?"#ffffff40":"#1a2a6c",fontSize:9,cursor:(saving||(isPastDeadline&&(tab==="partidos"||tab==="predicciones")))?"not-allowed":"pointer",fontWeight:"bold"}}>{saving?"...":saveMsg||"💾"}</button>
             </div>
           </div>
         </div>
@@ -632,7 +642,7 @@ export default function App(){
 
       <div style={{maxWidth:560,margin:"0 auto",padding:"12px 10px 56px"}}>
         {/* Lock banner for grupos and predicciones */}
-        {isPastDeadline&&(tab==="partidos"||tab==="predicciones")&&(
+        {(isGruposFullyLocked||isPastDeadline)&&(tab==="partidos"||tab==="predicciones")&&(
           <div style={{background:"#fff3f0",border:"1px solid #e6394640",borderRadius:10,padding:"10px 14px",marginBottom:12,display:"flex",alignItems:"center",gap:10}}>
             <span style={{fontSize:20}}>🔒</span>
             <div><div style={{fontSize:12,fontWeight:"bold",color:"#e63946"}}>Predicciones cerradas</div><div style={{fontSize:11,color:"#888"}}>El torneo ya comenzó. Las eliminatorias siguen abiertas.</div></div>
@@ -664,9 +674,9 @@ export default function App(){
                           <div style={{fontSize:9,color:"#777",marginBottom:5}}>📅 {p.fecha}</div>
                           <div style={{display:"flex",alignItems:"center",gap:6}}>
                             <div style={{flex:1,fontSize:11,textAlign:"right",fontWeight:wL?"bold":"normal",color:wL?"#111":ok?"#333":"#aaa"}}>{p.local}</div>
-                            <input type="number" min="0" max="20" value={m.local} onChange={e=>!isPastDeadline&&setGol(grupo,idx,"local",e.target.value)} readOnly={isPastDeadline} style={{width:34,height:32,textAlign:"center",background:isPastDeadline?"#f5f5f5":"#f0f0f5",border:`2px solid ${ok?"#3a5bd9":"#e0e0e8"}`,borderRadius:6,color:ok?"#3a5bd9":"#bbb",fontSize:15,fontWeight:"bold",outline:"none",cursor:isPastDeadline?"default":"auto"}}/>
+                            <input type="number" min="0" max="20" value={m.local} onChange={e=>!isJornadaLocked(p.f)&&setGol(grupo,idx,"local",e.target.value)} readOnly={isJornadaLocked(p.f)} style={{width:34,height:32,textAlign:"center",background:isJornadaLocked(p.f)?"#f5f5f5":"#f0f0f5",border:`2px solid ${ok?"#3a5bd9":"#e0e0e8"}`,borderRadius:6,color:ok?"#3a5bd9":"#bbb",fontSize:15,fontWeight:"bold",outline:"none",cursor:isJornadaLocked(p.f)?"default":"auto"}}/>
                             <div style={{width:16,textAlign:"center",fontSize:12,color:wL?"#3a5bd9":wV?"#e63946":emp?"#f77f00":"#ccc",fontWeight:"bold"}}>{ok?(wL?"▸":wV?"◂":"="):"·"}</div>
-                            <input type="number" min="0" max="20" value={m.visita} onChange={e=>!isPastDeadline&&setGol(grupo,idx,"visita",e.target.value)} readOnly={isPastDeadline} style={{width:34,height:32,textAlign:"center",background:isPastDeadline?"#f5f5f5":"#f0f0f5",border:`2px solid ${ok?"#3a5bd9":"#e0e0e8"}`,borderRadius:6,color:ok?"#333":"#bbb",fontSize:15,fontWeight:"bold",outline:"none",cursor:isPastDeadline?"default":"auto"}}/>
+                            <input type="number" min="0" max="20" value={m.visita} onChange={e=>!isJornadaLocked(p.f)&&setGol(grupo,idx,"visita",e.target.value)} readOnly={isJornadaLocked(p.f)} style={{width:34,height:32,textAlign:"center",background:isJornadaLocked(p.f)?"#f5f5f5":"#f0f0f5",border:`2px solid ${ok?"#3a5bd9":"#e0e0e8"}`,borderRadius:6,color:ok?"#333":"#bbb",fontSize:15,fontWeight:"bold",outline:"none",cursor:isJornadaLocked(p.f)?"default":"auto"}}/>
                             <div style={{flex:1,fontSize:11,fontWeight:wV?"bold":"normal",color:wV?"#111":ok?"#333":"#aaa"}}>{p.visita}</div>
                           </div>
                         </div>
