@@ -253,7 +253,14 @@ export default function App(){
   };
 
   const saveQuiniela=async()=>{
-    if((isPastDeadline||isGruposFullyLocked)&&(tab==="partidos"||tab==="predicciones")){setSaveMsg("⏰ Cerrado");setTimeout(()=>setSaveMsg(""),3000);return;}
+    // Grupos: only block if ALL jornadas of current group are locked
+    if(tab==="partidos"){
+      const grupoActualLocked=[1,2,3].every(f=>isJornadaLocked(grupo,f));
+      const allGruposLocked=isGruposFullyLocked;
+      if(grupoActualLocked&&allGruposLocked){setSaveMsg("⏰ Cerrado");setTimeout(()=>setSaveMsg(""),3000);return;}
+    }
+    // Predicciones: block if past deadline
+    if(tab==="predicciones"&&isPastDeadline){setSaveMsg("⏰ Cerrado");setTimeout(()=>setSaveMsg(""),3000);return;}
     setSaving(true);setSaveMsg("");
     try{const snap=await getDoc(doc(db,"quinielas",myId));const existingHash=snap.exists()?snap.data().passwordHash:undefined;await setDoc(doc(db,"quinielas",myId),{nombre:myNombre,email:emailInput.trim(),...(existingHash&&{passwordHash:existingHash}),scores,campeon,segundo,tercero,goleador,goleadorCustom,knockout,updatedAt:Date.now()});setSaveMsg("¡Guardado! ✓");}
     catch(e){setSaveMsg("Error ✗");}
@@ -629,12 +636,12 @@ export default function App(){
                   <div style={{fontSize:9,color:"#ffffff",fontWeight:"bold",fontFamily:"monospace"}}>{countdown}</div>
                 </div>
               )}
-              {isPastDeadline&&(tab==="partidos"||tab==="predicciones")&&(
+              {isPastDeadline&&tab==="predicciones"&&(
                 <div style={{background:"#e6394630",border:"1px solid #e6394660",borderRadius:6,padding:"2px 6px"}}>
                   <div style={{fontSize:8,color:"#ff6b6b",fontWeight:"bold"}}>🔒 Cerrado</div>
                 </div>
               )}
-              <button onClick={saveQuiniela} disabled={saving||((isPastDeadline||isGruposFullyLocked)&&(tab==="partidos"||tab==="predicciones"))} style={{padding:"3px 8px",borderRadius:6,border:"none",background:saving?"#ffffff30":saveMsg.includes("✓")?"#00c853":((isPastDeadline||isGruposFullyLocked)&&(tab==="partidos"||tab==="predicciones"))?"#ffffff15":"#ffffff",color:saving?"#aaa":saveMsg.includes("✓")?"#ffffff":((isPastDeadline||isGruposFullyLocked)&&(tab==="partidos"||tab==="predicciones"))?"#ffffff40":"#1a2a6c",fontSize:9,cursor:(saving||(isPastDeadline&&(tab==="partidos"||tab==="predicciones")))?"not-allowed":"pointer",fontWeight:"bold"}}>{saving?"...":saveMsg||"💾"}</button>
+              <button onClick={saveQuiniela} disabled={saving||(isPastDeadline&&tab==="predicciones")} style={{padding:"3px 8px",borderRadius:6,border:"none",background:saving?"#ffffff30":saveMsg.includes("✓")?"#00c853":(isPastDeadline&&tab==="predicciones")?"#ffffff15":"#ffffff",color:saving?"#aaa":saveMsg.includes("✓")?"#ffffff":(isPastDeadline&&tab==="predicciones")?"#ffffff40":"#1a2a6c",fontSize:9,cursor:(saving||(isPastDeadline&&(tab==="partidos"||tab==="predicciones")))?"not-allowed":"pointer",fontWeight:"bold"}}>{saving?"...":saveMsg||"💾"}</button>
             </div>
           </div>
         </div>
@@ -642,7 +649,7 @@ export default function App(){
 
       <div style={{maxWidth:560,margin:"0 auto",padding:"12px 10px 56px"}}>
         {/* Lock banner for grupos and predicciones */}
-        {(isGruposFullyLocked||isPastDeadline)&&(tab==="partidos"||tab==="predicciones")&&(
+        {isPastDeadline&&tab==="predicciones"&&(
           <div style={{background:"#fff3f0",border:"1px solid #e6394640",borderRadius:10,padding:"10px 14px",marginBottom:12,display:"flex",alignItems:"center",gap:10}}>
             <span style={{fontSize:20}}>🔒</span>
             <div><div style={{fontSize:12,fontWeight:"bold",color:"#e63946"}}>Predicciones cerradas</div><div style={{fontSize:11,color:"#888"}}>El torneo ya comenzó. Las eliminatorias siguen abiertas.</div></div>
