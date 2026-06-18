@@ -609,34 +609,74 @@ export default function Admin({ onBack }) {
         {/* ═══ JORNADAS ═══ */}
         {!loading && adminTab === "jornadas" && (
           <div>
-            <div style={{background:`${B.admin}15`,border:`1px solid ${B.admin}40`,borderRadius:10,padding:"12px 14px",marginBottom:18,fontSize:11,color:B.muted}}>
-              🔓 Controla qué jornadas pueden editar los participantes. Cierra cada jornada <strong style={{color:B.text}}>antes de que empiece a jugarse</strong>.
+            <div style={{background:`${B.admin}15`,border:`1px solid ${B.admin}40`,borderRadius:10,padding:"12px 14px",marginBottom:16,fontSize:11,color:B.muted}}>
+              🔓 Cierra partidos específicos por <strong style={{color:B.text}}>grupo y jornada</strong>. 🔒 = bloqueado para edición. Los cambios aplican al instante.
             </div>
-            {[1,2,3].map(f=>{
-              const locked = jornadasCerradas[f]===true;
-              const toggle = () => {
-                const updated = {...jornadasCerradas,[f]:!locked};
-                setJornadasCerradas(updated);
-                saveJornadas(updated);
-              };
-              return(
-                <div key={f} style={{background:"#ffffff",border:`2px solid ${locked?"#e63946":"#00c853"}`,borderRadius:12,padding:"14px 18px",marginBottom:12,display:"flex",alignItems:"center",gap:14}}>
-                  <div style={{fontSize:28}}>{locked?"🔒":"🔓"}</div>
-                  <div style={{flex:1}}>
-                    <div style={{fontSize:14,fontWeight:"bold",color:B.text}}>Jornada {f}</div>
-                    <div style={{fontSize:11,color:B.muted,marginTop:2}}>
-                      {locked?"Cerrada — los participantes no pueden editar estos partidos":"Abierta — los participantes pueden editar estos partidos"}
-                    </div>
+
+            {/* Quick actions */}
+            <div style={{display:"flex",gap:8,marginBottom:14,flexWrap:"wrap"}}>
+              {[1,2,3].map(f=>(
+                <button key={f} onClick={()=>{
+                  const allLocked=KEYS.every(g=>jornadasCerradas[`${g}-${f}`]);
+                  const updated={...jornadasCerradas};
+                  KEYS.forEach(g=>{updated[`${g}-${f}`]=!allLocked;});
+                  setJornadasCerradas(updated);saveJornadas(updated);
+                }} style={{padding:"6px 12px",borderRadius:8,border:"1px solid #e0e0e8",background:"#f5f5f7",color:"#555",fontSize:11,cursor:"pointer",fontWeight:"bold"}}>
+                  {KEYS.every(g=>jornadasCerradas[`${g}-${f}`])?"🔓":"🔒"} Toda J{f}
+                </button>
+              ))}
+              <button onClick={()=>{
+                const allLocked=KEYS.every(g=>[1,2,3].every(f=>jornadasCerradas[`${g}-${f}`]));
+                const updated={};
+                KEYS.forEach(g=>[1,2,3].forEach(f=>{updated[`${g}-${f}`]=!allLocked;}));
+                setJornadasCerradas(updated);saveJornadas(updated);
+              }} style={{padding:"6px 12px",borderRadius:8,border:"1px solid #e63946",background:"#fff0f0",color:"#e63946",fontSize:11,cursor:"pointer",fontWeight:"bold"}}>
+                🔒 Todo
+              </button>
+            </div>
+
+            {/* Matrix table */}
+            <div style={{background:"#ffffff",border:"1px solid #e0e0e8",borderRadius:12,overflow:"hidden",marginBottom:12}}>
+              {/* Header */}
+              <div style={{display:"grid",gridTemplateColumns:"52px 1fr 1fr 1fr",background:"#f5f5f7",borderBottom:"2px solid #e0e0e8"}}>
+                <div style={{padding:"8px 10px",fontSize:9,color:"#888",fontWeight:"600",textTransform:"uppercase"}}>Grupo</div>
+                {[1,2,3].map(f=>(
+                  <div key={f} style={{padding:"8px 10px",fontSize:9,color:"#555",fontWeight:"700",textTransform:"uppercase",textAlign:"center",borderLeft:"1px solid #e0e0e8"}}>
+                    Jornada {f}
                   </div>
-                  <button onClick={toggle} style={{padding:"8px 18px",borderRadius:9,border:"none",background:locked?"#00c85320":"#e6394620",color:locked?"#00a044":"#e63946",fontWeight:"bold",fontSize:12,cursor:"pointer",border:`1px solid ${locked?"#00c85360":"#e6394660"}`}}>
-                    {locked?"🔓 Abrir":"🔒 Cerrar"}
-                  </button>
-                </div>
-              );
-            })}
-            {jornadasSaved&&<div style={{textAlign:"center",fontSize:12,color:"#00c853",fontWeight:"bold",marginTop:8}}>✓ Cambios guardados</div>}
-            <div style={{background:"#f8f8fc",border:"1px solid #e0e0e8",borderRadius:10,padding:"10px 14px",marginTop:8,fontSize:11,color:B.muted}}>
-              💡 Los cambios aplican inmediatamente. El participante verá la jornada bloqueada la próxima vez que recargue.
+                ))}
+              </div>
+              {/* Rows */}
+              {KEYS.map((g,gi)=>{
+                const gr=GRUPOS[g];
+                return(
+                  <div key={g} style={{display:"grid",gridTemplateColumns:"52px 1fr 1fr 1fr",borderTop:gi>0?"1px solid #f0f0f0":"none"}}>
+                    <div style={{padding:"8px 10px",display:"flex",alignItems:"center",gap:6}}>
+                      <div style={{width:24,height:24,borderRadius:5,background:gr.color,color:gr.accent,display:"flex",alignItems:"center",justifyContent:"center",fontSize:11,fontWeight:"900"}}>{g}</div>
+                    </div>
+                    {[1,2,3].map(f=>{
+                      const key=`${g}-${f}`;
+                      const locked=jornadasCerradas[key]===true;
+                      const partidos=gr.partidos.filter(p=>p.f===f);
+                      return(
+                        <div key={f} onClick={()=>{
+                          const updated={...jornadasCerradas,[key]:!locked};
+                          setJornadasCerradas(updated);saveJornadas(updated);
+                        }} style={{padding:"8px 6px",borderLeft:"1px solid #f0f0f0",cursor:"pointer",background:locked?"#fff5f5":"#f5fff7",display:"flex",flexDirection:"column",alignItems:"center",gap:3,transition:"background 0.15s"}}>
+                          <div style={{fontSize:16}}>{locked?"🔒":"🔓"}</div>
+                          <div style={{fontSize:8,color:locked?"#e63946":"#00a044",fontWeight:"bold"}}>{locked?"Cerrado":"Abierto"}</div>
+                          <div style={{fontSize:7,color:"#aaa"}}>{partidos.length} partido{partidos.length!==1?"s":""}</div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                );
+              })}
+            </div>
+
+            {jornadasSaved&&<div style={{textAlign:"center",fontSize:12,color:"#00c853",fontWeight:"bold",marginBottom:8}}>✓ Guardado</div>}
+            <div style={{background:"#f8f8fc",border:"1px solid #e0e0e8",borderRadius:10,padding:"10px 14px",fontSize:11,color:B.muted}}>
+              💡 Haz clic en cualquier celda para cambiar su estado. Usa los botones de arriba para cerrar/abrir una jornada completa de golpe.
             </div>
           </div>
         )}

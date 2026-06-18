@@ -188,7 +188,7 @@ export default function App(){
   const[tab,setTab]=useState("partidos");const[grupo,setGrupo]=useState("A");
   const[portalTab,setPortalTab]=useState("ranking");
   const[detailTab,setDetailTab]=useState("grupos");
-  const[jornadasCerradas,setJornadasCerradas]=useState({1:true,2:false,3:false}); // J1 cerrada por defecto
+  const[jornadasCerradas,setJornadasCerradas]=useState({}); // loaded from Firebase
 
   // Countdown to deadline
   const countdown=useCountdown();
@@ -271,8 +271,8 @@ export default function App(){
   const getMs=(g)=>GRUPOS[g].partidos.map((_,i)=>scores[g]?.[i]||{local:"",visita:""});
   const setGol=(g,idx,lado,val)=>{setScores(prev=>{const arr=GRUPOS[g].partidos.map((_,i)=>prev[g]?.[i]||{local:"",visita:""});arr[idx]={...arr[idx],[lado]:val};return{...prev,[g]:arr};});};
   const isDone=(g)=>getMs(g).every(m=>!isNaN(parseInt(m.local))&&m.local!==""&&!isNaN(parseInt(m.visita))&&m.visita!=="");
-  const isJornadaLocked=(f)=>jornadasCerradas[f]===true;
-  const isGruposFullyLocked=isJornadaLocked(1)&&isJornadaLocked(2)&&isJornadaLocked(3);
+  const isJornadaLocked=(g,f)=>jornadasCerradas[`${g}-${f}`]===true;
+  const isGruposFullyLocked=KEYS.every(g=>[1,2,3].every(f=>isJornadaLocked(g,f)));
 
   const myQ={scores,campeon,segundo,tercero,goleador:goleador==="Otro..."?goleadorCustom:goleador,knockout};
   const{partidos:rellenados,total:totalP,extras:predCount,pct,koFilled,koTotal}=completionPct(myQ);
@@ -663,7 +663,7 @@ export default function App(){
               <div style={{background:"#f5f5f7"}}>
                 {[1,2,3].map(fecha=>(
                   <div key={fecha}>
-                    <div style={{padding:"5px 14px",background:"#f0f0f5",fontSize:9,color:"#333",fontWeight:"600",letterSpacing:2,textTransform:"uppercase",borderTop:fecha>1?"1px solid #e0e0e8":"none",borderBottom:"1px solid #e0e0e8"}}>Jornada {fecha}</div>
+                    {(()=>{const locked=isJornadaLocked(grupo,fecha);return(<div style={{padding:"5px 14px",background:locked?"#fff5f5":"#f0f0f5",fontSize:9,color:locked?"#e63946":"#333",fontWeight:"600",letterSpacing:2,textTransform:"uppercase",borderTop:fecha>1?"1px solid #e0e0e8":"none",borderBottom:"1px solid #e0e0e8",display:"flex",alignItems:"center",gap:5}}><span>Jornada {fecha}</span>{locked&&<span style={{fontSize:9}}>🔒</span>}</div>);})()}
                     {gr.partidos.filter(p=>p.f===fecha).map(p=>{
                       const idx=gr.partidos.indexOf(p);const m=ms[idx];
                       const gl=parseInt(m.local),gv=parseInt(m.visita);
@@ -674,9 +674,9 @@ export default function App(){
                           <div style={{fontSize:9,color:"#777",marginBottom:5}}>📅 {p.fecha}</div>
                           <div style={{display:"flex",alignItems:"center",gap:6}}>
                             <div style={{flex:1,fontSize:11,textAlign:"right",fontWeight:wL?"bold":"normal",color:wL?"#111":ok?"#333":"#aaa"}}>{p.local}</div>
-                            <input type="number" min="0" max="20" value={m.local} onChange={e=>!isJornadaLocked(p.f)&&setGol(grupo,idx,"local",e.target.value)} readOnly={isJornadaLocked(p.f)} style={{width:34,height:32,textAlign:"center",background:isJornadaLocked(p.f)?"#f5f5f5":"#f0f0f5",border:`2px solid ${ok?"#3a5bd9":"#e0e0e8"}`,borderRadius:6,color:ok?"#3a5bd9":"#bbb",fontSize:15,fontWeight:"bold",outline:"none",cursor:isJornadaLocked(p.f)?"default":"auto"}}/>
+                            <input type="number" min="0" max="20" value={m.local} onChange={e=>!isJornadaLocked(grupo,p.f)&&setGol(grupo,idx,"local",e.target.value)} readOnly={isJornadaLocked(grupo,p.f)} style={{width:34,height:32,textAlign:"center",background:isJornadaLocked(grupo,p.f)?"#f5f5f5":"#f0f0f5",border:`2px solid ${ok?"#3a5bd9":"#e0e0e8"}`,borderRadius:6,color:ok?"#3a5bd9":"#bbb",fontSize:15,fontWeight:"bold",outline:"none",cursor:isJornadaLocked(grupo,p.f)?"default":"auto"}}/>
                             <div style={{width:16,textAlign:"center",fontSize:12,color:wL?"#3a5bd9":wV?"#e63946":emp?"#f77f00":"#ccc",fontWeight:"bold"}}>{ok?(wL?"▸":wV?"◂":"="):"·"}</div>
-                            <input type="number" min="0" max="20" value={m.visita} onChange={e=>!isJornadaLocked(p.f)&&setGol(grupo,idx,"visita",e.target.value)} readOnly={isJornadaLocked(p.f)} style={{width:34,height:32,textAlign:"center",background:isJornadaLocked(p.f)?"#f5f5f5":"#f0f0f5",border:`2px solid ${ok?"#3a5bd9":"#e0e0e8"}`,borderRadius:6,color:ok?"#333":"#bbb",fontSize:15,fontWeight:"bold",outline:"none",cursor:isJornadaLocked(p.f)?"default":"auto"}}/>
+                            <input type="number" min="0" max="20" value={m.visita} onChange={e=>!isJornadaLocked(grupo,p.f)&&setGol(grupo,idx,"visita",e.target.value)} readOnly={isJornadaLocked(grupo,p.f)} style={{width:34,height:32,textAlign:"center",background:isJornadaLocked(grupo,p.f)?"#f5f5f5":"#f0f0f5",border:`2px solid ${ok?"#3a5bd9":"#e0e0e8"}`,borderRadius:6,color:ok?"#333":"#bbb",fontSize:15,fontWeight:"bold",outline:"none",cursor:isJornadaLocked(grupo,p.f)?"default":"auto"}}/>
                             <div style={{flex:1,fontSize:11,fontWeight:wV?"bold":"normal",color:wV?"#111":ok?"#333":"#aaa"}}>{p.visita}</div>
                           </div>
                         </div>
