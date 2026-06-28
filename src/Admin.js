@@ -452,7 +452,7 @@ export default function Admin({ onBack }) {
             </div>
           </div>
           <div style={{ display: "flex", gap: 4, overflowX: "auto" }}>
-            {[["grupos","📋 Grupos"],["knockout","⚔️ Eliminatorias"],["especiales","🏆 Especiales"],["ranking","🥇 Ranking"],["jornadas","🔓 Jornadas"],["codigo","🔑 Código"]].map(([id, label]) => (
+            {[["grupos","📋 Grupos"],["knockout","⚔️ Eliminatorias"],["bracket","🔧 Cruces"],["especiales","🏆 Especiales"],["ranking","🥇 Ranking"],["jornadas","🔓 Jornadas"],["codigo","🔑 Código"]].map(([id, label]) => (
               <button key={id} onClick={() => setAdminTab(id)} style={{ padding: "5px 10px", borderRadius: 6, border: "none", background: adminTab === id ? B.admin : "#f0f0f8", color: adminTab === id ? "#ffffff" : "#555", fontSize: 10, cursor: "pointer", fontWeight: "bold", whiteSpace: "nowrap", flexShrink: 0 }}>{label}</button>
             ))}
           </div>
@@ -588,6 +588,46 @@ export default function Admin({ onBack }) {
               );
             })()}
           </>
+        )}
+
+        {/* ═══ CRUCES MANUALES ═══ */}
+        {!loading && adminTab === "bracket" && (
+          <div>
+            <div style={{background:`${B.admin}15`,border:`1px solid ${B.admin}40`,borderRadius:10,padding:"12px 14px",marginBottom:16,fontSize:11,color:B.muted}}>
+              🔧 Edita manualmente los equipos de cada partido eliminatorio. Útil si hubo un error o si el bracket automático no se llenó bien. <strong style={{color:B.text}}>Guarda al terminar.</strong>
+            </div>
+            <div style={{display:"flex",gap:4,overflowX:"auto",marginBottom:14}}>
+              {RONDAS.map(r=>{const active=r.id===rondaActiva;return(<button key={r.id} onClick={()=>setRondaActiva(r.id)} style={{padding:"6px 10px",borderRadius:8,border:`2px solid ${active?B.admin:"transparent"}`,background:active?B.adminDim:"#f5f5f7",color:active?B.admin:B.muted,fontSize:10,cursor:"pointer",fontWeight:"bold",whiteSpace:"nowrap",flexShrink:0}}>{r.emoji} {r.label}</button>);})}
+            </div>
+            {(()=>{
+              const ronda=RONDAS.find(r=>r.id===rondaActiva);
+              const matches=resultados.knockout?.[rondaActiva]||Array.from({length:ronda.partidos},(_,i)=>({id:i,local:"",localGoles:"",visita:"",visitaGoles:"",ganador:"",penaltis:false,penaltisGanador:""}));
+              return(
+                <div style={{display:ronda.partidos>=4?"grid":"block",gridTemplateColumns:ronda.partidos>=4?"1fr 1fr":"1fr",gap:8}}>
+                  {matches.map((match,i)=>(
+                    <div key={i} style={{background:"#ffffff",border:"1px solid #e0e0e8",borderRadius:12,padding:"10px 12px",marginBottom:8}}>
+                      <div style={{fontSize:9,color:"#3a5bd9",fontWeight:"800",marginBottom:8}}>{match.num||`P${i+1}`}{match.fecha&&<span style={{color:"#bbb",fontWeight:"normal"}}> · {match.fecha}</span>}</div>
+                      <div style={{marginBottom:6}}>
+                        <div style={{fontSize:9,color:B.muted,marginBottom:3}}>Local</div>
+                        <input value={match.local||""} onChange={e=>setKO(rondaActiva,i,"local",e.target.value)} placeholder="Equipo local..." style={{width:"100%",background:"#f8f8fc",border:"1px solid #e0e0e8",borderRadius:7,padding:"7px 10px",fontSize:11,outline:"none",boxSizing:"border-box"}}/>
+                      </div>
+                      <div>
+                        <div style={{fontSize:9,color:B.muted,marginBottom:3}}>Visitante</div>
+                        <input value={match.visita||""} onChange={e=>setKO(rondaActiva,i,"visita",e.target.value)} placeholder="Equipo visitante..." style={{width:"100%",background:"#f8f8fc",border:"1px solid #e0e0e8",borderRadius:7,padding:"7px 10px",fontSize:11,outline:"none",boxSizing:"border-box"}}/>
+                      </div>
+                      {match.ganador&&<div style={{marginTop:6,fontSize:10,color:B.admin,fontWeight:"bold"}}>✓ Ganador actual: {match.ganador}</div>}
+                    </div>
+                  ))}
+                </div>
+              );
+            })()}
+            <div style={{marginTop:14,textAlign:"center"}}>
+              <button onClick={saveResultados} style={{padding:"10px 28px",borderRadius:9,border:"none",background:`linear-gradient(135deg,${B.admin},#6d28d9)`,color:"#ffffff",fontWeight:"bold",fontSize:13,cursor:"pointer"}}>
+                💾 Guardar cruces
+              </button>
+              {saveMsg&&<div style={{marginTop:8,fontSize:12,color:saveMsg.includes("✓")?"#00c853":"#e63946",fontWeight:"bold"}}>{saveMsg}</div>}
+            </div>
+          </div>
         )}
 
         {/* ═══ ESPECIALES ═══ */}

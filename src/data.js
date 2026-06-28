@@ -92,22 +92,22 @@ export function completionPct(quiniela) {
 
 // ─── BRACKET FIFA 2026 OFICIAL ────────────────────────────────────────────────
 export const R32_BRACKET = [
-  { num:"P73",  local:"2A", visita:"2B",       fecha:"28 jun", sede:"Los Ángeles"    },
-  { num:"P74",  local:"1E", visita:"3ABCDF",   fecha:"29 jun", sede:"Boston"         },
-  { num:"P75",  local:"1F", visita:"2C",       fecha:"29 jun", sede:"Monterrey"      },
-  { num:"P76",  local:"1C", visita:"2F",       fecha:"29 jun", sede:"Houston"        },
-  { num:"P77",  local:"1I", visita:"3CDFGH",   fecha:"30 jun", sede:"Nueva York/NJ"  },
-  { num:"P78",  local:"2E", visita:"2I",       fecha:"30 jun", sede:"Dallas"         },
-  { num:"P79",  local:"1A", visita:"3CEFHI",   fecha:"30 jun", sede:"Ciudad de México"},
-  { num:"P80",  local:"1L", visita:"3EHIJK",   fecha:"1 jul",  sede:"Atlanta"        },
-  { num:"P81",  local:"1D", visita:"3BEFIJ",   fecha:"1 jul",  sede:"San Francisco"  },
-  { num:"P82",  local:"1G", visita:"3AEHIJ",   fecha:"1 jul",  sede:"Seattle"        },
-  { num:"P83",  local:"2K", visita:"2L",       fecha:"2 jul",  sede:"Toronto"        },
-  { num:"P84",  local:"1H", visita:"2J",       fecha:"2 jul",  sede:"Los Ángeles"    },
-  { num:"P85",  local:"1B", visita:"3EFGIJ",   fecha:"2 jul",  sede:"Vancouver"      },
-  { num:"P86",  local:"1J", visita:"2H",       fecha:"3 jul",  sede:"Miami"          },
-  { num:"P87",  local:"1K", visita:"3DEIJL",   fecha:"3 jul",  sede:"Kansas City"    },
-  { num:"P88",  local:"2D", visita:"2G",       fecha:"3 jul",  sede:"Dallas"         },
+  { num:"P73",  local:"🇿🇦 Sudáfrica",       visita:"🇨🇦 Canadá",          fecha:"28 jun", sede:"Los Ángeles"    },
+  { num:"P74",  local:"🇩🇪 Alemania",        visita:"🇵🇾 Paraguay",         fecha:"29 jun", sede:"Boston"         },
+  { num:"P75",  local:"🇳🇱 Países Bajos",    visita:"🇲🇦 Marruecos",        fecha:"29 jun", sede:"Guadalajara"    },
+  { num:"P76",  local:"🇧🇷 Brasil",          visita:"🇯🇵 Japón",            fecha:"29 jun", sede:"Houston"        },
+  { num:"P77",  local:"🇫🇷 Francia",         visita:"🇸🇪 Suecia",           fecha:"30 jun", sede:"Nueva York/NJ"  },
+  { num:"P78",  local:"🇨🇮 Costa de Marfil", visita:"🇳🇴 Noruega",          fecha:"30 jun", sede:"Dallas"         },
+  { num:"P79",  local:"🇲🇽 México",          visita:"🇪🇨 Ecuador",          fecha:"30 jun", sede:"Ciudad de México"},
+  { num:"P80",  local:"🏴󠁧󠁢󠁥󠁮󠁧󠁿 Inglaterra",    visita:"🇨🇩 R.D. Congo",       fecha:"1 jul",  sede:"Atlanta"        },
+  { num:"P81",  local:"🇺🇸 EE.UU.",          visita:"🇧🇦 Bosnia y Herz.",   fecha:"1 jul",  sede:"San Francisco"  },
+  { num:"P82",  local:"🇧🇪 Bélgica",         visita:"🇸🇳 Senegal",          fecha:"1 jul",  sede:"Seattle"        },
+  { num:"P83",  local:"🇵🇹 Portugal",        visita:"🇭🇷 Croacia",          fecha:"2 jul",  sede:"Toronto"        },
+  { num:"P84",  local:"🇪🇸 España",          visita:"🇦🇹 Austria",          fecha:"2 jul",  sede:"Los Ángeles"    },
+  { num:"P85",  local:"🇨🇭 Suiza",           visita:"🇩🇿 Argelia",          fecha:"2 jul",  sede:"Vancouver"      },
+  { num:"P86",  local:"🇦🇷 Argentina",       visita:"🇨🇻 Cabo Verde",       fecha:"3 jul",  sede:"Miami"          },
+  { num:"P87",  local:"🇨🇴 Colombia",        visita:"🇬🇭 Ghana",            fecha:"3 jul",  sede:"Kansas City"    },
+  { num:"P88",  local:"🇦🇺 Australia",       visita:"🇪🇬 Egipto",           fecha:"3 jul",  sede:"Dallas"         },
 ];
 
 export const R16_BRACKET = [
@@ -178,17 +178,10 @@ export function buildBracket(scores, knockout) {
     const usedThirds = new Set();
     const ko = {};
 
+    // R32: use hardcoded real teams from R32_BRACKET (already filled with real names)
     ko.r32 = R32_BRACKET.map((s,i) => {
-      let local = "", visita = "";
-      if (s.local.startsWith("1") || s.local.startsWith("2")) local = c[s.local]||"";
-      if (s.visita.startsWith("3")) {
-        const allowedGroups = s.visita.slice(1).split("");
-        visita = getBestThird(thirds, allowedGroups, usedThirds);
-        if (visita) usedThirds.add(visita);
-      } else {
-        visita = c[s.visita]||"";
-      }
-      if (s.local.startsWith("2")) local = c[s.local]||"";
+      const local = s.local || "";
+      const visita = s.visita || "";
       return { ...makeMatch(i, local, visita, knockout?.r32?.[i]), num:s.num, sede:s.sede, fecha:s.fecha };
     });
 
