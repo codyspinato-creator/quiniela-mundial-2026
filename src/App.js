@@ -133,6 +133,7 @@ function KnockoutTab({knockout,setKnockout,resultadosOficiales,jornadasCerradas}
   const[rondaActiva,setRondaActiva]=useState("r32");
   const ronda=RONDAS.find(r=>r.id===rondaActiva);
   const isRondaLocked=(rid)=>jornadasCerradas?.[`ko-${rid}`]===true;
+  const locked=isRondaLocked(rondaActiva);
 
   // Official matches for current ronda (teams from admin results)
   const oficialMatches=(resultadosOficiales?.knockout||{})[rondaActiva]||[];
@@ -140,12 +141,26 @@ function KnockoutTab({knockout,setKnockout,resultadosOficiales,jornadasCerradas}
   // User predictions for current ronda
   const userMatches=knockout[rondaActiva]||Array.from({length:ronda.partidos},(_,i)=>({id:i,local:"",localGoles:"",visita:"",visitaGoles:"",ganador:"",penaltis:false,penaltisGanador:""}));
 
-  const pickWinner=(idx,eq)=>{
-    if(isRondaLocked(rondaActiva)) return;
+  const updMatch=(idx,field,val)=>{
+    if(locked) return;
     setKnockout(prev=>{
-      const arr=[...(prev[rondaActiva]||Array.from({length:ronda.partidos},(_,i)=>({id:i,local:"",localGoles:"",visita:"",visitaGoles:"",ganador:"",penaltis:false,penaltisGanador:""})))];
+      const empty=Array.from({length:ronda.partidos},(_,i)=>({id:i,local:"",localGoles:"",visita:"",visitaGoles:"",ganador:"",penaltis:false,penaltisGanador:""}));
+      const arr=[...(prev[rondaActiva]||empty)];
       const om=oficialMatches[idx]||{};
-      arr[idx]={...arr[idx],local:om.local||arr[idx].local,visita:om.visita||arr[idx].visita,ganador:arr[idx].ganador===eq?"":eq};
+      const cur={...arr[idx],local:om.local||arr[idx].local,visita:om.visita||arr[idx].visita};
+      arr[idx]={...cur,[field]:val};
+      // Auto-resolve ganador from score if not empate
+      if(field==="localGoles"||field==="visitaGoles"){
+        const gl=parseInt(field==="localGoles"?val:arr[idx].localGoles);
+        const gv=parseInt(field==="visitaGoles"?val:arr[idx].visitaGoles);
+        if(!isNaN(gl)&&!isNaN(gv)&&gl!==gv){
+          arr[idx].ganador=gl>gv?(om.local||arr[idx].local):(om.visita||arr[idx].visita);
+          arr[idx].penaltis=false;arr[idx].penaltisGanador="";
+        } else if(!isNaN(gl)&&!isNaN(gv)&&gl===gv){
+          // empate — clear ganador so user picks via penaltis
+          arr[idx].ganador="";arr[idx].penaltis=false;arr[idx].penaltisGanador="";
+        }
+      }
       return {...prev,[rondaActiva]:arr};
     });
   };
@@ -153,7 +168,6 @@ function KnockoutTab({knockout,setKnockout,resultadosOficiales,jornadasCerradas}
   const completedInRound=userMatches.filter(m=>m.ganador).length;
   const isFinal=rondaActiva==="final";
   const isThird=rondaActiva==="third";
-  const locked=isRondaLocked(rondaActiva);
 
   return(
     <div>
@@ -171,33 +185,43 @@ function KnockoutTab({knockout,setKnockout,resultadosOficiales,jornadasCerradas}
         <div style={{height:3,background:"#00000008",borderRadius:2,overflow:"hidden",marginTop:10}}><div style={{height:"100%",width:`${(completedInRound/ronda.partidos)*100}%`,background:ronda.color,transition:"width 0.3s"}}/></div>
       </div>
       {locked&&<div style={{background:"#fff5f5",border:"1px solid #e6394640",borderRadius:10,padding:"9px 14px",marginBottom:12,fontSize:11,color:"#e63946",fontWeight:"bold"}}>🔒 Esta fase está cerrada para edición.</div>}
-      {oficialMatches.length===0&&!locked&&<div style={{background:"#f5f5f7",border:"1px solid #e0e0e8",borderRadius:10,padding:"9px 12px",marginBottom:12,fontSize:11,color:B.muted,lineHeight:1.5}}>Los cruces se llenarán cuando el organizador ingrese los clasificados. Solo tienes que elegir el ganador de cada partido.</div>}
+      {oficialMatches.length===0&&!locked&&<div style={{background:"#f5f5f7",border:"1px solid #e0e0e8",borderRadius:10,padding:"9px 12px",marginBottom:12,fontSize:11,color:B.muted,lineHeight:1.5}}>Los cruces se llenarán cuando el organizador los ingrese. Podrás predecir el marcador de cada partido.</div>}
       <div style={{display:ronda.partidos>2?"grid":"block",gridTemplateColumns:ronda.partidos>=4?"1fr 1fr":"1fr",gap:8}}>
         {Array.from({length:ronda.partidos},(_,i)=>{
           const om=oficialMatches[i]||{};
           const um=userMatches[i]||{};
           const local=om.local||"";
           const visita=om.visita||"";
+          const localGoles=um.localGoles||"";
+          const visitaGoles=um.visitaGoles||"";
           const ganador=um.ganador||"";
+          const penaltisGanador=um.penaltisGanador||"";
           const hasTeams=local&&visita;
+          const gl=parseInt(localGoles),gv=parseInt(visitaGoles);
+          const hasScore=hasTeams&&!isNaN(gl)&&!isNaN(gv)&&localGoles!==""&&visitaGoles!=="";
+          const empate=hasScore&&gl===gv;
+          const wL=hasScore&&gl>gv,wV=hasScore&&gv>gl;
           return(
             <div key={i} style={{background:"#ffffff",border:`1px solid ${ganador?ronda.color+"80":"#e0e0e8"}`,borderRadius:12,padding:"10px 12px",marginBottom:8,boxShadow:ganador?`0 0 10px ${ronda.color}18`:"none"}}>
-              <div style={{fontSize:9,color:B.muted,marginBottom:8,display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+              <div style={{fontSize:9,color:B.muted,marginBottom:7,display:"flex",justifyContent:"space-between",alignItems:"center"}}>
                 <span><span style={{color:"#3a5bd9",fontWeight:"800"}}>{om.num||`P${i+1}`}</span>{om.fecha&&<span style={{color:"#bbb"}}> · {om.fecha}</span>}{om.sede&&<span style={{color:"#aaa"}}> · {om.sede}</span>}</span>
                 {ganador&&<span style={{color:ronda.color,fontWeight:"bold"}}>✓ {ganador.split(" ").slice(0,2).join(" ")}</span>}
               </div>
               {!hasTeams&&<div style={{fontSize:11,color:"#ccc",textAlign:"center",padding:"8px 0",fontStyle:"italic"}}>Cruces pendientes</div>}
-              {hasTeams&&(
-                <div style={{display:"flex",gap:6}}>
-                  {[local,visita].map(eq=>(
-                    <button key={eq} onClick={()=>pickWinner(i,eq)} disabled={locked} style={{flex:1,padding:"10px 6px",borderRadius:9,border:`2px solid ${ganador===eq?ronda.color:"#e0e0e8"}`,background:ganador===eq?ronda.color+"18":"#f8f8fc",color:ganador===eq?ronda.color:"#555",cursor:locked?"default":"pointer",fontSize:11,fontWeight:ganador===eq?"bold":"normal",textAlign:"center",transition:"all 0.15s"}}>
-                      <div style={{fontSize:13,marginBottom:2}}>{eq.split(" ")[0]}</div>
-                      <div>{eq.split(" ").slice(1).join(" ")}</div>
-                      {ganador===eq&&<div style={{fontSize:9,marginTop:3,color:ronda.color}}>✓ Mi pick</div>}
-                    </button>
-                  ))}
+              {hasTeams&&(<>
+                {/* Local row */}
+                <div style={{display:"flex",alignItems:"center",gap:6,marginBottom:6}}>
+                  <div style={{flex:1,fontSize:11,textAlign:"right",fontWeight:wL?"bold":"normal",color:wL?"#111":hasScore?"#333":"#aaa"}}>{local}</div>
+                  <input type="number" min="0" max="20" value={localGoles} onChange={e=>updMatch(i,"localGoles",e.target.value)} readOnly={locked} style={{width:34,height:32,textAlign:"center",background:locked?"#f5f5f5":"#f0f0f5",border:`2px solid ${hasScore?ronda.color:"#e0e0e8"}`,borderRadius:6,color:hasScore?ronda.color:"#bbb",fontSize:15,fontWeight:"bold",outline:"none",cursor:locked?"default":"auto"}}/>
                 </div>
-              )}
+                {/* Visita row */}
+                <div style={{display:"flex",alignItems:"center",gap:6,marginBottom:empate?8:0}}>
+                  <div style={{flex:1,fontSize:11,textAlign:"right",fontWeight:wV?"bold":"normal",color:wV?"#111":hasScore?"#333":"#aaa"}}>{visita}</div>
+                  <input type="number" min="0" max="20" value={visitaGoles} onChange={e=>updMatch(i,"visitaGoles",e.target.value)} readOnly={locked} style={{width:34,height:32,textAlign:"center",background:locked?"#f5f5f5":"#f0f0f5",border:`2px solid ${hasScore?ronda.color:"#e0e0e8"}`,borderRadius:6,color:hasScore?"#333":"#bbb",fontSize:15,fontWeight:"bold",outline:"none",cursor:locked?"default":"auto"}}/>
+                </div>
+                {/* Empate → penaltis */}
+                {empate&&!locked&&(<div style={{marginTop:8,padding:"6px 8px",background:"#f5f5f7",borderRadius:8,border:"1px solid #e8e8f0"}}><div style={{fontSize:9,color:B.muted,marginBottom:5}}>Penaltis — ¿Quién avanza?</div><div style={{display:"flex",gap:6}}>{[local,visita].map(eq=>(<button key={eq} onClick={()=>{updMatch(i,"penaltis",true);updMatch(i,"penaltisGanador",eq);updMatch(i,"ganador",eq);}} style={{flex:1,padding:"5px 8px",borderRadius:7,border:`1px solid ${penaltisGanador===eq?ronda.color:"#e0e0e8"}`,background:penaltisGanador===eq?ronda.color+"20":"#ffffff",color:penaltisGanador===eq?ronda.color:"#666",fontSize:11,cursor:"pointer",fontWeight:penaltisGanador===eq?"bold":"normal"}}>{eq.split(" ").slice(0,2).join(" ")}</button>))}</div></div>)}
+              </>)}
             </div>
           );
         })}
