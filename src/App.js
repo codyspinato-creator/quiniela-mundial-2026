@@ -188,7 +188,7 @@ function KnockoutTab({knockout,setKnockout,resultadosOficiales,jornadasCerradas}
               </div>
               {!hasTeams&&<div style={{fontSize:11,color:"#ccc",textAlign:"center",padding:"8px 0",fontStyle:"italic"}}>Cruces pendientes</div>}
               {hasTeams&&(
-                <div style={{display:"flex",gap:6"}}>
+                <div style={{display:"flex",gap:6}}>
                   {[local,visita].map(eq=>(
                     <button key={eq} onClick={()=>pickWinner(i,eq)} disabled={locked} style={{flex:1,padding:"10px 6px",borderRadius:9,border:`2px solid ${ganador===eq?ronda.color:"#e0e0e8"}`,background:ganador===eq?ronda.color+"18":"#f8f8fc",color:ganador===eq?ronda.color:"#555",cursor:locked?"default":"pointer",fontSize:11,fontWeight:ganador===eq?"bold":"normal",textAlign:"center",transition:"all 0.15s"}}>
                       <div style={{fontSize:13,marginBottom:2}}>{eq.split(" ")[0]}</div>
