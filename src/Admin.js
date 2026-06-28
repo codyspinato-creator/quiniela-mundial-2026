@@ -678,6 +678,41 @@ export default function Admin({ onBack }) {
             <div style={{background:"#f8f8fc",border:"1px solid #e0e0e8",borderRadius:10,padding:"10px 14px",fontSize:11,color:B.muted}}>
               💡 Haz clic en cualquier celda para cambiar su estado. Usa los botones de arriba para cerrar/abrir una jornada completa de golpe.
             </div>
+
+            {/* Eliminatorias */}
+            <div style={{marginTop:20,marginBottom:10}}>
+              <div style={{fontSize:11,fontWeight:"700",color:B.text,letterSpacing:1,textTransform:"uppercase",marginBottom:12}}>⚔️ Fases Eliminatorias</div>
+              <div style={{background:`${B.admin}15`,border:`1px solid ${B.admin}40`,borderRadius:10,padding:"10px 14px",marginBottom:14,fontSize:11,color:B.muted}}>
+                Cierra cada fase antes de que empiece a jugarse. Los participantes solo pueden elegir el ganador de cada partido.
+              </div>
+              {[
+                {id:"r32",label:"Dieciseisavos",emoji:"⚔️"},
+                {id:"r16",label:"Octavos",emoji:"🔥"},
+                {id:"qf",label:"Cuartos de Final",emoji:"⭐"},
+                {id:"sf",label:"Semifinales",emoji:"🌟"},
+                {id:"final",label:"Final",emoji:"🏆"},
+                {id:"third",label:"Tercer Puesto",emoji:"🥉"},
+              ].map(r=>{
+                const key=`ko-${r.id}`;
+                const locked=jornadasCerradas[key]===true;
+                const toggle=()=>{
+                  const updated={...jornadasCerradas,[key]:!locked};
+                  setJornadasCerradas(updated);saveJornadas(updated);
+                };
+                return(
+                  <div key={r.id} style={{background:"#ffffff",border:`2px solid ${locked?"#e63946":"#00c853"}`,borderRadius:12,padding:"12px 16px",marginBottom:10,display:"flex",alignItems:"center",gap:12}}>
+                    <div style={{fontSize:24}}>{r.emoji}</div>
+                    <div style={{flex:1}}>
+                      <div style={{fontSize:13,fontWeight:"bold",color:B.text}}>{r.label}</div>
+                      <div style={{fontSize:11,color:B.muted,marginTop:2}}>{locked?"🔒 Cerrada — los participantes no pueden editar":"🔓 Abierta — los participantes pueden elegir ganadores"}</div>
+                    </div>
+                    <button onClick={toggle} style={{padding:"7px 16px",borderRadius:9,border:`1px solid ${locked?"#00c85360":"#e6394660"}`,background:locked?"#00c85320":"#e6394620",color:locked?"#00a044":"#e63946",fontWeight:"bold",fontSize:12,cursor:"pointer"}}>
+                      {locked?"🔓 Abrir":"🔒 Cerrar"}
+                    </button>
+                  </div>
+                );
+              })}
+            </div>
           </div>
         )}
 

@@ -129,35 +129,81 @@ function MatchCard({match,idx,rondaColor,onChange,autoFilled=false}){
   );
 }
 
-function KnockoutTab({knockout,setKnockout,scores}){
+function KnockoutTab({knockout,setKnockout,resultadosOficiales,jornadasCerradas}){
   const[rondaActiva,setRondaActiva]=useState("r32");
   const ronda=RONDAS.find(r=>r.id===rondaActiva);
-  const updateMatch=(rondaId,idx,newMatch)=>{setKnockout(prev=>{const arr=[...(prev[rondaId]||[])];arr[idx]=newMatch;const updated={...prev,[rondaId]:arr};if(newMatch.ganador){try{return buildBracket(scores||{},updated);}catch(e){return updated;}}return updated;});};
-  const matches=knockout[rondaActiva]||Array.from({length:ronda.partidos},(_,i)=>({id:i,local:"",localGoles:"",visita:"",visitaGoles:"",ganador:"",penaltis:false,penaltisGanador:""}));
-  const completedInRound=matches.filter(m=>m.ganador).length;
+  const isRondaLocked=(rid)=>jornadasCerradas?.[`ko-${rid}`]===true;
+
+  // Official matches for current ronda (teams from admin results)
+  const oficialMatches=(resultadosOficiales?.knockout||{})[rondaActiva]||[];
+
+  // User predictions for current ronda
+  const userMatches=knockout[rondaActiva]||Array.from({length:ronda.partidos},(_,i)=>({id:i,local:"",localGoles:"",visita:"",visitaGoles:"",ganador:"",penaltis:false,penaltisGanador:""}));
+
+  const pickWinner=(idx,eq)=>{
+    if(isRondaLocked(rondaActiva)) return;
+    setKnockout(prev=>{
+      const arr=[...(prev[rondaActiva]||Array.from({length:ronda.partidos},(_,i)=>({id:i,local:"",localGoles:"",visita:"",visitaGoles:"",ganador:"",penaltis:false,penaltisGanador:""})))];
+      const om=oficialMatches[idx]||{};
+      arr[idx]={...arr[idx],local:om.local||arr[idx].local,visita:om.visita||arr[idx].visita,ganador:arr[idx].ganador===eq?"":eq};
+      return {...prev,[rondaActiva]:arr};
+    });
+  };
+
+  const completedInRound=userMatches.filter(m=>m.ganador).length;
   const isFinal=rondaActiva==="final";
   const isThird=rondaActiva==="third";
+  const locked=isRondaLocked(rondaActiva);
+
   return(
     <div>
       <div style={{overflowX:"auto",marginBottom:16}}>
         <div style={{display:"flex",gap:4,minWidth:"max-content",padding:"0 2px"}}>
-          {RONDAS.map(r=>{const ko=knockout[r.id]||[];const done=ko.filter(m=>m.ganador).length;const active=r.id===rondaActiva;return(<button key={r.id} onClick={()=>setRondaActiva(r.id)} style={{padding:"6px 10px",borderRadius:8,border:`2px solid ${active?r.color:"transparent"}`,background:active?r.color+"22":"#00000008",color:active?r.color:done===r.partidos?"#3a5bd9":B.muted,fontSize:10,cursor:"pointer",fontWeight:"bold",whiteSpace:"nowrap"}}><div style={{fontSize:14}}>{r.emoji}</div><div>{r.short}</div><div style={{fontSize:8,marginTop:2}}>{done}/{r.partidos}</div></button>);})}
+          {RONDAS.map(r=>{const ko=knockout[r.id]||[];const done=ko.filter(m=>m.ganador).length;const active=r.id===rondaActiva;const rLocked=isRondaLocked(r.id);return(<button key={r.id} onClick={()=>setRondaActiva(r.id)} style={{padding:"6px 10px",borderRadius:8,border:`2px solid ${active?r.color:"transparent"}`,background:active?r.color+"22":"#00000008",color:active?r.color:done===r.partidos?"#3a5bd9":B.muted,fontSize:10,cursor:"pointer",fontWeight:"bold",whiteSpace:"nowrap"}}><div style={{fontSize:14}}>{r.emoji}{rLocked?" 🔒":""}</div><div>{r.short}</div><div style={{fontSize:8,marginTop:2}}>{done}/{r.partidos}</div></button>);})}
         </div>
       </div>
       <div style={{background:`linear-gradient(135deg,${ronda.color}22,${ronda.color}10)`,border:`1px solid ${ronda.color}40`,borderRadius:12,padding:"12px 14px",marginBottom:12}}>
         <div style={{display:"flex",alignItems:"center",gap:10}}>
           <div style={{fontSize:28}}>{ronda.emoji}</div>
-          <div><div style={{fontSize:16,fontWeight:"bold",color:ronda.color}}>{ronda.label}</div><div style={{fontSize:10,color:B.muted}}>{completedInRound}/{ronda.partidos} partidos predichos</div></div>
+          <div><div style={{fontSize:16,fontWeight:"bold",color:ronda.color}}>{ronda.label}{locked&&<span style={{fontSize:12,marginLeft:6}}>🔒</span>}</div><div style={{fontSize:10,color:B.muted}}>{completedInRound}/{ronda.partidos} partidos predichos</div></div>
           {completedInRound===ronda.partidos&&<div style={{marginLeft:"auto",fontSize:10,color:"#3a5bd9",background:"#eeeefc",border:"1px solid #4caf50",borderRadius:20,padding:"2px 8px"}}>✓ Completo</div>}
         </div>
         <div style={{height:3,background:"#00000008",borderRadius:2,overflow:"hidden",marginTop:10}}><div style={{height:"100%",width:`${(completedInRound/ronda.partidos)*100}%`,background:ronda.color,transition:"width 0.3s"}}/></div>
       </div>
-      {rondaActiva==="r32"&&(<div style={{background:"#f5f5f7",border:"1px solid #e0e0e8",borderRadius:10,padding:"9px 12px",marginBottom:12,fontSize:11,color:B.muted,lineHeight:1.5}}>Escribe los equipos que crees que pasan a cada partido de dieciseisavos. Los cruces oficiales se conocerán al terminar grupos.</div>)}
+      {locked&&<div style={{background:"#fff5f5",border:"1px solid #e6394640",borderRadius:10,padding:"9px 14px",marginBottom:12,fontSize:11,color:"#e63946",fontWeight:"bold"}}>🔒 Esta fase está cerrada para edición.</div>}
+      {oficialMatches.length===0&&!locked&&<div style={{background:"#f5f5f7",border:"1px solid #e0e0e8",borderRadius:10,padding:"9px 12px",marginBottom:12,fontSize:11,color:B.muted,lineHeight:1.5}}>Los cruces se llenarán cuando el organizador ingrese los clasificados. Solo tienes que elegir el ganador de cada partido.</div>}
       <div style={{display:ronda.partidos>2?"grid":"block",gridTemplateColumns:ronda.partidos>=4?"1fr 1fr":"1fr",gap:8}}>
-        {matches.map((match,i)=>(<MatchCard key={i} match={match} idx={i} rondaColor={ronda.color} autoFilled={rondaActiva!=="r32"&&!!match.local} onChange={(idx,newMatch)=>updateMatch(rondaActiva,idx,newMatch)}/>))}
+        {Array.from({length:ronda.partidos},(_,i)=>{
+          const om=oficialMatches[i]||{};
+          const um=userMatches[i]||{};
+          const local=om.local||"";
+          const visita=om.visita||"";
+          const ganador=um.ganador||"";
+          const hasTeams=local&&visita;
+          return(
+            <div key={i} style={{background:"#ffffff",border:`1px solid ${ganador?ronda.color+"80":"#e0e0e8"}`,borderRadius:12,padding:"10px 12px",marginBottom:8,boxShadow:ganador?`0 0 10px ${ronda.color}18`:"none"}}>
+              <div style={{fontSize:9,color:B.muted,marginBottom:8,display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+                <span><span style={{color:"#3a5bd9",fontWeight:"800"}}>{om.num||`P${i+1}`}</span>{om.fecha&&<span style={{color:"#bbb"}}> · {om.fecha}</span>}{om.sede&&<span style={{color:"#aaa"}}> · {om.sede}</span>}</span>
+                {ganador&&<span style={{color:ronda.color,fontWeight:"bold"}}>✓ {ganador.split(" ").slice(0,2).join(" ")}</span>}
+              </div>
+              {!hasTeams&&<div style={{fontSize:11,color:"#ccc",textAlign:"center",padding:"8px 0",fontStyle:"italic"}}>Cruces pendientes</div>}
+              {hasTeams&&(
+                <div style={{display:"flex",gap:6"}}>
+                  {[local,visita].map(eq=>(
+                    <button key={eq} onClick={()=>pickWinner(i,eq)} disabled={locked} style={{flex:1,padding:"10px 6px",borderRadius:9,border:`2px solid ${ganador===eq?ronda.color:"#e0e0e8"}`,background:ganador===eq?ronda.color+"18":"#f8f8fc",color:ganador===eq?ronda.color:"#555",cursor:locked?"default":"pointer",fontSize:11,fontWeight:ganador===eq?"bold":"normal",textAlign:"center",transition:"all 0.15s"}}>
+                      <div style={{fontSize:13,marginBottom:2}}>{eq.split(" ")[0]}</div>
+                      <div>{eq.split(" ").slice(1).join(" ")}</div>
+                      {ganador===eq&&<div style={{fontSize:9,marginTop:3,color:ronda.color}}>✓ Mi pick</div>}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          );
+        })}
       </div>
-      {completedInRound>0&&!isFinal&&!isThird&&(<div style={{marginTop:14,background:"#f5f5f7",border:`1px solid ${ronda.color}30`,borderRadius:12,padding:"10px 14px"}}><div style={{fontSize:9,color:ronda.color,letterSpacing:2,textTransform:"uppercase",marginBottom:8}}>Clasificados → {RONDAS[RONDAS.indexOf(ronda)+1]?.label}</div><div style={{display:"flex",flexWrap:"wrap",gap:5}}>{matches.filter(m=>m.ganador).map((m,i)=>(<div key={i} style={{padding:"4px 10px",borderRadius:20,background:ronda.color+"18",border:`1px solid ${ronda.color}40`,fontSize:11,color:ronda.color,fontWeight:"bold"}}>{m.ganador.split(" ").slice(0,2).join(" ")}</div>))}</div></div>)}
-      {isFinal&&matches[0]?.ganador&&(<div style={{marginTop:14,background:"linear-gradient(135deg,#eff4ff,#e8f0ff)",border:"2px solid #3a5bd9",borderRadius:14,padding:"16px",textAlign:"center"}}><div style={{fontSize:36,marginBottom:6}}>🏆</div><div style={{fontSize:12,color:B.muted,marginBottom:4}}>CAMPEON DEL MUNDO 2026</div><div style={{fontSize:20,fontWeight:"bold",color:B.primary}}>{matches[0].ganador}</div></div>)}
+      {completedInRound>0&&!isFinal&&!isThird&&(<div style={{marginTop:14,background:"#f5f5f7",border:`1px solid ${ronda.color}30`,borderRadius:12,padding:"10px 14px"}}><div style={{fontSize:9,color:ronda.color,letterSpacing:2,textTransform:"uppercase",marginBottom:8}}>Mis picks → {RONDAS[RONDAS.indexOf(ronda)+1]?.label}</div><div style={{display:"flex",flexWrap:"wrap",gap:5}}>{userMatches.filter(m=>m.ganador).map((m,i)=>(<div key={i} style={{padding:"4px 10px",borderRadius:20,background:ronda.color+"18",border:`1px solid ${ronda.color}40`,fontSize:11,color:ronda.color,fontWeight:"bold"}}>{m.ganador.split(" ").slice(0,2).join(" ")}</div>))}</div></div>)}
+      {isFinal&&userMatches[0]?.ganador&&(<div style={{marginTop:14,background:"linear-gradient(135deg,#eff4ff,#e8f0ff)",border:"2px solid #3a5bd9",borderRadius:14,padding:"16px",textAlign:"center"}}><div style={{fontSize:36,marginBottom:6}}>🏆</div><div style={{fontSize:12,color:B.muted,marginBottom:4}}>MI CAMPEÓN DEL MUNDO 2026</div><div style={{fontSize:20,fontWeight:"bold",color:B.primary}}>{userMatches[0].ganador}</div></div>)}
       <div style={{display:"flex",gap:8,marginTop:14}}>
         {RONDAS.indexOf(ronda)>0&&(<button onClick={()=>setRondaActiva(RONDAS[RONDAS.indexOf(ronda)-1].id)} style={{flex:1,padding:8,borderRadius:9,border:"1px solid #e0e0e8",background:"#f0f0f8",color:B.muted,fontSize:12,cursor:"pointer"}}>← {RONDAS[RONDAS.indexOf(ronda)-1].label}</button>)}
         {RONDAS.indexOf(ronda)<RONDAS.length-1&&(<button onClick={()=>setRondaActiva(RONDAS[RONDAS.indexOf(ronda)+1].id)} style={{flex:1,padding:8,borderRadius:9,border:"none",background:ronda.color,color:"#ffffff",fontSize:12,fontWeight:"bold",cursor:"pointer"}}>{RONDAS[RONDAS.indexOf(ronda)+1].label} →</button>)}
@@ -251,6 +297,8 @@ export default function App(){
     const msg=encodeURIComponent(`Hola, olvidé mi contraseña de la quiniela. Mi nombre es: ${nombre}`);
     window.open(`https://wa.me/${B.adminWhatsApp}?text=${msg}`,"_blank");
   };
+
+  const isKoRondaLocked=(rid)=>jornadasCerradas?.[`ko-${rid}`]===true;
 
   const saveQuiniela=async()=>{
     // Grupos: only block if ALL jornadas of current group are locked
@@ -710,7 +758,7 @@ export default function App(){
             </div>)}
           </>
         )}
-        {tab==="knockout"&&(<KnockoutTab knockout={knockout} setKnockout={setKnockout} scores={scores}/>)}
+        {tab==="knockout"&&(<KnockoutTab knockout={knockout} setKnockout={setKnockout} resultadosOficiales={resultadosOficiales} jornadasCerradas={jornadasCerradas}/>)}
         {tab==="predicciones"&&(
           <div style={{pointerEvents:isPastDeadline?"none":"auto",opacity:isPastDeadline?0.7:1}}>
             <div style={{background:"linear-gradient(135deg,#2a4bc9,#7c3aed)",borderRadius:14,padding:16,marginBottom:18,textAlign:"center",boxShadow:"0 4px 20px rgba(58,91,217,0.25)"}}>
