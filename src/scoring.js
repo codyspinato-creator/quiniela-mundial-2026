@@ -5,22 +5,20 @@
 //   Solo ganador/empate correcto          → 3 pts
 //
 // Eliminatorias (por partido):
-//   Resultado exacto CON los 2 equipos correctos → 5 pts
-//   Solo ganador correcto (equipos distintos)    → 3 pts
-//   +1 pt por cada equipo que avanza correctamente en cada ronda
+//   Resultado exacto (marcador correcto)  → 5 pts
+//   Solo ganador correcto                 → 3 pts
 //
 // Predicciones especiales:
-//   Campeón correcto                      → 10 pts  ← subido
+//   Campeón correcto                      → 10 pts
 //   Subcampeón correcto                   → 5 pts
 //   Tercer lugar correcto                 → 5 pts
-//   Goleador correcto                     → 10 pts  ← subido
+//   Goleador correcto                     → 10 pts
 //
 // Máximo posible:
 //   Grupos: 72 × 5 = 360 pts
-//   Eliminatorias partidos: 32 × 5 = 160 pts
-//   Eliminatorias equipos: hasta 64 pts (2 equipos × 32 partidos × 1 pt)
+//   Eliminatorias: 32 × 5 = 160 pts
 //   Especiales: 10 + 5 + 5 + 10 = 30 pts
-//   TOTAL MÁXIMO: ~554 pts
+//   TOTAL MÁXIMO: 550 pts
 
 import { GRUPOS, KEYS } from "./data";
 
@@ -85,12 +83,6 @@ export function calcKnockoutPoints(quiniela, resultados) {
       const pL = parseInt(pred.localGoles), pV = parseInt(pred.visitaGoles);
       const rL = parseInt(real.localGoles), rV = parseInt(real.visitaGoles);
 
-      // Check if both teams match exactly
-      const bothTeamsMatch =
-        pred.local && pred.visita && real.local && real.visita &&
-        ((pred.local === real.local && pred.visita === real.visita) ||
-         (pred.local === real.visita && pred.visita === real.local));
-
       const exactScore =
         !isNaN(pL) && !isNaN(pV) && !isNaN(rL) && !isNaN(rV) &&
         pL === rL && pV === rV;
@@ -98,23 +90,14 @@ export function calcKnockoutPoints(quiniela, resultados) {
       const rightWinner =
         pred.ganador && real.ganador && pred.ganador === real.ganador;
 
-      // +1 pt por cada equipo que el participante puso y avanzó correctamente
-      let teamPts = 0;
-      if (pred.local && (pred.local === real.local || pred.local === real.visita)) teamPts += 1;
-      if (pred.visita && (pred.visita === real.local || pred.visita === real.visita)) teamPts += 1;
-      pts += teamPts;
-
-      // Puntos por resultado
-      if (exactScore && rightWinner && bothTeamsMatch) {
-        // Resultado exacto con los 2 equipos correctos → 5 pts
+      if (exactScore && rightWinner) {
         pts += 5;
-        breakdown[key] = { pts: 5 + teamPts, type: "exact" };
+        breakdown[key] = { pts: 5, type: "exact" };
       } else if (rightWinner) {
-        // Ganador correcto (aunque no sean los mismos equipos) → 3 pts
         pts += 3;
-        breakdown[key] = { pts: 3 + teamPts, type: "winner" };
+        breakdown[key] = { pts: 3, type: "winner" };
       } else {
-        breakdown[key] = { pts: teamPts, type: teamPts > 0 ? "teams" : "miss" };
+        breakdown[key] = { pts: 0, type: "miss" };
       }
     });
   });
@@ -139,10 +122,10 @@ export function calcSpecialPoints(quiniela, resultados) {
     }
   };
 
-  check("campeon", "campeon", 10);  // 10 pts
+  check("campeon", "campeon", 10);
   check("segundo", "segundo", 5);
   check("tercero", "tercero", 5);
-  check("goleador", "goleador", 10); // 10 pts
+  check("goleador", "goleador", 10);
 
   return { pts, breakdown };
 }

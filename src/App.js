@@ -808,7 +808,7 @@ export default function App(){
             {resultadosOficiales&&Object.keys(resultadosOficiales).length>0&&portalData.length===0&&(<div style={{textAlign:"center",marginTop:16}}><button onClick={loadPortal} style={{padding:"9px 20px",borderRadius:9,border:"none",background:"#3a5bd9",color:"#ffffff",fontWeight:"bold",fontSize:13,cursor:"pointer"}}>Cargar ranking completo</button></div>)}
             <div style={{marginTop:14,background:"#f5f5f7",border:"1px solid #e0e0e8",borderRadius:10,padding:12}}>
               <div style={{fontSize:9,color:B.muted,letterSpacing:2,textTransform:"uppercase",marginBottom:8}}>Sistema de puntos</div>
-              <div style={{display:"flex",flexWrap:"wrap",gap:6}}>{[["Resultado exacto","5 pts",B.primary],["Solo ganador","3 pts","#7c3aed"],["Equipo que avanza","+1 pt","#00c853"],["Campeón","10 pts",B.primary],["Goleador","10 pts",B.primary]].map(([l,v,c])=>(<div key={l} style={{padding:"4px 10px",borderRadius:8,background:c+"15",border:`1px solid ${c}30`,fontSize:10}}><span style={{color:B.muted}}>{l}: </span><span style={{color:c,fontWeight:"bold"}}>{v}</span></div>))}</div>
+              <div style={{display:"flex",flexWrap:"wrap",gap:6}}>{[["Resultado exacto","5 pts",B.primary],["Solo ganador","3 pts","#7c3aed"],["Campeón","10 pts",B.primary],["Goleador","10 pts",B.primary]].map(([l,v,c])=>(<div key={l} style={{padding:"4px 10px",borderRadius:8,background:c+"15",border:`1px solid ${c}30`,fontSize:10}}><span style={{color:B.muted}}>{l}: </span><span style={{color:c,fontWeight:"bold"}}>{v}</span></div>))}</div>
             </div>
           </div>
         )}
