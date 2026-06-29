@@ -37,6 +37,94 @@ function emptyResultados() {
   return { scores: {}, knockout: emptyKnockout(), campeon: "", segundo: "", tercero: "", goleador: "" };
 }
 
+// ─── KO MATCH EDITOR (sub-component for UserQuinielaEditor) ─────────────────
+function KOMatchEditor({ knockout, setKnockout, rondaActiva, setRondaActiva }) {
+  const [adminKO, setAdminKO] = useState({});
+  useEffect(() => {
+    getDoc(doc(db, "admin", "resultados")).then(snap => {
+      if (snap.exists()) setAdminKO(snap.data().knockout || {});
+    }).catch(() => {});
+  }, []);
+
+  const ronda = RONDAS.find(r => r.id === rondaActiva);
+  const oficialMatches = adminKO[rondaActiva] || [];
+  const userMatches = knockout[rondaActiva] || Array.from({ length: ronda.partidos }, (_, i) => ({ id: i, local: "", localGoles: "", visita: "", visitaGoles: "", ganador: "", penaltis: false, penaltisGanador: "" }));
+
+  const updMatch = (idx, field, val) => {
+    setKnockout(prev => {
+      const empty = Array.from({ length: ronda.partidos }, (_, i) => ({ id: i, local: "", localGoles: "", visita: "", visitaGoles: "", ganador: "", penaltis: false, penaltisGanador: "" }));
+      const arr = [...(prev[rondaActiva] || empty)];
+      const om = oficialMatches[idx] || {};
+      arr[idx] = { ...arr[idx], local: om.local || arr[idx].local, visita: om.visita || arr[idx].visita, [field]: val };
+      if (field === "localGoles" || field === "visitaGoles") {
+        const gl = parseInt(field === "localGoles" ? val : arr[idx].localGoles);
+        const gv = parseInt(field === "visitaGoles" ? val : arr[idx].visitaGoles);
+        if (!isNaN(gl) && !isNaN(gv) && gl !== gv) {
+          arr[idx].ganador = gl > gv ? (om.local || arr[idx].local) : (om.visita || arr[idx].visita);
+          arr[idx].penaltis = false; arr[idx].penaltisGanador = "";
+        } else if (!isNaN(gl) && !isNaN(gv) && gl === gv) {
+          arr[idx].ganador = ""; arr[idx].penaltis = false; arr[idx].penaltisGanador = "";
+        }
+      }
+      return { ...prev, [rondaActiva]: arr };
+    });
+  };
+
+  return (
+    <div>
+      <div style={{ display: "flex", gap: 4, overflowX: "auto", marginBottom: 14 }}>
+        {RONDAS.map(r => {
+          const matches = knockout[r.id] || [];
+          const done = matches.filter(m => m.ganador).length;
+          const active = r.id === rondaActiva;
+          return (
+            <button key={r.id} onClick={() => setRondaActiva(r.id)} style={{ padding: "6px 10px", borderRadius: 8, border: `2px solid ${active ? B.admin : "transparent"}`, background: active ? B.adminDim : "#f5f5f7", color: active ? B.admin : done === r.partidos ? "#9b5de5" : B.muted, fontSize: 10, cursor: "pointer", fontWeight: "bold", whiteSpace: "nowrap", flexShrink: 0 }}>
+              {r.emoji} {r.label} ({done}/{r.partidos})
+            </button>
+          );
+        })}
+      </div>
+      <div style={{ display: ronda.partidos >= 4 ? "grid" : "block", gridTemplateColumns: ronda.partidos >= 4 ? "1fr 1fr" : "1fr", gap: 8 }}>
+        {Array.from({ length: ronda.partidos }, (_, i) => {
+          const om = oficialMatches[i] || {};
+          const um = userMatches[i] || {};
+          const local = om.local || "";
+          const visita = om.visita || "";
+          const localGoles = um.localGoles || "";
+          const visitaGoles = um.visitaGoles || "";
+          const ganador = um.ganador || "";
+          const penaltisGanador = um.penaltisGanador || "";
+          const hasTeams = local && visita;
+          const gl = parseInt(localGoles), gv = parseInt(visitaGoles);
+          const hasScore = hasTeams && !isNaN(gl) && !isNaN(gv) && localGoles !== "" && visitaGoles !== "";
+          const empate = hasScore && gl === gv;
+          const wL = hasScore && gl > gv, wV = hasScore && gv > gl;
+          return (
+            <div key={i} style={{ background: "#ffffff", border: `1px solid ${ganador ? B.admin + "80" : "#e0e0e8"}`, borderRadius: 12, padding: "10px 12px", marginBottom: 8 }}>
+              <div style={{ fontSize: 9, color: B.muted, marginBottom: 7, display: "flex", justifyContent: "space-between" }}>
+                <span style={{ color: B.admin, fontWeight: "800" }}>{om.num || `P${i + 1}`}{om.fecha && <span style={{ color: "#bbb", fontWeight: "normal" }}> · {om.fecha}</span>}</span>
+                {ganador && <span style={{ color: B.admin, fontWeight: "bold" }}>✓ {ganador.split(" ").slice(0, 2).join(" ")}</span>}
+              </div>
+              {!hasTeams && <div style={{ fontSize: 11, color: "#ccc", textAlign: "center", padding: "8px 0", fontStyle: "italic" }}>Cruces pendientes</div>}
+              {hasTeams && (<>
+                <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 6 }}>
+                  <div style={{ flex: 1, fontSize: 11, textAlign: "right", fontWeight: wL ? "bold" : "normal", color: wL ? "#111" : hasScore ? "#333" : "#aaa" }}>{local}</div>
+                  <input type="number" min="0" max="20" value={localGoles} onChange={e => updMatch(i, "localGoles", e.target.value)} style={{ width: 34, height: 32, textAlign: "center", background: "#f0f0f5", border: `2px solid ${hasScore ? B.admin : "#e0e0e8"}`, borderRadius: 6, color: hasScore ? B.admin : "#bbb", fontSize: 15, fontWeight: "bold", outline: "none" }} />
+                </div>
+                <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: empate ? 8 : 0 }}>
+                  <div style={{ flex: 1, fontSize: 11, textAlign: "right", fontWeight: wV ? "bold" : "normal", color: wV ? "#111" : hasScore ? "#333" : "#aaa" }}>{visita}</div>
+                  <input type="number" min="0" max="20" value={visitaGoles} onChange={e => updMatch(i, "visitaGoles", e.target.value)} style={{ width: 34, height: 32, textAlign: "center", background: "#f0f0f5", border: `2px solid ${hasScore ? B.admin : "#e0e0e8"}`, borderRadius: 6, color: hasScore ? "#333" : "#bbb", fontSize: 15, fontWeight: "bold", outline: "none" }} />
+                </div>
+                {empate && (<div style={{ padding: "6px 8px", background: "#f5f5f7", borderRadius: 8 }}><div style={{ fontSize: 9, color: B.muted, marginBottom: 5 }}>Penaltis — ¿Quién avanza?</div><div style={{ display: "flex", gap: 6 }}>{[local, visita].map(eq => (<button key={eq} onClick={() => { updMatch(i, "penaltis", true); updMatch(i, "penaltisGanador", eq); updMatch(i, "ganador", eq); }} style={{ flex: 1, padding: "5px 8px", borderRadius: 7, border: `1px solid ${penaltisGanador === eq ? B.admin : "#e0e0e8"}`, background: penaltisGanador === eq ? "#f5f0ff" : "#ffffff", color: penaltisGanador === eq ? B.admin : "#666", fontSize: 11, cursor: "pointer" }}>{eq.split(" ").slice(0, 2).join(" ")}</button>))}</div></div>)}
+              </>)}
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
 // ─── EDITOR DE QUINIELA DE USUARIO ───────────────────────────────────────────
 function UserQuinielaEditor({ participante, onBack, onSaved }) {
   const [scores, setScores] = useState(participante.scores || {});
@@ -206,61 +294,13 @@ function UserQuinielaEditor({ participante, onBack, onSaved }) {
 
         {/* ── ELIMINATORIAS ── */}
         {tab === "knockout" && (
-          <div>
-            <div style={{ display: "flex", gap: 4, overflowX: "auto", marginBottom: 14 }}>
-              {RONDAS.map(r => {
-                const matches = knockout[r.id] || [];
-                const done = matches.filter(m => m.ganador).length;
-                const active = r.id === rondaActiva;
-                return (
-                  <button key={r.id} onClick={() => setRondaActiva(r.id)} style={{ padding: "6px 10px", borderRadius: 8, border: `2px solid ${active ? B.admin : "transparent"}`, background: active ? B.adminDim : "#f5f5f7", color: active ? B.admin : done === r.partidos ? "#9b5de5" : B.muted, fontSize: 10, cursor: "pointer", fontWeight: "bold", whiteSpace: "nowrap", flexShrink: 0 }}>
-                    {r.emoji} {r.label} ({done}/{r.partidos})
-                  </button>
-                );
-              })}
-            </div>
-            {(() => {
-              const ronda = RONDAS.find(r => r.id === rondaActiva);
-              const matches = knockout[rondaActiva] || Array.from({ length: ronda.partidos }, (_, i) => ({ id: i, local: "", localGoles: "", visita: "", visitaGoles: "", ganador: "", penaltis: false, penaltisGanador: "" }));
-              const updateMatch = (idx, newMatch) => {
-                setKnockout(prev => {
-                  const arr = [...(prev[rondaActiva] || [])]; arr[idx] = newMatch;
-                  const updated = { ...prev, [rondaActiva]: arr };
-                  try { return buildBracket(scores, updated); } catch (e) { return updated; }
-                });
-              };
-              return (
-                <div style={{ display: ronda.partidos >= 4 ? "grid" : "block", gridTemplateColumns: ronda.partidos >= 4 ? "1fr 1fr" : "1fr", gap: 8 }}>
-                  {matches.map((match, i) => {
-                    const gl = parseInt(match.localGoles), gv = parseInt(match.visitaGoles);
-                    const hasScore = !isNaN(gl) && !isNaN(gv) && match.localGoles !== "" && match.visitaGoles !== "";
-                    const empate = hasScore && gl === gv;
-                    const upd = (field, val) => updateMatch(i, { ...match, [field]: val });
-                    return (
-                      <div key={i} style={{ background: "#ffffff", border: `1px solid ${match.ganador ? B.admin + "80" : "#e0e0e8"}`, borderRadius: 12, padding: "10px 12px", marginBottom: 8 }}>
-                        <div style={{ fontSize: 9, color: B.muted, marginBottom: 7, display: "flex", justifyContent: "space-between" }}>
-                          <span style={{ color: B.admin, fontWeight: "800" }}>{match.num || `P${i + 1}`}</span>
-                          {match.ganador && <span style={{ color: B.admin, fontWeight: "bold" }}>✓ {match.ganador.split(" ").slice(0, 2).join(" ")}</span>}
-                        </div>
-                        <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 6 }}>
-                          <input value={match.local} onChange={e => upd("local", e.target.value)} placeholder="Local..." style={{ flex: 1, background: "#f8f8f8", border: "1px solid #e0e0e8", borderRadius: 6, padding: "6px 8px", fontSize: 11, outline: "none" }} />
-                          <input type="number" min="0" max="20" value={match.localGoles} onChange={e => upd("localGoles", e.target.value)} style={{ width: 36, height: 32, textAlign: "center", background: "#f5f5f7", border: `2px solid ${hasScore ? B.admin : "#e0e0e8"}`, borderRadius: 8, color: hasScore ? B.admin : "#bbb", fontSize: 14, fontWeight: "bold", outline: "none" }} />
-                        </div>
-                        <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: empate ? 8 : 0 }}>
-                          <input value={match.visita} onChange={e => upd("visita", e.target.value)} placeholder="Visitante..." style={{ flex: 1, background: "#f8f8f8", border: "1px solid #e0e0e8", borderRadius: 6, padding: "6px 8px", fontSize: 11, outline: "none" }} />
-                          <input type="number" min="0" max="20" value={match.visitaGoles} onChange={e => upd("visitaGoles", e.target.value)} style={{ width: 36, height: 32, textAlign: "center", background: "#f5f5f7", border: `2px solid ${hasScore ? B.admin : "#e0e0e8"}`, borderRadius: 8, color: hasScore ? "#111" : "#bbb", fontSize: 14, fontWeight: "bold", outline: "none" }} />
-                        </div>
-                        {empate && (<div style={{ padding: "6px 8px", background: "#f5f5f7", borderRadius: 8 }}><div style={{ fontSize: 9, color: B.muted, marginBottom: 5 }}>Penaltis:</div><div style={{ display: "flex", gap: 6 }}>{[match.local, match.visita].filter(Boolean).map(eq => (<button key={eq} onClick={() => { upd("penaltis", true); upd("penaltisGanador", eq); upd("ganador", eq); }} style={{ flex: 1, padding: "5px 8px", borderRadius: 7, border: `1px solid ${match.ganador === eq ? B.admin : "#e0e0e8"}`, background: match.ganador === eq ? "#f5f0ff" : "#ffffff", color: match.ganador === eq ? B.admin : "#666", fontSize: 11, cursor: "pointer" }}>{eq.split(" ").slice(0, 2).join(" ")}</button>))}</div></div>)}
-                        {hasScore && !empate && (<div><div style={{ fontSize: 9, color: B.muted, marginBottom: 5, marginTop: 8 }}>Ganador:</div><div style={{ display: "flex", gap: 6 }}>{[{ eq: match.local, wins: gl > gv }, { eq: match.visita, wins: gv > gl }].filter(x => x.eq).map(({ eq, wins }) => (<button key={eq} onClick={() => upd("ganador", eq)} style={{ flex: 1, padding: "5px 8px", borderRadius: 7, border: `1px solid ${match.ganador === eq ? B.admin : "#e0e0e8"}`, background: match.ganador === eq ? "#f5f0ff" : "#f8f8fc", color: match.ganador === eq ? B.admin : "#888", fontSize: 10, cursor: "pointer", fontWeight: match.ganador === eq ? "bold" : "normal" }}>{wins ? "⚽ " : ""}{eq.split(" ").slice(0, 2).join(" ")}</button>))}</div></div>)}
-                      </div>
-                    );
-                  })}
-                </div>
-              );
-            })()}
-          </div>
+          <KOMatchEditor
+            knockout={knockout}
+            setKnockout={setKnockout}
+            rondaActiva={rondaActiva}
+            setRondaActiva={setRondaActiva}
+          />
         )}
-
         <div style={{ marginTop: 16, background: "#ffffff", border: "1px solid #e0e0e8", borderRadius: 10, padding: "10px 14px", textAlign: "center" }}>
           <button onClick={saveUser} disabled={saving} style={{ padding: "10px 28px", borderRadius: 9, border: "none", background: saving ? "#e0e0e8" : "linear-gradient(135deg,#3a5bd9,#7c3aed)", color: saving ? "#aaa" : "#ffffff", fontWeight: "bold", fontSize: 14, cursor: "pointer" }}>
             {saving ? "Guardando..." : saveMsg || "💾 Guardar quiniela de " + participante.nombre}
