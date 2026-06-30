@@ -55,7 +55,7 @@ function KOMatchEditor({ knockout, setKnockout, rondaActiva, setRondaActiva }) {
       const empty = Array.from({ length: ronda.partidos }, (_, i) => ({ id: i, local: "", localGoles: "", visita: "", visitaGoles: "", ganador: "", penaltis: false, penaltisGanador: "" }));
       const arr = [...(prev[rondaActiva] || empty)];
       const om = oficialMatches[idx] || {};
-      arr[idx] = { ...arr[idx], local: om.local || arr[idx].local, visita: om.visita || arr[idx].visita, [field]: val };
+      arr[idx] = { ...arr[idx], local: om.local || arr[idx].local, visita: om.visita || arr[idx].visita, num: om.num || arr[idx].num, [field]: val };
       if (field === "localGoles" || field === "visitaGoles") {
         const gl = parseInt(field === "localGoles" ? val : arr[idx].localGoles);
         const gv = parseInt(field === "visitaGoles" ? val : arr[idx].visitaGoles);

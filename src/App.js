@@ -152,7 +152,7 @@ function KnockoutTab({knockout,setKnockout,resultadosOficiales,jornadasCerradas}
       const empty=Array.from({length:ronda.partidos},(_,i)=>({id:i,local:"",localGoles:"",visita:"",visitaGoles:"",ganador:"",penaltis:false,penaltisGanador:""}));
       const arr=[...(prev[rondaActiva]||empty)];
       const om=oficialMatches[idx]||{};
-      const cur={...arr[idx],local:om.local||arr[idx].local,visita:om.visita||arr[idx].visita};
+      const cur={...arr[idx],local:om.local||arr[idx].local,visita:om.visita||arr[idx].visita,num:om.num||arr[idx].num};
       arr[idx]={...cur,[field]:val};
       // Auto-resolve ganador from score if not empate
       if(field==="localGoles"||field==="visitaGoles"){
