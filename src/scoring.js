@@ -122,6 +122,17 @@ export function calcKnockoutPoints(quiniela, resultados) {
         // Acertó que hubo empate en 90 min, sin acertar el marcador exacto
         matchPts = 3;
         type = "draw90";
+      } else if (!realEmpate90 && hasPred) {
+        // No hubo empate: si acertó el ganador (aunque no el marcador exacto) → 3 pts
+        const predWinner = pL > pV ? "L" : pL < pV ? "V" : "E";
+        const realWinner = rL > rV ? "L" : "V";
+        if (predWinner === realWinner) {
+          matchPts = 3;
+          type = "winner";
+        } else {
+          matchPts = 0;
+          type = "miss";
+        }
       } else {
         matchPts = 0;
         type = "miss";
