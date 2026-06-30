@@ -67,6 +67,11 @@ export function calcGroupPoints(quiniela, resultados) {
 }
 
 // ─── Calcular puntos de eliminatorias ────────────────────────────────────────
+// IMPORTANTE: los partidos se emparejan por NÚMERO DE PARTIDO (real.num, ej "P78"),
+// no por posición de array. Esto evita errores cuando el admin reordena o edita
+// manualmente los cruces, ya que el índice del array del usuario podría no
+// coincidir con el índice del array de resultados oficiales tras una edición.
+//
 // Basado en el marcador de los 90 minutos (localGoles/visitaGoles), no en
 // quién avanza por penales. El "ganador" oficial solo se usa para el bonus
 // de +1 pt cuando hubo empate en los 90 minutos.
@@ -80,12 +85,24 @@ export function calcKnockoutPoints(quiniela, resultados) {
     const predMatches = quiniela.knockout?.[rondaId] || [];
     const realMatches = resultados.knockout?.[rondaId] || [];
 
+    // Build a lookup of predicted matches by their "num" (P73, P74, etc.)
+    // Falls back to array index if num is missing (legacy data safety net).
+    const predByNum = {};
+    predMatches.forEach((m, i) => {
+      const numKey = m?.num || `__idx${i}`;
+      predByNum[numKey] = m;
+    });
+
     realMatches.forEach((real, i) => {
       // Solo evaluar si el resultado oficial tiene marcador de 90 min cargado
       const rL = parseInt(real.localGoles), rV = parseInt(real.visitaGoles);
       if (isNaN(rL) || isNaN(rV)) return;
 
-      const pred = predMatches[i] || {};
+      // Match by num first; if not found, fall back to same array index
+      const numKey = real?.num;
+      let pred = (numKey && predByNum[numKey]) ? predByNum[numKey] : predMatches[i];
+      pred = pred || {};
+
       const key = `${rondaId}-${i}`;
 
       const pL = parseInt(pred.localGoles), pV = parseInt(pred.visitaGoles);
