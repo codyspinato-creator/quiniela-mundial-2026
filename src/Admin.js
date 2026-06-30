@@ -759,36 +759,60 @@ export default function Admin({ onBack }) {
               💡 Haz clic en cualquier celda para cambiar su estado. Usa los botones de arriba para cerrar/abrir una jornada completa de golpe.
             </div>
 
-            {/* Eliminatorias */}
+            {/* Eliminatorias - por partido */}
             <div style={{marginTop:20,marginBottom:10}}>
-              <div style={{fontSize:11,fontWeight:"700",color:B.text,letterSpacing:1,textTransform:"uppercase",marginBottom:12}}>⚔️ Fases Eliminatorias</div>
+              <div style={{fontSize:11,fontWeight:"700",color:B.text,letterSpacing:1,textTransform:"uppercase",marginBottom:12}}>⚔️ Fases Eliminatorias — por partido</div>
               <div style={{background:`${B.admin}15`,border:`1px solid ${B.admin}40`,borderRadius:10,padding:"10px 14px",marginBottom:14,fontSize:11,color:B.muted}}>
-                Cierra cada fase antes de que empiece a jugarse. Los participantes solo pueden elegir el ganador de cada partido.
+                Cierra cada partido individualmente antes de que se juegue. Útil si los partidos de una misma fase se juegan en días distintos.
               </div>
               {[
-                {id:"r32",label:"Dieciseisavos",emoji:"⚔️"},
-                {id:"r16",label:"Octavos",emoji:"🔥"},
-                {id:"qf",label:"Cuartos de Final",emoji:"⭐"},
-                {id:"sf",label:"Semifinales",emoji:"🌟"},
-                {id:"final",label:"Final",emoji:"🏆"},
-                {id:"third",label:"Tercer Puesto",emoji:"🥉"},
+                {id:"r32",label:"Dieciseisavos",emoji:"⚔️",n:16},
+                {id:"r16",label:"Octavos",emoji:"🔥",n:8},
+                {id:"qf",label:"Cuartos de Final",emoji:"⭐",n:4},
+                {id:"sf",label:"Semifinales",emoji:"🌟",n:2},
+                {id:"final",label:"Final",emoji:"🏆",n:1},
+                {id:"third",label:"Tercer Puesto",emoji:"🥉",n:1},
               ].map(r=>{
-                const key=`ko-${r.id}`;
-                const locked=jornadasCerradas[key]===true;
-                const toggle=()=>{
-                  const updated={...jornadasCerradas,[key]:!locked};
+                const oficialMatches=(resultados.knockout||{})[r.id]||[];
+                const allLockedInPhase=Array.from({length:r.n},(_,i)=>jornadasCerradas[`ko-${r.id}-${i}`]===true).every(Boolean);
+                const toggleAll=()=>{
+                  const updated={...jornadasCerradas};
+                  Array.from({length:r.n},(_,i)=>{updated[`ko-${r.id}-${i}`]=!allLockedInPhase;});
                   setJornadasCerradas(updated);saveJornadas(updated);
                 };
                 return(
-                  <div key={r.id} style={{background:"#ffffff",border:`2px solid ${locked?"#e63946":"#00c853"}`,borderRadius:12,padding:"12px 16px",marginBottom:10,display:"flex",alignItems:"center",gap:12}}>
-                    <div style={{fontSize:24}}>{r.emoji}</div>
-                    <div style={{flex:1}}>
-                      <div style={{fontSize:13,fontWeight:"bold",color:B.text}}>{r.label}</div>
-                      <div style={{fontSize:11,color:B.muted,marginTop:2}}>{locked?"🔒 Cerrada — los participantes no pueden editar":"🔓 Abierta — los participantes pueden elegir ganadores"}</div>
+                  <div key={r.id} style={{marginBottom:16}}>
+                    <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:8}}>
+                      <span style={{fontSize:18}}>{r.emoji}</span>
+                      <span style={{fontSize:13,fontWeight:"bold",color:B.text}}>{r.label}</span>
+                      <button onClick={toggleAll} style={{marginLeft:"auto",padding:"4px 10px",borderRadius:7,border:"1px solid #e0e0e8",background:"#f5f5f7",color:"#555",fontSize:10,cursor:"pointer",fontWeight:"bold"}}>
+                        {allLockedInPhase?"🔓 Abrir todos":"🔒 Cerrar todos"}
+                      </button>
                     </div>
-                    <button onClick={toggle} style={{padding:"7px 16px",borderRadius:9,border:`1px solid ${locked?"#00c85360":"#e6394660"}`,background:locked?"#00c85320":"#e6394620",color:locked?"#00a044":"#e63946",fontWeight:"bold",fontSize:12,cursor:"pointer"}}>
-                      {locked?"🔓 Abrir":"🔒 Cerrar"}
-                    </button>
+                    <div style={{display:"grid",gridTemplateColumns:r.n>=4?"1fr 1fr":"1fr",gap:6}}>
+                      {Array.from({length:r.n},(_,i)=>{
+                        const om=oficialMatches[i]||{};
+                        const key=`ko-${r.id}-${i}`;
+                        const locked=jornadasCerradas[key]===true;
+                        const toggle=()=>{
+                          const updated={...jornadasCerradas,[key]:!locked};
+                          setJornadasCerradas(updated);saveJornadas(updated);
+                        };
+                        const hasTeams=om.local&&om.visita;
+                        return(
+                          <div key={i} onClick={toggle} style={{background:"#ffffff",border:`2px solid ${locked?"#e63946":"#00c853"}`,borderRadius:10,padding:"8px 12px",display:"flex",alignItems:"center",gap:8,cursor:"pointer"}}>
+                            <div style={{fontSize:16}}>{locked?"🔒":"🔓"}</div>
+                            <div style={{flex:1,minWidth:0}}>
+                              <div style={{fontSize:10,fontWeight:"bold",color:"#3a5bd9"}}>{om.num||`P${i+1}`}</div>
+                              <div style={{fontSize:10,color:hasTeams?B.text:"#bbb",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>
+                                {hasTeams?`${om.local.split(" ").slice(1).join(" ")} vs ${om.visita.split(" ").slice(1).join(" ")}`:"Cruce pendiente"}
+                              </div>
+                            </div>
+                            <div style={{fontSize:9,color:locked?"#e63946":"#00a044",fontWeight:"bold",whiteSpace:"nowrap"}}>{locked?"Cerrado":"Abierto"}</div>
+                          </div>
+                        );
+                      })}
+                    </div>
                   </div>
                 );
               })}

@@ -4,9 +4,12 @@
 //   Resultado exacto (marcador correcto)  → 5 pts
 //   Solo ganador/empate correcto          → 3 pts
 //
-// Eliminatorias (por partido):
-//   Resultado exacto (marcador correcto)  → 5 pts
-//   Solo ganador correcto                 → 3 pts
+// Eliminatorias (por partido, basado en el marcador de los 90 minutos):
+//   Marcador exacto en los 90 min         → 5 pts
+//   Acertó el empate en 90 min (sin marcador exacto) → 3 pts
+//   Nada acertado                         → 0 pts
+//   + Si hubo empate en 90 min: +1 pt extra si acertó quién avanza
+//     en penales/tiempo extra
 //
 // Predicciones especiales:
 //   Campeón correcto                      → 10 pts
@@ -16,9 +19,9 @@
 //
 // Máximo posible:
 //   Grupos: 72 × 5 = 360 pts
-//   Eliminatorias: 32 × 5 = 160 pts
+//   Eliminatorias: hasta 32 × 6 = 192 pts (5 + 1 si hay empates con penales)
 //   Especiales: 10 + 5 + 5 + 10 = 30 pts
-//   TOTAL MÁXIMO: 550 pts
+//   TOTAL MÁXIMO: ~580 pts (depende de cuántos partidos van a penales)
 
 import { GRUPOS, KEYS } from "./data";
 
@@ -64,6 +67,9 @@ export function calcGroupPoints(quiniela, resultados) {
 }
 
 // ─── Calcular puntos de eliminatorias ────────────────────────────────────────
+// Basado en el marcador de los 90 minutos (localGoles/visitaGoles), no en
+// quién avanza por penales. El "ganador" oficial solo se usa para el bonus
+// de +1 pt cuando hubo empate en los 90 minutos.
 export function calcKnockoutPoints(quiniela, resultados) {
   let pts = 0;
   let breakdown = {};
@@ -75,30 +81,44 @@ export function calcKnockoutPoints(quiniela, resultados) {
     const realMatches = resultados.knockout?.[rondaId] || [];
 
     realMatches.forEach((real, i) => {
-      if (!real.ganador) return;
+      // Solo evaluar si el resultado oficial tiene marcador de 90 min cargado
+      const rL = parseInt(real.localGoles), rV = parseInt(real.visitaGoles);
+      if (isNaN(rL) || isNaN(rV)) return;
 
       const pred = predMatches[i] || {};
       const key = `${rondaId}-${i}`;
 
       const pL = parseInt(pred.localGoles), pV = parseInt(pred.visitaGoles);
-      const rL = parseInt(real.localGoles), rV = parseInt(real.visitaGoles);
+      const hasPred = !isNaN(pL) && !isNaN(pV);
 
-      const exactScore =
-        !isNaN(pL) && !isNaN(pV) && !isNaN(rL) && !isNaN(rV) &&
-        pL === rL && pV === rV;
+      const realEmpate90 = rL === rV;
+      const predEmpate90 = hasPred && pL === pV;
 
-      const rightWinner =
-        pred.ganador && real.ganador && pred.ganador === real.ganador;
+      let matchPts = 0;
+      let type = "miss";
 
-      if (exactScore && rightWinner) {
-        pts += 5;
-        breakdown[key] = { pts: 5, type: "exact" };
-      } else if (rightWinner) {
-        pts += 3;
-        breakdown[key] = { pts: 3, type: "winner" };
+      if (hasPred && pL === rL && pV === rV) {
+        // Marcador exacto en los 90 minutos
+        matchPts = 5;
+        type = "exact";
+      } else if (realEmpate90 && predEmpate90) {
+        // Acertó que hubo empate en 90 min, sin acertar el marcador exacto
+        matchPts = 3;
+        type = "draw90";
       } else {
-        breakdown[key] = { pts: 0, type: "miss" };
+        matchPts = 0;
+        type = "miss";
       }
+
+      // Bonus: si hubo empate en 90 min y se definió por penales/tiempo extra,
+      // +1 pt si el participante acertó quién avanza
+      let bonusPts = 0;
+      if (realEmpate90 && real.ganador && pred.ganador && pred.ganador === real.ganador) {
+        bonusPts = 1;
+      }
+
+      pts += matchPts + bonusPts;
+      breakdown[key] = { pts: matchPts + bonusPts, type, bonus: bonusPts };
     });
   });
 
