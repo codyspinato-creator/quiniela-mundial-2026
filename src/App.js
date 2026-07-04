@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { doc, setDoc, getDoc, collection, getDocs, addDoc } from "firebase/firestore";
 import { db } from "./firebase";
 import { GRUPOS, KEYS, SELECCIONES, GOLEADORES, calcTabla, completionPct, buildBracket } from "./data";
@@ -152,22 +152,25 @@ function KnockoutTab({knockout,setKnockout,resultadosOficiales,jornadasCerradas}
       const empty=Array.from({length:ronda.partidos},(_,i)=>({id:i,local:"",localGoles:"",visita:"",visitaGoles:"",ganador:"",penaltis:false,penaltisGanador:""}));
       const arr=[...(prev[rondaActiva]||empty)];
       const om=oficialMatches[idx]||{};
-      // Teams: prefer oficial results, then existing user data, then knockout state (for r16+)
       const existingMatch=arr[idx]||{};
       const koMatch=(prev[rondaActiva]||[])[idx]||{};
       const teamLocal=om.local||existingMatch.local||koMatch.local||"";
       const teamVisita=om.visita||existingMatch.visita||koMatch.visita||"";
       const num=om.num||existingMatch.num||koMatch.num||"";
       arr[idx]={...existingMatch,local:teamLocal,visita:teamVisita,num,[field]:val};
-      // Auto-resolve ganador from score
       if(field==="localGoles"||field==="visitaGoles"){
         const gl=parseInt(field==="localGoles"?val:arr[idx].localGoles);
         const gv=parseInt(field==="visitaGoles"?val:arr[idx].visitaGoles);
+        console.log(`[KO] ${rondaActiva}[${idx}] ${field}=${val} → local="${teamLocal}" visita="${teamVisita}" gl=${gl} gv=${gv}`);
         if(!isNaN(gl)&&!isNaN(gv)&&gl!==gv){
           arr[idx].ganador=gl>gv?teamLocal:teamVisita;
           arr[idx].penaltis=false;arr[idx].penaltisGanador="";
+          console.log(`[KO] ganador asignado: "${arr[idx].ganador}"`);
         } else if(!isNaN(gl)&&!isNaN(gv)&&gl===gv){
           arr[idx].ganador="";arr[idx].penaltis=false;arr[idx].penaltisGanador="";
+          console.log(`[KO] empate detectado, esperando penaltis`);
+        } else {
+          console.log(`[KO] score incompleto, no se asigna ganador`);
         }
       }
       return {...prev,[rondaActiva]:arr};
@@ -194,7 +197,7 @@ function KnockoutTab({knockout,setKnockout,resultadosOficiales,jornadasCerradas}
         <div style={{height:3,background:"#00000008",borderRadius:2,overflow:"hidden",marginTop:10}}><div style={{height:"100%",width:`${(completedInRound/ronda.partidos)*100}%`,background:ronda.color,transition:"width 0.3s"}}/></div>
       </div>
       {isRondaLocked(rondaActiva)&&<div style={{background:"#fff5f5",border:"1px solid #e6394640",borderRadius:10,padding:"9px 14px",marginBottom:12,fontSize:11,color:"#e63946",fontWeight:"bold"}}>🔒 Todos los partidos de esta fase están cerrados.</div>}
-      {oficialMatches.length===0&&!locked&&<div style={{background:"#f5f5f7",border:"1px solid #e0e0e8",borderRadius:10,padding:"9px 12px",marginBottom:12,fontSize:11,color:B.muted,lineHeight:1.5}}>Los cruces se llenarán cuando el organizador los ingrese. Podrás predecir el marcador de cada partido.</div>}
+      {oficialMatches.length===0&&!isRondaLocked(rondaActiva)&&<div style={{background:"#f5f5f7",border:"1px solid #e0e0e8",borderRadius:10,padding:"9px 12px",marginBottom:12,fontSize:11,color:B.muted,lineHeight:1.5}}>Los cruces se llenarán cuando el organizador los ingrese. Podrás predecir el marcador de cada partido.</div>}
       <div style={{display:ronda.partidos>2?"grid":"block",gridTemplateColumns:ronda.partidos>=4?"1fr 1fr":"1fr",gap:8}}>
         {Array.from({length:ronda.partidos},(_,i)=>{
           const om=oficialMatches[i]||{};
@@ -267,6 +270,7 @@ export default function App(){
   const[tercero,setTercero]=useState("");const[goleador,setGoleador]=useState("");
   const[goleadorCustom,setGoleadorCustom]=useState("");
   const[knockout,setKnockout]=useState(emptyKnockout());
+  const knockoutRef=useRef(emptyKnockout());
   const[tab,setTab]=useState("partidos");const[grupo,setGrupo]=useState("A");
   const[portalTab,setPortalTab]=useState("ranking");
   const[detailTab,setDetailTab]=useState("grupos");
@@ -276,9 +280,12 @@ export default function App(){
   const countdown=useCountdown();
   const isPastDeadline=Date.now()>=DEADLINE.getTime();
 
-  useEffect(()=>{try{const newKO=buildBracket(scores,knockout);setKnockout(newKO);}catch(e){}
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  },[scores]);
+  // Keep knockoutRef in sync so saveQuiniela always uses the latest value
+  useEffect(()=>{knockoutRef.current=knockout;},[knockout]);
+
+  // NOTE: We no longer auto-run buildBracket on scores change because teams
+  // for r16+ come from resultadosOficiales (admin-entered), not computed from
+  // group results. Running buildBracket was overwriting user's score predictions.
 
   const handleLogin=async()=>{
     const name=loginInput.trim();
@@ -322,7 +329,7 @@ export default function App(){
 
   const enterQuiniela=(id,nombre,passwordHash,data)=>{
     setMyId(id);setMyNombre(nombre);
-    if(data){setScores(data.scores||{});setCampeon(data.campeon||"");setSegundo(data.segundo||"");setTercero(data.tercero||"");setGoleador(data.goleador||"");setGoleadorCustom(data.goleadorCustom||"");setKnockout(data.knockout||emptyKnockout());setEmailInput(data.email||emailInput);}
+    if(data){const loadedKO=data.knockout||emptyKnockout();setScores(data.scores||{});setCampeon(data.campeon||"");setSegundo(data.segundo||"");setTercero(data.tercero||"");setGoleador(data.goleador||"");setGoleadorCustom(data.goleadorCustom||"");setKnockout(loadedKO);knockoutRef.current=loadedKO;setEmailInput(data.email||emailInput);}
     if(passwordHash){setDoc(doc(db,"quinielas",id),{nombre,email:emailInput.trim(),passwordHash,scores:data?.scores||{},campeon:data?.campeon||"",segundo:data?.segundo||"",tercero:data?.tercero||"",goleador:data?.goleador||"",goleadorCustom:data?.goleadorCustom||"",knockout:data?.knockout||emptyKnockout(),updatedAt:Date.now()}).catch(()=>{});}
     setLoginStep("form");setPendingUser(null);setPassInput("");setPassConfirm("");
     setScreen("quiniela");
@@ -365,7 +372,7 @@ export default function App(){
           savedAt:Date.now(),
         }).catch(()=>{});
       }
-      await setDoc(doc(db,"quinielas",myId),{nombre:myNombre,email:emailInput.trim(),...(existingHash&&{passwordHash:existingHash}),scores,campeon,segundo,tercero,goleador,goleadorCustom,knockout,updatedAt:Date.now()});
+      const latestKnockout=knockoutRef.current;console.log('[SAVE] knockout r16 count:',Object.values(latestKnockout.r16||[]).filter(m=>m.ganador).length);await setDoc(doc(db,"quinielas",myId),{nombre:myNombre,email:emailInput.trim(),...(existingHash&&{passwordHash:existingHash}),scores,campeon,segundo,tercero,goleador,goleadorCustom,knockout:latestKnockout,updatedAt:Date.now()});
       setSaveMsg("¡Guardado! ✓");
     }
     catch(e){setSaveMsg("Error ✗");}
