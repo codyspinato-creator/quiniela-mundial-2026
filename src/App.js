@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import { doc, setDoc, getDoc, collection, getDocs } from "firebase/firestore";
+import { doc, setDoc, getDoc, collection, getDocs, addDoc } from "firebase/firestore";
 import { db } from "./firebase";
 import { GRUPOS, KEYS, SELECCIONES, GOLEADORES, calcTabla, completionPct, buildBracket } from "./data";
 import { calcTotalPoints } from "./scoring";
@@ -152,17 +152,21 @@ function KnockoutTab({knockout,setKnockout,resultadosOficiales,jornadasCerradas}
       const empty=Array.from({length:ronda.partidos},(_,i)=>({id:i,local:"",localGoles:"",visita:"",visitaGoles:"",ganador:"",penaltis:false,penaltisGanador:""}));
       const arr=[...(prev[rondaActiva]||empty)];
       const om=oficialMatches[idx]||{};
-      const cur={...arr[idx],local:om.local||arr[idx].local,visita:om.visita||arr[idx].visita,num:om.num||arr[idx].num};
-      arr[idx]={...cur,[field]:val};
-      // Auto-resolve ganador from score if not empate
+      // Teams: prefer oficial results, then existing user data, then knockout state (for r16+)
+      const existingMatch=arr[idx]||{};
+      const koMatch=(prev[rondaActiva]||[])[idx]||{};
+      const teamLocal=om.local||existingMatch.local||koMatch.local||"";
+      const teamVisita=om.visita||existingMatch.visita||koMatch.visita||"";
+      const num=om.num||existingMatch.num||koMatch.num||"";
+      arr[idx]={...existingMatch,local:teamLocal,visita:teamVisita,num,[field]:val};
+      // Auto-resolve ganador from score
       if(field==="localGoles"||field==="visitaGoles"){
         const gl=parseInt(field==="localGoles"?val:arr[idx].localGoles);
         const gv=parseInt(field==="visitaGoles"?val:arr[idx].visitaGoles);
         if(!isNaN(gl)&&!isNaN(gv)&&gl!==gv){
-          arr[idx].ganador=gl>gv?(om.local||arr[idx].local):(om.visita||arr[idx].visita);
+          arr[idx].ganador=gl>gv?teamLocal:teamVisita;
           arr[idx].penaltis=false;arr[idx].penaltisGanador="";
         } else if(!isNaN(gl)&&!isNaN(gv)&&gl===gv){
-          // empate — clear ganador so user picks via penaltis
           arr[idx].ganador="";arr[idx].penaltis=false;arr[idx].penaltisGanador="";
         }
       }
@@ -195,8 +199,9 @@ function KnockoutTab({knockout,setKnockout,resultadosOficiales,jornadasCerradas}
         {Array.from({length:ronda.partidos},(_,i)=>{
           const om=oficialMatches[i]||{};
           const um=userMatches[i]||{};
-          const local=om.local||"";
-          const visita=om.visita||"";
+          // For r16+: teams come from the user's own knockout state (built via buildBracket)
+          const local=om.local||um.local||"";
+          const visita=om.visita||um.visita||"";
           const localGoles=um.localGoles||"";
           const visitaGoles=um.visitaGoles||"";
           const ganador=um.ganador||"";
@@ -339,7 +344,30 @@ export default function App(){
     // Predicciones: block if past deadline
     if(tab==="predicciones"&&isPastDeadline){setSaveMsg("⏰ Cerrado");setTimeout(()=>setSaveMsg(""),3000);return;}
     setSaving(true);setSaveMsg("");
-    try{const snap=await getDoc(doc(db,"quinielas",myId));const existingHash=snap.exists()?snap.data().passwordHash:undefined;await setDoc(doc(db,"quinielas",myId),{nombre:myNombre,email:emailInput.trim(),...(existingHash&&{passwordHash:existingHash}),scores,campeon,segundo,tercero,goleador,goleadorCustom,knockout,updatedAt:Date.now()});setSaveMsg("¡Guardado! ✓");}
+    try{
+      const snap=await getDoc(doc(db,"quinielas",myId));
+      const existingHash=snap.exists()?snap.data().passwordHash:undefined;
+      // Backup: save a copy of the PREVIOUS state before overwriting (only if there was previous data)
+      if(snap.exists()){
+        const prevData=snap.data();
+        addDoc(collection(db,"historial"),{
+          userId:myId,
+          nombre:prevData.nombre||myNombre,
+          snapshot:{
+            scores:prevData.scores||{},
+            campeon:prevData.campeon||"",
+            segundo:prevData.segundo||"",
+            tercero:prevData.tercero||"",
+            goleador:prevData.goleador||"",
+            goleadorCustom:prevData.goleadorCustom||"",
+            knockout:prevData.knockout||{},
+          },
+          savedAt:Date.now(),
+        }).catch(()=>{});
+      }
+      await setDoc(doc(db,"quinielas",myId),{nombre:myNombre,email:emailInput.trim(),...(existingHash&&{passwordHash:existingHash}),scores,campeon,segundo,tercero,goleador,goleadorCustom,knockout,updatedAt:Date.now()});
+      setSaveMsg("¡Guardado! ✓");
+    }
     catch(e){setSaveMsg("Error ✗");}
     setSaving(false);setTimeout(()=>setSaveMsg(""),3000);
   };
