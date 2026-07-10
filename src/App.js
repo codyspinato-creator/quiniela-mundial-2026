@@ -654,35 +654,40 @@ export default function App(){
                     <div style={{display:"flex",flexWrap:"wrap",gap:5}}>
                       {userMatches.map((m,i)=>{
                         if(!m?.ganador) return null;
-                        const ganador=m.ganador;
+                        // Always use official teams for display (fixes stale local/visita names)
+                        const om=(m.num&&oficialByNum[m.num])||oficialMatches[i]||{};
+                        const displayLocal=om?.local||m.local||"";
+                        const displayVisita=om?.visita||m.visita||"";
+                        // Resolve ganador: compare flag emoji of stored ganador against official teams
+                        const storedFlag=m.ganador.split(" ")[0];
+                        const oficialLocalFlag=(om?.local||"").split(" ")[0];
+                        const oficialVisitaFlag=(om?.visita||"").split(" ")[0];
+                        let displayGanador=m.ganador;
+                        if(om?.local&&om?.visita){
+                          if(storedFlag===oficialLocalFlag) displayGanador=om.local;
+                          else if(storedFlag===oficialVisitaFlag) displayGanador=om.visita;
+                        }
                         const hasScore=m.localGoles!==""&&m.localGoles!==undefined&&m.visitaGoles!==""&&m.visitaGoles!==undefined;
-                        const lFlag=m.local?.split(" ")[0]||"";
-                        const vFlag=m.visita?.split(" ")[0]||"";
-                        // Calculate points for this match against official results
+                        const lFlag=displayLocal.split(" ")[0];
+                        const vFlag=displayVisita.split(" ")[0];
+                        // Calculate points
                         let matchPts=null;
-                        if(hasOficial){
-                          const om=(m.num&&oficialByNum[m.num])||oficialMatches[i]||{};
-                          if(om?.ganador){
-                            const rL=parseInt(om.localGoles),rV=parseInt(om.visitaGoles);
-                            const pL=parseInt(m.localGoles),pV=parseInt(m.visitaGoles);
-                            const realEmpate=!isNaN(rL)&&!isNaN(rV)&&rL===rV;
-                            const predEmpate=!isNaN(pL)&&!isNaN(pV)&&pL===pV;
-                            if(!isNaN(pL)&&!isNaN(pV)&&!isNaN(rL)&&!isNaN(rV)&&pL===rL&&pV===rV){
-                              matchPts=5;
-                            } else if(realEmpate&&predEmpate){
-                              matchPts=3;
-                            } else if(!realEmpate&&!isNaN(pL)&&!isNaN(pV)){
-                              matchPts=(pL>pV?"L":"V")===(rL>rV?"L":"V")?3:0;
-                            } else {
-                              matchPts=0;
-                            }
-                            if(realEmpate&&om.ganador&&ganador&&ganador.split(" ")[0]===om.ganador.split(" ")[0]) matchPts=(matchPts||0)+1;
-                          }
+                        if(hasOficial&&om?.ganador){
+                          const rL=parseInt(om.localGoles),rV=parseInt(om.visitaGoles);
+                          const pL=parseInt(m.localGoles),pV=parseInt(m.visitaGoles);
+                          const realEmpate=!isNaN(rL)&&!isNaN(rV)&&rL===rV;
+                          const predEmpate=!isNaN(pL)&&!isNaN(pV)&&pL===pV;
+                          if(!isNaN(pL)&&!isNaN(pV)&&!isNaN(rL)&&!isNaN(rV)&&pL===rL&&pV===rV) matchPts=5;
+                          else if(realEmpate&&predEmpate) matchPts=3;
+                          else if(!realEmpate&&!isNaN(pL)&&!isNaN(pV)) matchPts=(pL>pV?"L":"V")===(rL>rV?"L":"V")?3:0;
+                          else matchPts=0;
+                          // Bonus +1 penales
+                          if(realEmpate&&om.ganador&&storedFlag===om.ganador.split(" ")[0]) matchPts=(matchPts||0)+1;
                         }
                         const ptColor=matchPts>=5?"#00c853":matchPts>=3?"#f77f00":matchPts===0?"#e63946":"#888";
                         return(
                           <div key={i} style={{background:matchPts===null?"#f0f4ff":matchPts>=5?"#f0fff4":matchPts>=3?"#fff8f0":"#fff0f0",border:`1px solid ${matchPts===null?"#c8d8ff":matchPts>=5?"#00c85340":matchPts>=3?"#f77f0040":"#e6394640"}`,borderRadius:8,padding:"4px 10px",fontSize:10}}>
-                            <span style={{fontWeight:"bold",color:B.primary}}>{ganador.split(" ").slice(0,3).join(" ")}</span>
+                            <span style={{fontWeight:"bold",color:B.primary}}>{displayGanador.split(" ").slice(0,3).join(" ")}</span>
                             {hasScore&&<span style={{color:B.muted}}> ({lFlag} {m.localGoles}–{m.visitaGoles} {vFlag})</span>}
                             {matchPts!==null&&<span style={{marginLeft:4,fontWeight:"bold",color:ptColor}}>{matchPts>0?"+":""}{matchPts}pts</span>}
                           </div>
