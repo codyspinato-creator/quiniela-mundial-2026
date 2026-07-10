@@ -264,6 +264,7 @@ export default function App(){
   const[saving,setSaving]=useState(false);const[saveMsg,setSaveMsg]=useState("");
   const[portalData,setPortalData]=useState([]);const[portalLoading,setPortalLoading]=useState(false);
   const[selectedUser,setSelectedUser]=useState(null);
+  const[loadingUser,setLoadingUser]=useState(false);
   const[resultadosOficiales,setResultadosOficiales]=useState({});
   const[scores,setScores]=useState({});
   const[campeon,setCampeon]=useState("");const[segundo,setSegundo]=useState("");
@@ -377,6 +378,16 @@ export default function App(){
     }
     catch(e){setSaveMsg("Error ✗");}
     setSaving(false);setTimeout(()=>setSaveMsg(""),3000);
+  };
+
+  const fetchAndSelectUser=async(p)=>{
+    setLoadingUser(true);
+    try{
+      const snap=await getDoc(doc(db,"quinielas",p.id));
+      if(snap.exists()) setSelectedUser({id:p.id,...snap.data()});
+      else setSelectedUser(p);
+    }catch(e){setSelectedUser(p);}
+    setLoadingUser(false);
   };
 
   const loadPortal=useCallback(async()=>{
@@ -512,6 +523,12 @@ export default function App(){
 
   if(screen==="portal"){
     // ── User detail view ──────────────────────────────────────────────────────
+    if(loadingUser) return(
+      <div style={{minHeight:"100vh",background:B.bg,display:"flex",alignItems:"center",justifyContent:"center",flexDirection:"column",gap:12}}>
+        <div style={{fontSize:32}}>⏳</div>
+        <div style={{fontSize:13,color:B.muted}}>Cargando quiniela...</div>
+      </div>
+    );
     if(selectedUser){
       const q=selectedUser;
       const qc=completionPct(q);
@@ -665,7 +682,7 @@ export default function App(){
                   const isMe=p.id===myId;
                   const hasScore=resultadosOficiales&&Object.keys(resultadosOficiales).length>0;
                   return(
-                    <div key={p.id} onClick={()=>setSelectedUser(p)} style={{display:"grid",gridTemplateColumns:"36px 1fr 44px 44px 44px 56px",gap:4,padding:"10px 12px",borderTop:"1px solid #f0f0f0",background:isMe?"#eff4ff":rank===0?"#fffbf0":"transparent",alignItems:"center",cursor:"pointer"}}>
+                    <div key={p.id} onClick={()=>fetchAndSelectUser(p)} style={{display:"grid",gridTemplateColumns:"36px 1fr 44px 44px 44px 56px",gap:4,padding:"10px 12px",borderTop:"1px solid #f0f0f0",background:isMe?"#eff4ff":rank===0?"#fffbf0":"transparent",alignItems:"center",cursor:"pointer"}}>
                       <div style={{fontSize:rank<3?16:12,textAlign:"center"}}>{rank===0?"🥇":rank===1?"🥈":rank===2?"🥉":<span style={{color:B.muted,fontWeight:"bold"}}>{rank+1}</span>}</div>
                       <div>
                         <div style={{display:"flex",alignItems:"center",gap:5}}>
@@ -698,7 +715,7 @@ export default function App(){
                 const qc=completionPct(q);const isMe=q.id===myId;
                 const hasScore=resultadosOficiales&&Object.keys(resultadosOficiales).length>0;
                 return(
-                  <div key={q.id} onClick={()=>setSelectedUser(q)} style={{background:isMe?"#eff4ff":"#ffffff",border:`1px solid ${isMe?"#3a5bd9":"#e0e0e8"}`,borderRadius:12,padding:"12px 14px",marginBottom:8,cursor:"pointer"}}>
+                  <div key={q.id} onClick={()=>fetchAndSelectUser(q)} style={{background:isMe?"#eff4ff":"#ffffff",border:`1px solid ${isMe?"#3a5bd9":"#e0e0e8"}`,borderRadius:12,padding:"12px 14px",marginBottom:8,cursor:"pointer"}}>
                     <div style={{display:"flex",alignItems:"center",gap:10}}>
                       <div style={{width:36,height:36,borderRadius:10,background:isMe?"#dde8ff":"#f0f0f0",display:"flex",alignItems:"center",justifyContent:"center",fontSize:15,fontWeight:"bold",color:isMe?B.primary:"#888",flexShrink:0}}>{q.nombre.charAt(0).toUpperCase()}</div>
                       <div style={{flex:1,minWidth:0}}>
