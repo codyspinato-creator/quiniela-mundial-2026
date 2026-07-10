@@ -417,7 +417,31 @@ export default function App(){
 
   useEffect(()=>{
     if(screen==="quiniela"&&myId){
-      getDoc(doc(db,"admin","resultados")).then(snap=>{if(snap.exists())setResultadosOficiales(snap.data());}).catch(()=>{});
+      getDoc(doc(db,"admin","resultados")).then(snap=>{
+        if(snap.exists()){
+          const res=snap.data();
+          setResultadosOficiales(res);
+          // Migrate knockout: update team names from official results,
+          // keeping user's score predictions intact
+          if(res.knockout){
+            setKnockout(prev=>{
+              const updated={...prev};
+              Object.keys(res.knockout).forEach(rondaId=>{
+                const oficialRonda=res.knockout[rondaId]||[];
+                const userRonda=[...(prev[rondaId]||[])];
+                oficialRonda.forEach((om,i)=>{
+                  if(!om.local&&!om.visita) return;
+                  const um=userRonda[i]||{};
+                  userRonda[i]={...um,local:om.local||um.local,visita:om.visita||um.visita,num:om.num||um.num,fecha:om.fecha||um.fecha,sede:om.sede||um.sede};
+                });
+                updated[rondaId]=userRonda;
+              });
+              knockoutRef.current=updated;
+              return updated;
+            });
+          }
+        }
+      }).catch(()=>{});
       getDoc(doc(db,"admin","config")).then(snap=>{
         if(snap.exists()&&snap.data().jornadasCerradas) setJornadasCerradas(snap.data().jornadasCerradas);
       }).catch(()=>{});
@@ -611,23 +635,58 @@ export default function App(){
             {/* ELIMINATORIAS tab */}
             {detailTab==="knockout"&&(()=>{
               const ko=q.knockout||{};
+              const oficialKO=resultadosOficiales?.knockout||{};
               return RONDAS.map(r=>{
-                const matches=(ko[r.id]||[]).filter(m=>m.ganador);
-                if(!matches.length) return(<div key={r.id} style={{background:"#ffffff",border:"1px solid #e0e0e8",borderRadius:10,padding:"10px 14px",marginBottom:8,display:"flex",alignItems:"center",gap:8}}><span style={{fontSize:18}}>{r.emoji}</span><div><div style={{fontSize:12,fontWeight:"bold",color:B.muted}}>{r.label}</div><div style={{fontSize:10,color:"#ccc"}}>Sin predicciones</div></div></div>);
+                const userMatches=ko[r.id]||[];
+                const oficialMatches=oficialKO[r.id]||[];
+                const oficialByNum={};
+                oficialMatches.forEach((m,i)=>{if(m?.num)oficialByNum[m.num]=m;});
+                const predictedMatches=userMatches.filter(m=>m.ganador);
+                if(!predictedMatches.length) return(<div key={r.id} style={{background:"#ffffff",border:"1px solid #e0e0e8",borderRadius:10,padding:"10px 14px",marginBottom:8,display:"flex",alignItems:"center",gap:8}}><span style={{fontSize:18}}>{r.emoji}</span><div><div style={{fontSize:12,fontWeight:"bold",color:B.muted}}>{r.label}</div><div style={{fontSize:10,color:"#ccc"}}>Sin predicciones</div></div></div>);
                 return(
-                  <div key={r.id} style={{background:"#ffffff",border:`1px solid #e0e0e8`,borderRadius:10,padding:"10px 14px",marginBottom:8}}>
+                  <div key={r.id} style={{background:"#ffffff",border:"1px solid #e0e0e8",borderRadius:10,padding:"10px 14px",marginBottom:8}}>
                     <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:8}}>
                       <span style={{fontSize:18}}>{r.emoji}</span>
                       <div style={{fontSize:12,fontWeight:"bold",color:B.text}}>{r.label}</div>
-                      <div style={{marginLeft:"auto",fontSize:9,color:matches.length===r.partidos?B.primary:B.muted}}>{matches.length}/{r.partidos}</div>
+                      <div style={{marginLeft:"auto",fontSize:9,color:predictedMatches.length===r.partidos?B.primary:B.muted}}>{predictedMatches.length}/{r.partidos}</div>
                     </div>
                     <div style={{display:"flex",flexWrap:"wrap",gap:5}}>
-                      {matches.map((m,i)=>(
-                        <div key={i} style={{background:"#f0f4ff",border:"1px solid #c8d8ff",borderRadius:8,padding:"4px 10px",fontSize:10}}>
-                          <span style={{fontWeight:"bold",color:B.primary}}>{m.ganador.split(" ").slice(0,2).join(" ")}</span>
-                          {m.localGoles!==""&&m.visitaGoles!==""&&<span style={{color:B.muted}}> ({m.local?.split(" ").slice(-1)[0]} {m.localGoles}–{m.visitaGoles} {m.visita?.split(" ").slice(-1)[0]})</span>}
-                        </div>
-                      ))}
+                      {userMatches.map((m,i)=>{
+                        if(!m?.ganador) return null;
+                        // Get official match by num first, then by index
+                        const om=(m.num&&oficialByNum[m.num])||oficialMatches[i]||{};
+                        // Official teams (what's really playing)
+                        const oficialLocal=om?.local||"";
+                        const oficialVisita=om?.visita||"";
+                        // Resolve who the user picked:
+                        // If stored ganador matches official local → picked local
+                        // If stored ganador matches official visita → picked visita
+                        // Otherwise fall back to stored ganador (for users with up-to-date data)
+                        let ganador=m.ganador;
+                        if(oficialLocal&&oficialVisita){
+                          // Compare by flag emoji (first word) for robustness
+                          const storedFlag=m.ganador.split(" ")[0];
+                          const storedLocalFlag=m.local?.split(" ")[0]||"";
+                          const storedVisitaFlag=m.visita?.split(" ")[0]||"";
+                          const oficialLocalFlag=oficialLocal.split(" ")[0];
+                          const oficialVisitaFlag=oficialVisita.split(" ")[0];
+                          if(storedFlag===oficialLocalFlag||storedLocalFlag===oficialLocalFlag&&m.ganador===m.local){
+                            ganador=oficialLocal;
+                          } else if(storedFlag===oficialVisitaFlag||storedVisitaFlag===oficialVisitaFlag&&m.ganador===m.visita){
+                            ganador=oficialVisita;
+                          }
+                        }
+                        const ganadorDisplay=ganador.split(" ").slice(0,3).join(" ");
+                        const hasScore=m.localGoles!==""&&m.localGoles!==undefined&&m.visitaGoles!==""&&m.visitaGoles!==undefined;
+                        const lFlag=oficialLocal.split(" ")[0]||m.local?.split(" ")[0]||"";
+                        const vFlag=oficialVisita.split(" ")[0]||m.visita?.split(" ")[0]||"";
+                        return(
+                          <div key={i} style={{background:"#f0f4ff",border:"1px solid #c8d8ff",borderRadius:8,padding:"4px 10px",fontSize:10}}>
+                            <span style={{fontWeight:"bold",color:B.primary}}>{ganadorDisplay}</span>
+                            {hasScore&&<span style={{color:B.muted}}> ({lFlag} {m.localGoles}–{m.visitaGoles} {vFlag})</span>}
+                          </div>
+                        );
+                      })}
                     </div>
                   </div>
                 );
