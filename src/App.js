@@ -679,6 +679,7 @@ export default function App(){
                           const predEmpate=!isNaN(pL)&&!isNaN(pV)&&pL===pV;
                           if(!isNaN(pL)&&!isNaN(pV)&&!isNaN(rL)&&!isNaN(rV)&&pL===rL&&pV===rV) matchPts=5;
                           else if(realEmpate&&predEmpate) matchPts=3;
+                          else if(predEmpate&&!realEmpate) matchPts=0; // predicted draw but wasn't
                           else if(!realEmpate&&!isNaN(pL)&&!isNaN(pV)) matchPts=(pL>pV?"L":"V")===(rL>rV?"L":"V")?3:0;
                           else matchPts=0;
                           // Bonus +1 penales
